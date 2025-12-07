@@ -1,0 +1,188 @@
+{
+  "dev-guidelines": {
+    "type": "domain",
+    "enforcement": "suggest",
+    "priority": "high",
+    "promptTriggers": {
+      "keywords": [
+        "implement",
+        "create",
+        "build",
+        "add feature",
+        "code",
+        "function",
+        "component",
+        "module",
+        "class",
+        "refactor"
+      ],
+      "intentPatterns": [
+        "(create|add|build|implement).*?(feature|component|function|module|class)",
+        "(how to|best practice|should I).*?(code|implement|structure)",
+        "(fix|debug|resolve).*?(error|bug|issue)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [
+        "src/**/*",
+        "lib/**/*",
+        "**/*.ts",
+        "**/*.js",
+        "**/*.py",
+        "**/*.go",
+        "**/*.rs"
+      ],
+      "contentPatterns": []
+    }
+  },
+  "research-verifier": {
+    "type": "workflow",
+    "enforcement": "suggest",
+    "priority": "medium",
+    "promptTriggers": {
+      "keywords": [
+        "best practice",
+        "should I",
+        "how should",
+        "correct way",
+        "recommended",
+        "standard",
+        "pattern",
+        "convention",
+        "proper way",
+        "official",
+        "according to",
+        "the right way",
+        "implementation"
+      ],
+      "intentPatterns": [
+        "(what is|what's).*?(best|correct|proper|standard|recommended)",
+        "(how|should).*?(implement|structure|organize|design)",
+        "(is this|is it).*?(correct|right|proper|standard)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [],
+      "contentPatterns": []
+    }
+  },
+  "security-scanner": {
+    "type": "domain",
+    "enforcement": "suggest",
+    "priority": "high",
+    "promptTriggers": {
+      "keywords": [
+        "security",
+        "vulnerability",
+        "authentication",
+        "authorization",
+        "injection",
+        "XSS",
+        "CSRF",
+        "secrets",
+        "credentials"
+      ],
+      "intentPatterns": [
+        "(check|scan|audit).*?(security|vulnerabilities)",
+        "(auth|login|password|token).*?(implement|fix|review)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [
+        "**/auth/**",
+        "**/security/**",
+        "**/*auth*",
+        "**/*login*",
+        "**/*password*",
+        "**/*token*",
+        "**/*secret*"
+      ],
+      "contentPatterns": [
+        "password",
+        "token",
+        "secret",
+        "api.?key",
+        "credential"
+      ]
+    }
+  },
+  "performance-analyzer": {
+    "type": "domain",
+    "enforcement": "suggest",
+    "priority": "medium",
+    "promptTriggers": {
+      "keywords": [
+        "performance",
+        "optimize",
+        "slow",
+        "fast",
+        "speed",
+        "memory",
+        "cache",
+        "benchmark"
+      ],
+      "intentPatterns": [
+        "(optimize|improve|speed up).*?(performance|speed|loading)",
+        "(slow|bottleneck|memory leak)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [
+        "**/cache/**",
+        "**/worker/**",
+        "**/queue/**"
+      ],
+      "contentPatterns": []
+    }
+  },
+  "test-coverage": {
+    "type": "workflow",
+    "enforcement": "suggest",
+    "priority": "medium",
+    "promptTriggers": {
+      "keywords": [
+        "test",
+        "coverage",
+        "unit test",
+        "integration test",
+        "TDD"
+      ],
+      "intentPatterns": [
+        "(write|add|create).*?(test|spec)",
+        "(check|improve).*?(coverage)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [
+        "**/*.test.*",
+        "**/*.spec.*",
+        "**/test/**",
+        "**/tests/**",
+        "**/__tests__/**"
+      ],
+      "contentPatterns": []
+    }
+  },
+  "quality-audit": {
+    "type": "guardrail",
+    "enforcement": "require",
+    "priority": "high",
+    "promptTriggers": {
+      "keywords": [
+        "validate",
+        "audit",
+        "check quality",
+        "verify"
+      ],
+      "intentPatterns": []
+    },
+    "fileTriggers": {
+      "pathPatterns": [],
+      "contentPatterns": []
+    },
+    "autoInvoke": {
+      "onStop": true,
+      "agents": ["laziness-destroyer", "hallucination-checker"]
+    }
+  }
+}
