@@ -22,7 +22,7 @@ cp -r Claude_Protocol/.claude /path/to/your/project/
 cp Claude_Protocol/.mcp.json /path/to/your/project/
 cp Claude_Protocol/CLAUDE.md /path/to/your/project/
 
-# Build MCP server
+# Build MCP server this step happens automatically when you run /proto-init but you can do it yourself if you want 
 cd /path/to/your/project/.claude/mcp/memory-server
 npm install
 npm run build
