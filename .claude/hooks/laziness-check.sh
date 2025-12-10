@@ -1,199 +1,126 @@
 #!/bin/bash
-# Laziness Check Script (Merged from CP2 + CP_Final)
-# Detects placeholder code, TODOs, incomplete implementations
-# Supports both JSON output (for hooks) and human-readable output (for CLI)
+# Laziness Check - Stop Hook
+# Validates Claude's response for lazy patterns before completion
+# Uses watcher IPC when available, falls back to transcript parsing
 
-TARGET="${1:-.}"
-OUTPUT_MODE="${2:-human}"  # json or human
-
-# Arrays to collect issues
-declare -a ISSUES=()
-ERRORS=0
-
-add_issue() {
-  local type="$1"
-  local message="$2"
-  local file="$3"
-  local line="${4:-0}"
-  local severity="${5:-suggest}"
-
-  ISSUES+=("{\"type\":\"$type\",\"file\":\"$file\",\"line\":$line,\"message\":\"$message\",\"severity\":\"$severity\",\"suggestion\":\"Replace with actual implementation\"}")
-  ((ERRORS++))
-}
-
-# Colors for human output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-# File types to check
-FILE_TYPES="*.py *.ts *.js *.tsx *.jsx *.go *.rs *.java"
-
-# Directories to exclude
-EXCLUDE_DIRS="--exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=build --exclude-dir=__pycache__ --exclude-dir=.venv --exclude-dir=vendor --exclude-dir=.next --exclude-dir=coverage --exclude-dir=.cache"
-
-# Pattern definitions
-PLACEHOLDER_PATTERNS=(
-  "// \.\.\."
-  "# \.\.\."
-  "/\* \.\.\. \*/"
-)
-
-TODO_PATTERNS=(
-  "// TODO"
-  "# TODO"
-  "/\* TODO"
-  "// FIXME"
-  "# FIXME"
-)
-
-STUB_PATTERNS=(
-  "^\s*pass$"
-  "throw new NotImplementedError"
-  "raise NotImplementedError"
-  "// implement"
-  "# implement"
-  "// add implementation"
-  "// fill in"
-  "# fill in"
-)
-
-LAZY_PHRASES=(
-  "You could"
-  "You might want to"
-  "Consider adding"
-  "You'll need to"
-  "Left as an exercise"
-  "Implementation details"
-  "Add your logic here"
-)
-
-if [ "$OUTPUT_MODE" = "human" ]; then
-  echo "═══════════════════════════════════════════════════════════════"
-  echo "  LAZINESS CHECK"
-  echo "═══════════════════════════════════════════════════════════════"
-  echo ""
-  echo "▶ Checking for placeholder comments..."
-  echo "─────────────────────────────────────────────────────────────────"
-fi
-
-# Check placeholder patterns
-for pattern in "${PLACEHOLDER_PATTERNS[@]}"; do
-  while IFS=: read -r file line content; do
-    if [ -n "$file" ]; then
-      add_issue "placeholder" "Placeholder comment found: $pattern" "$file" "$line" "block"
-      if [ "$OUTPUT_MODE" = "human" ]; then
-        echo -e "${RED}FOUND:${NC} $file:$line: $content"
-      fi
-    fi
-  done < <(grep -rn $EXCLUDE_DIRS --include="*.py" --include="*.ts" --include="*.js" --include="*.go" --include="*.rs" --include="*.java" "$pattern" "$TARGET" 2>/dev/null || true)
-done
-
-if [ "$OUTPUT_MODE" = "human" ]; then
-  if [ ${#ISSUES[@]} -eq 0 ]; then
-    echo -e "${GREEN}✓${NC} No placeholder comments found"
-  fi
-  echo ""
-  echo "▶ Checking for TODO/FIXME markers..."
-  echo "─────────────────────────────────────────────────────────────────"
-fi
-
-# Check TODO patterns
-PREV_ERRORS=$ERRORS
-for pattern in "${TODO_PATTERNS[@]}"; do
-  while IFS=: read -r file line content; do
-    if [ -n "$file" ]; then
-      add_issue "todo" "TODO/FIXME marker found" "$file" "$line" "suggest"
-      if [ "$OUTPUT_MODE" = "human" ]; then
-        echo -e "${YELLOW}FOUND:${NC} $file:$line: $content"
-      fi
-    fi
-  done < <(grep -rn $EXCLUDE_DIRS --include="*.py" --include="*.ts" --include="*.js" --include="*.go" --include="*.rs" --include="*.java" "$pattern" "$TARGET" 2>/dev/null || true)
-done
-
-if [ "$OUTPUT_MODE" = "human" ]; then
-  TODO_COUNT=$((ERRORS - PREV_ERRORS))
-  if [ $TODO_COUNT -gt 0 ]; then
-    echo -e "${RED}✗${NC} Found $TODO_COUNT TODO/FIXME markers (must be implemented)"
-  else
-    echo -e "${GREEN}✓${NC} No unimplemented TODOs found"
-  fi
-  echo ""
-  echo "▶ Checking for stub implementations..."
-  echo "─────────────────────────────────────────────────────────────────"
-fi
-
-# Check stub patterns
-PREV_ERRORS=$ERRORS
-for pattern in "${STUB_PATTERNS[@]}"; do
-  while IFS=: read -r file line content; do
-    if [ -n "$file" ]; then
-      add_issue "stub" "Stub implementation found" "$file" "$line" "block"
-      if [ "$OUTPUT_MODE" = "human" ]; then
-        echo -e "${RED}FOUND:${NC} $file:$line: $content"
-      fi
-    fi
-  done < <(grep -rn $EXCLUDE_DIRS --include="*.py" --include="*.ts" --include="*.js" --include="*.go" --include="*.rs" --include="*.java" -E "$pattern" "$TARGET" 2>/dev/null || true)
-done
-
-if [ "$OUTPUT_MODE" = "human" ]; then
-  STUB_COUNT=$((ERRORS - PREV_ERRORS))
-  if [ $STUB_COUNT -gt 0 ]; then
-    echo -e "${RED}✗${NC} Found stub implementations (must be completed)"
-  else
-    echo -e "${GREEN}✓${NC} No stub implementations found"
-  fi
-  echo ""
-  echo "▶ Checking for lazy delegation phrases..."
-  echo "─────────────────────────────────────────────────────────────────"
-fi
-
-# Check lazy phrases in assistant responses
-PREV_ERRORS=$ERRORS
-for phrase in "${LAZY_PHRASES[@]}"; do
-  if echo "$TARGET" | grep -qi "$phrase" 2>/dev/null; then
-    add_issue "delegation" "Lazy delegation detected: '$phrase'" "response" "0" "block"
-    if [ "$OUTPUT_MODE" = "human" ]; then
-      echo -e "${RED}FOUND:${NC} Delegation phrase: '$phrase'"
-    fi
-  fi
-done
-
-if [ "$OUTPUT_MODE" = "human" ]; then
-  LAZY_COUNT=$((ERRORS - PREV_ERRORS))
-  if [ $LAZY_COUNT -gt 0 ]; then
-    echo -e "${RED}✗${NC} Found lazy delegation (must implement instead of suggesting)"
-  else
-    echo -e "${GREEN}✓${NC} No lazy delegation found"
-  fi
-fi
-
-# Output based on mode
-if [ "$OUTPUT_MODE" = "json" ]; then
-  # Build JSON output
-  STATUS="pass"
-  DECISION="approve"
-  if [ $ERRORS -gt 0 ]; then
-    STATUS="warning"
-    DECISION="block"
-  fi
-
-  ISSUES_JSON=$(IFS=,; echo "[${ISSUES[*]}]")
-  echo "{\"hook\":\"laziness-check\",\"status\":\"$STATUS\",\"decision\":\"$DECISION\",\"target\":\"$TARGET\",\"issue_count\":$ERRORS,\"issues\":$ISSUES_JSON}"
+# Source shared logger (write to watcher.log with hook name)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "${SCRIPT_DIR}/hook-logger.sh" ]; then
+    source "${SCRIPT_DIR}/hook-logger.sh"
 else
-  # Human-readable summary
-  echo ""
-  echo "═══════════════════════════════════════════════════════════════"
-
-  if [ $ERRORS -eq 0 ]; then
-    echo -e "${GREEN}LAZINESS CHECK PASSED${NC}"
-  else
-    echo -e "${RED}LAZINESS CHECK FAILED - $ERRORS ISSUE(S) FOUND${NC}"
-    echo ""
-    echo "All placeholder code and TODOs must be replaced with"
-    echo "actual implementations before this code is acceptable."
-  fi
+    hook_log() { :; }  # No-op if logger not available
 fi
 
-exit $ERRORS
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
+IPC_SCRIPT="${PROJECT_DIR}/.claude/watcher/ipc.sh"
+
+# Read JSON input from stdin
+INPUT=$(cat)
+
+# Prevent infinite loops - if we're already in a stop hook, approve
+STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
+if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
+    echo '{"decision": "approve"}'
+    exit 0
+fi
+
+# Get transcript path from input
+TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty')
+if [ -z "$TRANSCRIPT_PATH" ]; then
+    # Try to find transcript from Claude's project dir
+    TRANSCRIPT_PATH=$(ls -t "$HOME/.claude/projects/"*/*.jsonl 2>/dev/null | head -1)
+fi
+
+hook_log "INFO" "Checking response for lazy patterns"
+
+# Try watcher first (has real-time validation)
+if [ -x "$IPC_SCRIPT" ]; then
+    WATCHER_RESPONSE=$("$IPC_SCRIPT" get_pending 2>/dev/null)
+    
+    if echo "$WATCHER_RESPONSE" | jq -e '.has_issues == true' >/dev/null 2>&1; then
+        # Filter for laziness-related issue types
+        LAZY_ISSUES=$(echo "$WATCHER_RESPONSE" | jq -r '.issues[] | select(.type == "SUGGESTION" or .type == "DELEGATION" or .type == "SCOPE_REDUCTION") | .pattern' 2>/dev/null | tr '\n' '; ')
+        
+        if [ -n "$LAZY_ISSUES" ]; then
+            hook_log "BLOCK" "Lazy patterns found: ${LAZY_ISSUES}"
+            echo "[LAZINESS CHECK] Detected lazy patterns: ${LAZY_ISSUES}" >&2
+            cat << EOF
+{"decision": "block", "reason": "Lazy response detected: ${LAZY_ISSUES}"}
+EOF
+            exit 2
+        fi
+    fi
+    
+    # Watcher running but no laziness issues
+    if echo "$WATCHER_RESPONSE" | jq -e '.has_issues == false' >/dev/null 2>&1; then
+        hook_log "OK" "No lazy patterns (watcher)"
+        echo '{"decision": "approve"}'
+        exit 0
+    fi
+fi
+
+# Fallback: Parse transcript directly if watcher unavailable
+if [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH" ]; then
+    hook_log "OK" "No transcript, approving"
+    echo '{"decision": "approve"}'
+    exit 0
+fi
+
+# Get the most recent assistant response from transcript
+LAST_RESPONSE=$(tac "$TRANSCRIPT_PATH" | jq -r 'select(.type=="assistant") | .message.content[]? | select(.type=="text") | .text' 2>/dev/null | head -1)
+
+if [ -z "$LAST_RESPONSE" ]; then
+    hook_log "OK" "No response text found"
+    echo '{"decision": "approve"}'
+    exit 0
+fi
+
+# Check for work-done indicators (past tense = actually did something)
+WORK_DONE=false
+if echo "$LAST_RESPONSE" | grep -qiE '\b(completed|fixed|updated|created|implemented|edited|wrote|modified|added|removed|refactored)\b'; then
+    WORK_DONE=true
+fi
+
+# Check for user-choice context (offering options is OK)
+USER_CHOICE_CONTEXT=false
+if echo "$LAST_RESPONSE" | grep -qiE '(which would you prefer|do you want me to|should I|would you like)'; then
+    USER_CHOICE_CONTEXT=true
+fi
+
+# Skip laziness check if work was done or offering choices
+if [ "$WORK_DONE" = "true" ] || [ "$USER_CHOICE_CONTEXT" = "true" ]; then
+    hook_log "OK" "Work done or choice offered, approving"
+    echo '{"decision": "approve"}'
+    exit 0
+fi
+
+# Lazy patterns to detect
+LAZY_FOUND=""
+
+# Suggestion patterns (telling user what to do instead of doing it)
+if echo "$LAST_RESPONSE" | grep -qiE '\b(you could|you might want to|i recommend you|i suggest you|consider adding)\b'; then
+    LAZY_FOUND="${LAZY_FOUND}suggestion; "
+fi
+
+# Delegation patterns (pushing work back to user)
+if echo "$LAST_RESPONSE" | grep -qiE '\b(you need to|you have to|you.ll need to|make sure to|now you|go ahead and)\b'; then
+    LAZY_FOUND="${LAZY_FOUND}delegation; "
+fi
+
+# Scope reduction patterns (avoiding work)
+if echo "$LAST_RESPONSE" | grep -qiE '\b(for brevity|beyond the scope|i.ll leave|as an exercise|left as)\b'; then
+    LAZY_FOUND="${LAZY_FOUND}scope_reduction; "
+fi
+
+if [ -n "$LAZY_FOUND" ]; then
+    hook_log "BLOCK" "Lazy patterns: ${LAZY_FOUND}"
+    echo "[LAZINESS CHECK] Detected: ${LAZY_FOUND}" >&2
+    cat << EOF
+{"decision": "block", "reason": "Lazy response patterns detected: ${LAZY_FOUND}"}
+EOF
+    exit 2
+fi
+
+hook_log "OK" "No lazy patterns (fallback)"
+echo '{"decision": "approve"}'
+exit 0
