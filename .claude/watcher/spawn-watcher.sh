@@ -26,19 +26,30 @@ if [ ! -f "$WATCHER_SCRIPT" ]; then
     exit 1
 fi
 
-# Check if already running
+# Kill any existing watcher processes first (clean slate)
 if [ -f "${FLAGS_DIR}/watcher.pid" ]; then
-    PID=$(cat "${FLAGS_DIR}/watcher.pid" 2>/dev/null)
-    if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
-        echo "Watcher already running (PID: $PID)"
-        exit 0
+    OLD_PID=$(cat "${FLAGS_DIR}/watcher.pid" 2>/dev/null)
+    if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+        echo "Killing old watcher (PID: $OLD_PID)"
+        kill "$OLD_PID" 2>/dev/null || true
+        sleep 0.3
+        kill -9 "$OLD_PID" 2>/dev/null || true
     fi
-    # Stale PID file, remove it
     rm -f "${FLAGS_DIR}/watcher.pid"
 fi
 
-# Clear old log
+# Kill any orphaned watcher processes
+pkill -f "session-watcher.py" 2>/dev/null || true
+
+# Kill old tmux viewer session
+tmux kill-session -t claude-watcher 2>/dev/null || true
+
+# Remove stale socket
+rm -f "${FLAGS_DIR}/watcher.socket" 2>/dev/null
+
+# Clear log file completely for fresh session
 > "$LOG_FILE"
+echo "[$(date '+%H:%M:%S')] Session started - log cleared" >> "$LOG_FILE"
 
 # Build watcher command
 WATCHER_CMD="CLAUDE_PROJECT_DIR='$PROJECT_DIR'"
