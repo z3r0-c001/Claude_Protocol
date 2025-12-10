@@ -1,0 +1,168 @@
+# Claude Bootstrap Protocol - GitHub Actions Workflow
+# Copy this to .github/workflows/claude-checks.yml
+
+name: Claude Protocol Checks
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  sanitize:
+    name: Sanitization Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run Sanitization
+        run: |
+          chmod +x .claude/scripts/pre-commit-sanitize.sh
+          bash .claude/scripts/pre-commit-sanitize.sh
+        continue-on-error: false
+
+  validate:
+    name: Protocol Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Validate JSON Files
+        run: |
+          for f in .claude/settings.json .claude/config.json .claude-plugin/plugin.json .mcp.json; do
+            if [ -f "$f" ]; then
+              echo "Validating $f..."
+              python3 -m json.tool "$f" > /dev/null || exit 1
+            fi
+          done
+      
+      - name: Validate Scripts
+        run: |
+          for f in .claude/scripts/*.sh; do
+            echo "Checking $f..."
+            bash -n "$f" || exit 1
+          done
+      
+      - name: Check CLAUDE.md exists
+        run: |
+          if [ ! -f "CLAUDE.md" ]; then
+            echo "Warning: CLAUDE.md not found"
+          fi
+
+  laziness-check:
+    name: Laziness Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check for Placeholder Code
+        run: |
+          chmod +x .claude/scripts/laziness-check.sh
+          bash .claude/scripts/laziness-check.sh .
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    needs: [sanitize]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        if: hashFiles('package.json') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Setup Python
+        if: hashFiles('requirements.txt') != '' || hashFiles('pyproject.toml') != ''
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install Dependencies (Node)
+        if: hashFiles('package.json') != ''
+        run: npm ci
+      
+      - name: Install Dependencies (Python)
+        if: hashFiles('requirements.txt') != ''
+        run: pip install -r requirements.txt
+      
+      - name: Run Tests (Node)
+        if: hashFiles('package.json') != ''
+        run: npm test
+      
+      - name: Run Tests (Python)
+        if: hashFiles('pytest.ini') != '' || hashFiles('pyproject.toml') != ''
+        run: pytest --tb=short
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        if: hashFiles('package.json') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        if: hashFiles('package.json') != ''
+        run: npm ci
+      
+      - name: Run ESLint
+        if: hashFiles('.eslintrc*') != '' || hashFiles('eslint.config.*') != ''
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx
+      
+      - name: Run Prettier Check
+        if: hashFiles('.prettierrc*') != ''
+        run: npx prettier --check .
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run npm audit
+        if: hashFiles('package-lock.json') != ''
+        run: npm audit --audit-level=high
+        continue-on-error: true
+      
+      - name: Run pip-audit
+        if: hashFiles('requirements.txt') != ''
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt
+        continue-on-error: true
+
+  docs-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check README exists
+        run: |
+          if [ ! -f "README.md" ]; then
+            echo "::warning::README.md not found"
+          fi
+      
+      - name: Check for broken links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          config-file: '.github/markdown-link-check-config.json'
+        continue-on-error: true
+
+  all-checks:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [sanitize, validate, laziness-check, test, lint]
+    steps:
+      - name: All checks passed
+        run: echo "All checks passed!"

@@ -1,0 +1,20 @@
+{
+  "name": "claude-bootstrap-protocol",
+  "version": "1.2.0",
+  "description": "Self-invoking protocol that generates customized Claude Code tooling for any project",
+  "author": "Protocol Author",
+  "autoActivate": true,
+  "onLoad": {
+    "command": "bash",
+    "args": [".claude/scripts/protocol-init.sh"]
+  },
+  "provides": {
+    "commands": ["proto-init", "bootstrap", "validate", "remember", "recall", "fix", "feature", "refactor", "search", "commit", "proto-help", "proto-status", "test", "lint", "docs", "update-docs", "pr"],
+    "agents": ["laziness-destroyer", "hallucination-checker", "fact-checker", "research-analyzer", "honesty-evaluator", "security-scanner", "architect", "reviewer", "tester", "performance-analyzer", "test-coverage-enforcer", "dependency-auditor"],
+    "skills": ["memorizer", "project-bootstrap", "quality-control", "workflow"],
+    "hooks": ["SessionStart", "PreToolUse", "PostToolUse", "Stop", "Notification"]
+  },
+  "compatibility": {
+    "claudeCode": ">=1.0.0"
+  }
+}

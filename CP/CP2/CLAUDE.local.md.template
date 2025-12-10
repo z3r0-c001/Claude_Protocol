@@ -1,0 +1,68 @@
+# CLAUDE.local.md Template
+
+> **This file is gitignored.** Use it for personal preferences that shouldn't be shared with the team.
+
+## My Preferences
+
+### Communication Style
+<!-- Uncomment and customize -->
+<!-- - Be concise, no fluff -->
+<!-- - Explain your reasoning -->
+<!-- - Ask before making big changes -->
+<!-- - Use bullet points for lists -->
+
+### Code Style
+<!-- Uncomment and customize -->
+<!-- - I prefer functional over OOP -->
+<!-- - Always use TypeScript strict mode -->
+<!-- - 2-space indentation -->
+<!-- - Single quotes for strings -->
+
+### Tools
+<!-- Uncomment and customize -->
+<!-- - Use pnpm instead of npm -->
+<!-- - Run prettier after edits -->
+<!-- - I use VS Code -->
+
+### Context
+<!-- Add personal context that helps Claude assist you -->
+<!-- - I'm senior engineer, skip basic explanations -->
+<!-- - I'm learning Go, explain Go idioms -->
+<!-- - I work on the payments team -->
+
+## My Environment
+
+### Local Setup
+```bash
+# My custom commands
+# alias test="npm test -- --watch"
+# alias lint="npm run lint:fix"
+```
+
+### Paths
+<!-- Custom paths for my machine -->
+<!-- - Project root: ~/projects/myapp -->
+<!-- - Secrets: ~/.secrets/myapp.env -->
+
+## Reminders
+
+### Things I Always Forget
+<!-- - Run migrations before testing -->
+<!-- - Update .env.example when adding env vars -->
+<!-- - The API uses v2, not v1 -->
+
+### My Common Mistakes
+<!-- Claude will remember these -->
+<!-- - I often forget to handle null cases -->
+<!-- - I mix up forEach and map -->
+
+---
+
+## Usage
+
+1. Copy this template to your project root as `CLAUDE.local.md`
+2. Uncomment and customize the sections you want
+3. Add to `.gitignore`: `CLAUDE.local.md`
+4. Claude will read this alongside `CLAUDE.md`
+
+Your local preferences override team preferences when there's a conflict.

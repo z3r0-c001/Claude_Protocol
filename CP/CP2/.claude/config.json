@@ -1,0 +1,86 @@
+{
+  "version": "1.2.0",
+  
+  "thresholds": {
+    "coverage": {
+      "minimum_percent": 80,
+      "critical_paths_percent": 100,
+      "new_code_percent": 90
+    },
+    "file_size": {
+      "max_file_kb": 500,
+      "max_line_count": 1000,
+      "warn_line_count": 500
+    },
+    "complexity": {
+      "max_cyclomatic": 15,
+      "max_cognitive": 20,
+      "max_function_lines": 50
+    },
+    "memory": {
+      "max_entries_per_category": 100,
+      "prune_after_days": 90,
+      "max_entry_length": 500
+    }
+  },
+  
+  "sanitization": {
+    "block_on_secrets": true,
+    "block_on_todos": true,
+    "block_on_large_files": false,
+    "allowed_todo_patterns": ["TODO(username)", "TODO: #issue"],
+    "secret_patterns_enabled": {
+      "aws": true,
+      "github": true,
+      "stripe": true,
+      "generic_api_keys": true,
+      "database_urls": true,
+      "private_keys": true
+    },
+    "excluded_paths": [
+      "node_modules/",
+      "__pycache__/",
+      ".git/",
+      "dist/",
+      "build/",
+      "*.min.js",
+      "*.lock"
+    ]
+  },
+  
+  "testing": {
+    "require_tests_for_new_code": true,
+    "run_tests_before_commit": true,
+    "test_timeout_seconds": 300,
+    "parallel_tests": true
+  },
+  
+  "documentation": {
+    "require_docstrings": true,
+    "require_readme": true,
+    "auto_generate_changelog": true,
+    "doc_coverage_minimum": 70
+  },
+  
+  "git": {
+    "require_conventional_commits": true,
+    "protected_branches": ["main", "master", "production"],
+    "require_pr_for_protected": true,
+    "squash_on_merge": true
+  },
+  
+  "agents": {
+    "model": "claude-opus-4-5-20251101",
+    "timeout_seconds": 60,
+    "laziness_threshold": 3,
+    "hallucination_check_enabled": true,
+    "fact_check_external_claims": true
+  },
+  
+  "notifications": {
+    "on_validation_failure": true,
+    "on_sanitization_block": true,
+    "on_test_failure": true,
+    "log_all_tool_calls": false
+  }
+}

@@ -1,0 +1,47 @@
+# Claude Protocol - Git Ignore Template
+# Copy this to your project's .gitignore
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PRIVATE - Never commit these
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Local-only Claude configuration (personal preferences)
+CLAUDE.local.md
+
+# Memory files contain personal/project-specific learnings
+.claude/memory/user-preferences.json
+.claude/memory/project-learnings.json
+.claude/memory/corrections.json
+.claude/memory/patterns.json
+.claude/memory/decisions.json
+
+# Logs
+.claude/memory/*.log
+
+# Protocol state (session-specific)
+.claude/memory/protocol-state.json
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# COMMIT THESE - Shared team configuration
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# DO commit:
+# - CLAUDE.md (project context for all team members)
+# - .claude/settings.json (hooks, permissions)
+# - .claude/agents/*.md (subagent definitions)
+# - .claude/skills/*/SKILL.md (skill definitions)
+# - .claude/commands/*.md (slash commands)
+# - .claude/scripts/*.sh (validation scripts)
+# - .claude-plugin/plugin.json (plugin manifest)
+# - .mcp.json (MCP configuration)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# OPTIONAL - Decide per project
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Uncomment to keep memory private per developer:
+# .claude/memory/
+
+# Uncomment to keep all Claude config local:
+# .claude/
+# CLAUDE.md
