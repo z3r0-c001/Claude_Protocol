@@ -47,10 +47,16 @@ cat package.json | python3 -m json.tool
 
 **Solutions:**
 
-1. **Set executable permissions:**
+1. **Re-run the installer (easiest):**
+```bash
+./install.sh
+# This sets all permissions automatically
+```
+
+2. **Or set permissions manually:**
 ```bash
 chmod +x .claude/hooks/*.sh
-chmod +x scripts/*.sh
+chmod +x .claude/hooks/*.py
 ```
 
 2. **Check shebang line:**

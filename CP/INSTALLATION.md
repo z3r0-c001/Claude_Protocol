@@ -21,9 +21,29 @@ npm --version      # Should be 9.0.0+
 
 ## Installation Methods
 
-### Method 1: Copy to Existing Project
+### Method 1: Install Script (Recommended)
 
-Copy the protocol files to your project root:
+The easiest way to install:
+
+```bash
+# Clone the protocol
+git clone https://github.com/z3r0-c001/Claude_Protocol.git
+cd Claude_Protocol
+
+# Run the installer
+./install.sh
+```
+
+The installer will:
+- Prompt for target directory (current directory or custom path)
+- Copy all required files (`.claude/`, `CLAUDE.md`, `.mcp.json`)
+- Set executable permissions on all hooks automatically
+- Verify installation
+- Check dependencies (python3, jq, node, claude)
+
+### Method 2: Manual Installation
+
+If you prefer manual installation:
 
 ```bash
 # Clone or download the protocol
@@ -33,31 +53,10 @@ git clone https://github.com/z3r0-c001/Claude_Protocol.git
 cp -r Claude_Protocol/.claude /path/to/your/project/
 cp Claude_Protocol/CLAUDE.md /path/to/your/project/
 cp Claude_Protocol/.mcp.json /path/to/your/project/
-```
 
-### Method 2: Initialize New Project
-
-```bash
-# Create project directory
-mkdir my-project && cd my-project
-
-# Copy protocol
-cp -r /path/to/Claude_Protocol/.claude .
-cp /path/to/Claude_Protocol/CLAUDE.md .
-cp /path/to/Claude_Protocol/.mcp.json .
-
-# Initialize with Claude Code
-claude
-# Then run: /proto-init
-```
-
-## Set Hook Permissions
-
-Make hook scripts executable:
-
-```bash
-chmod +x .claude/hooks/*.sh
-chmod +x .claude/hooks/*.py
+# Set hook permissions
+chmod +x /path/to/your/project/.claude/hooks/*.sh
+chmod +x /path/to/your/project/.claude/hooks/*.py
 ```
 
 ## Verify Installation
