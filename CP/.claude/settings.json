@@ -131,6 +131,10 @@
           {
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/query-analyzer.sh\" 2>&1"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/context-loader.py\""
           }
         ]
       }
@@ -145,11 +149,13 @@
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/laziness-prewrite-check.sh\" 2>&1"
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretool-laziness-check.py\"",
+            "timeout": 10
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/completeness-check.sh\" 2>&1"
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretool-hallucination-check.py\"",
+            "timeout": 15
           }
         ]
       },
@@ -158,7 +164,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/dangerous-command-check.sh\" 2>&1"
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/dangerous-command-check.py\""
           }
         ]
       }
