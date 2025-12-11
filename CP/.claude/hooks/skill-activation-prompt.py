@@ -133,7 +133,8 @@ def main():
     except json.JSONDecodeError:
         sys.exit(0)
 
-    prompt = input_data.get("prompt", "")
+    # Claude Code sends "user_prompt" for UserPromptSubmit hooks
+    prompt = input_data.get("user_prompt", input_data.get("prompt", ""))
 
     if not prompt:
         sys.exit(0)

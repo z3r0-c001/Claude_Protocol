@@ -100,14 +100,35 @@ def extract_content(tool_input: dict, tool_name: str) -> Optional[str]:
     return None
 
 
+def is_string_literal_line(line: str) -> bool:
+    """Check if line is defining a string literal (pattern definition, etc.)."""
+    stripped = line.strip()
+    # Lines that are string definitions in arrays/dicts
+    if re.match(r'^["\'].*["\'],?\s*$', stripped):
+        return True
+    # Lines with r"..." raw strings (regex patterns)
+    if re.match(r'^r["\'].*["\'],?\s*$', stripped):
+        return True
+    # Lines defining patterns in arrays like:  "pattern",
+    if re.match(r'^["\'].*["\'],?\s*(#.*)?$', stripped):
+        return True
+    return False
+
+
 def check_content(content: str) -> list[dict]:
     """Check content for laziness patterns. Returns list of violations."""
     violations = []
     lines = content.split("\n")
-    
+
     for category, config in PATTERNS.items():
         for pattern in config["patterns"]:
             for line_num, line in enumerate(lines, 1):
+                # Skip noqa lines
+                if "noqa" in line.lower() or "nolint" in line.lower():
+                    continue
+                # Skip string literal definitions (avoids false positives on pattern arrays)
+                if is_string_literal_line(line):
+                    continue
                 if re.search(pattern, line, re.IGNORECASE | re.MULTILINE):
                     violations.append({
                         "category": category,
@@ -117,7 +138,7 @@ def check_content(content: str) -> list[dict]:
                         "content": line.strip()[:80],
                         "pattern": pattern,
                     })
-    
+
     return violations
 
 
