@@ -4,7 +4,8 @@ Get up and running with Claude Bootstrap Protocol in 5 minutes.
 
 ## Prerequisites
 
-- Node.js 20+ installed
+- Node.js 18+ installed
+- Python 3.8+ installed
 - Claude Code installed
 
 ## Step 1: Copy Protocol Files
@@ -32,6 +33,7 @@ npm run build
 ```bash
 cd /path/to/your/project
 chmod +x .claude/hooks/*.sh
+chmod +x .claude/hooks/*.py
 ```
 
 ## Step 4: Initialize
@@ -72,6 +74,8 @@ Answer the interactive questions:
 | `/commit <msg>` | Commit changes |
 | `/remember <cat> <text>` | Save to memory |
 | `/recall <topic>` | Search memory |
+| `/leftoff` | Save session for later |
+| `/resume` | Resume saved session |
 
 ### Example Session
 

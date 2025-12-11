@@ -47,9 +47,9 @@ claude
 
 | Hook | Event | Purpose |
 |------|-------|---------|
-| `laziness-prewrite-check.sh` | PreToolUse | Blocks placeholder code before it's written |
-| `completeness-check.sh` | PreToolUse | Ensures code is complete |
-| `dangerous-command-check.sh` | PreToolUse | Blocks dangerous bash commands |
+| `pretool-laziness-check.py` | PreToolUse | Blocks TODOs, placeholders, stubs before write |
+| `pretool-hallucination-check.py` | PreToolUse | Verifies packages exist on PyPI/npm |
+| `dangerous-command-check.py` | PreToolUse | Blocks dangerous bash commands |
 | `laziness-check.sh` | Stop | Final check for lazy patterns |
 | `honesty-check.sh` | Stop | Catches overclaiming |
 
@@ -62,12 +62,17 @@ claude
 | `/fix <issue>` | Fix a bug with test-first approach |
 | `/commit <msg>` | Safe commit after sanitization |
 | `/validate` | Run full validation suite |
+| `/leftoff` | Save session state for continuation |
+| `/resume` | Resume from saved session |
+| `/remember <cat> <text>` | Save to persistent memory |
+| `/recall <topic>` | Search memory |
 
 ## Requirements
 
 - Node.js 18+
+- Python 3.8+ (for PreToolUse hooks)
 - Claude Code CLI
-- bash, jq (for hooks)
+- bash, jq (for shell hooks)
 
 ## Documentation
 

@@ -46,6 +46,10 @@ Quality-enforced, research-first protocol for Claude Code.
 | Run tests | `/test [pattern]` |
 | Commit safely | `/commit <message>` |
 | Validate all | `/validate` |
+| Save session | `/leftoff [summary]` |
+| Resume session | `/resume` |
+| Remember fact | `/remember <category> <text>` |
+| Search memory | `/recall <topic>` |
 
 ## Autonomous Behaviors
 
@@ -64,12 +68,12 @@ When hooks return issues:
 
 ## Hooks Configuration
 
-| Hook Event | Purpose |
-|------------|---------|
-| PreToolUse (Write) | Block lazy/incomplete code before writing |
-| PreToolUse (Bash) | Block dangerous commands |
-| PostToolUse (Write) | Validate syntax, track edits |
-| Stop | Final quality gate (laziness, honesty) |
+| Hook Event | Scripts | Purpose |
+|------------|---------|---------|
+| PreToolUse (Write) | `pretool-laziness-check.py`, `pretool-hallucination-check.py` | Block lazy/incomplete code, verify packages |
+| PreToolUse (Bash) | `dangerous-command-check.py` | Block dangerous commands |
+| PostToolUse (Write) | `post-write-validate.sh`, `context-detector.sh` | Validate syntax, suggest agents |
+| Stop | `laziness-check.sh`, `honesty-check.sh` | Final quality gates |
 
 ## Quality Gates
 

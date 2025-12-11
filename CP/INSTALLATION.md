@@ -4,16 +4,18 @@ Complete installation guide for Claude Bootstrap Protocol.
 
 ## Prerequisites
 
-- **Node.js**: Version 20.0.0 or higher
+- **Node.js**: Version 18.0.0 or higher
 - **npm**: Version 9.0.0 or higher
+- **Python**: Version 3.8 or higher (for PreToolUse hooks)
 - **Claude Code**: Latest version installed
 
 ### Check Prerequisites
 
 ```bash
-node --version   # Should be v20.0.0+
-npm --version    # Should be 9.0.0+
-claude --version # Verify Claude Code is installed
+node --version     # Should be v18.0.0+
+npm --version      # Should be 9.0.0+
+python3 --version  # Should be 3.8+
+claude --version   # Verify Claude Code is installed
 ```
 
 ## Installation Methods
@@ -76,7 +78,7 @@ Make hook scripts executable:
 
 ```bash
 chmod +x .claude/hooks/*.sh
-chmod +x scripts/*.sh
+chmod +x .claude/hooks/*.py
 ```
 
 ## Verify Installation
@@ -187,13 +189,14 @@ your-project/
 │   │       └── test-coverage-enforcer.md
 │   ├── commands/
 │   │   ├── proto-init.md
-│   │   ├── bootstrap.md
-│   │   ├── validate.md
-│   │   └── ... (14 total)
+│   │   ├── leftoff.md          # Session save
+│   │   ├── resume.md           # Session restore
+│   │   └── ... (18 total)
 │   ├── hooks/
-│   │   ├── laziness-check.sh
-│   │   ├── dangerous-command-check.sh
-│   │   └── ... (13 total)
+│   │   ├── pretool-laziness-check.py    # BLOCKING: stops lazy code
+│   │   ├── pretool-hallucination-check.py # BLOCKING: verifies packages
+│   │   ├── dangerous-command-check.py   # BLOCKING: stops dangerous cmds
+│   │   └── ... (24 total)
 │   ├── skills/
 │   │   ├── skill-rules.json
 │   │   ├── quality-control/
