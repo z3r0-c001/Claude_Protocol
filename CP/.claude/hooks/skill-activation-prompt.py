@@ -130,13 +130,16 @@ def get_agent_suggestions(matched_skills: list) -> list:
 def main():
     try:
         input_data = json.load(sys.stdin)
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, EOFError):
+        # Always output valid JSON even on error
+        print(json.dumps({"decision": "continue"}))
         sys.exit(0)
 
     # Claude Code sends "user_prompt" for UserPromptSubmit hooks
     prompt = input_data.get("user_prompt", input_data.get("prompt", ""))
 
     if not prompt:
+        print(json.dumps({"decision": "continue"}))
         sys.exit(0)
 
     # Check for skill triggers

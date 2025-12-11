@@ -86,8 +86,8 @@ def main():
             "\n".join(f"  - {r}" for r in reminders["active"])
         )
 
-    # Output as JSON with decision
-    output = {"ok": True}
+    # Output as JSON - use "decision" format that Claude Code expects
+    output = {"decision": "continue"}
     if context_parts:
         output["context"] = "\n---\n".join(context_parts)
 
