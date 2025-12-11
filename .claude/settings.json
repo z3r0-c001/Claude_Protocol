@@ -111,15 +111,16 @@
   "hooks": {
     "UserPromptSubmit": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/skill-activation-prompt.py 2>/dev/null || true"
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/skill-activation-prompt.py\"",
+            "timeout": 10
           },
           {
             "type": "command",
-            "command": "python3 .claude/hooks/context-loader.py 2>/dev/null || true"
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/context-loader.py\"",
+            "timeout": 10
           }
         ]
       }

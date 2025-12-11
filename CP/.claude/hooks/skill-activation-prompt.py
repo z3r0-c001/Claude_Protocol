@@ -170,11 +170,14 @@ def main():
         set_verify_flag(prompt)
         messages.append("VERIFICATION QUEUED: Answer will be checked against docs")
 
-    # Always output valid JSON
+    # Always output valid JSON using Claude Code's hookSpecificOutput format
     output = {"decision": "continue"}
 
     if messages:
-        output["reason"] = " | ".join(messages)
+        output["hookSpecificOutput"] = {
+            "hookEventName": "UserPromptSubmit",
+            "additionalContext": "\n".join(messages)
+        }
 
     print(json.dumps(output))
     sys.exit(0)

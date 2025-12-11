@@ -86,10 +86,13 @@ def main():
             "\n".join(f"  - {r}" for r in reminders["active"])
         )
 
-    # Output as JSON - use "decision" format that Claude Code expects
+    # Output as JSON using Claude Code's hookSpecificOutput format
     output = {"decision": "continue"}
     if context_parts:
-        output["context"] = "\n---\n".join(context_parts)
+        output["hookSpecificOutput"] = {
+            "hookEventName": "UserPromptSubmit",
+            "additionalContext": "\n---\n".join(context_parts)
+        }
 
     print(json.dumps(output))
     sys.exit(0)
