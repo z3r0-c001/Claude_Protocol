@@ -2,6 +2,11 @@
 # PostToolUse hook: Validate written files
 # Checks syntax based on file extension
 
+# Source shared logging
+SCRIPT_DIR="$(dirname "$0")"
+source "$SCRIPT_DIR/hook-logger.sh"
+notify_hook_start "Write"
+
 FILE_PATH="$1"
 OUTPUT_MODE="${2:-json}"
 
@@ -81,4 +86,5 @@ else
   fi
 fi
 
+notify_hook_result "continue"
 exit 0

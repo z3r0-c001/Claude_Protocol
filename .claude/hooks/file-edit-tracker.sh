@@ -2,6 +2,11 @@
 # PostToolUse hook: Track file edits
 # Maintains list of modified files for session awareness
 
+# Source shared logging
+SCRIPT_DIR="$(dirname "$0")"
+source "$SCRIPT_DIR/hook-logger.sh"
+notify_hook_start "Write"
+
 FILE_PATH="$1"
 OUTPUT_MODE="${2:-json}"
 
@@ -42,4 +47,5 @@ else
   echo "Tracked: $FILE_PATH (total: $FILE_COUNT files this session)"
 fi
 
+notify_hook_result "continue"
 exit 0

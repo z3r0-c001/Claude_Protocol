@@ -8,7 +8,11 @@ if [ -f "${SCRIPT_DIR}/hook-logger.sh" ]; then
     source "${SCRIPT_DIR}/hook-logger.sh"
 else
     hook_log() { :; }
+    notify_hook_start() { :; }
+    notify_hook_result() { :; }
 fi
+
+notify_hook_start "Stop"
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 FLAGS_DIR="${PROJECT_DIR}/.claude/flags"
@@ -98,4 +102,5 @@ else
     fi
 fi
 
+notify_hook_result "continue"
 exit 0

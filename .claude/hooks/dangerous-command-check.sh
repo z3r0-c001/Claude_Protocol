@@ -1,83 +1,82 @@
 #!/bin/bash
 # PreToolUse hook: Block dangerous bash commands
-# Outputs JSON for automated processing
+# Reads JSON from stdin, checks command against dangerous patterns
+# Exit code 2 + stderr = BLOCK
 
-COMMAND="$1"
-OUTPUT_MODE="${2:-json}"
+SCRIPT_DIR="$(dirname "$0")"
+source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || {
+    hook_log() { :; }
+    notify_hook_start() { :; }
+    notify_hook_result() { :; }
+}
 
-# Dangerous patterns
-DANGEROUS_PATTERNS=(
-  "rm -rf /"
-  "rm -rf ~"
-  "rm -rf *"
-  "sudo rm"
-  "> /dev/sda"
-  "mkfs"
-  "dd if="
-  "chmod 777"
-  "chmod -R 777"
-  "curl .* | sh"
-  "curl .* | bash"
-  "wget .* | sh"
-  "wget .* | bash"
-  ":(){:|:&};:"
-  "eval \$(curl"
-  "eval \$(wget"
-  "python -c.*__import__.*os.*system"
-)
+notify_hook_start "Bash"
 
-# Commands that need warning but not block
-WARNING_PATTERNS=(
-  "sudo"
-  "rm -rf"
-  "git push.*force"
-  "git reset --hard"
-  "npm publish"
-  "pip install.*--user"
-  "docker rm"
-  "docker rmi"
-)
+# Read JSON input from stdin
+INPUT=$(cat)
 
-DECISION="approve"
-ISSUES=""
-SEVERITY="pass"
+# Extract command
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
-# Check dangerous patterns
-for pattern in "${DANGEROUS_PATTERNS[@]}"; do
-  if echo "$COMMAND" | grep -qE "$pattern"; then
-    DECISION="block"
-    SEVERITY="critical"
-    ISSUES="${ISSUES}{\"type\":\"dangerous_command\",\"pattern\":\"$pattern\",\"severity\":\"block\",\"suggestion\":\"This command is potentially destructive and has been blocked\"},"
-  fi
-done
-
-# Check warning patterns
-for pattern in "${WARNING_PATTERNS[@]}"; do
-  if echo "$COMMAND" | grep -qE "$pattern"; then
-    if [ "$DECISION" != "block" ]; then
-      SEVERITY="warning"
-    fi
-    ISSUES="${ISSUES}{\"type\":\"risky_command\",\"pattern\":\"$pattern\",\"severity\":\"warn\",\"suggestion\":\"Consider the implications of this command\"},"
-  fi
-done
-
-# Remove trailing comma
-ISSUES="${ISSUES%,}"
-
-if [ "$OUTPUT_MODE" = "json" ]; then
-  if [ -z "$ISSUES" ]; then
-    echo '{"hook":"dangerous-command-check","status":"pass","decision":"approve"}'
-  else
-    echo "{\"hook\":\"dangerous-command-check\",\"status\":\"$SEVERITY\",\"decision\":\"$DECISION\",\"issues\":[$ISSUES]}"
-  fi
-else
-  if [ "$DECISION" = "block" ]; then
-    echo "BLOCKED: Dangerous command detected"
-    exit 1
-  elif [ "$SEVERITY" = "warning" ]; then
-    echo "WARNING: Risky command detected"
-  fi
+# If no command, allow through
+if [ -z "$COMMAND" ]; then
+    notify_hook_result "continue"
+    exit 0
 fi
 
-[ "$DECISION" = "block" ] && exit 1
+# Dangerous patterns - BLOCK immediately
+DANGEROUS_PATTERNS=(
+    "rm -rf /"
+    "rm -rf ~"
+    "rm -rf \*"
+    "rm -rf \$HOME"
+    "sudo rm -rf"
+    "> /dev/sda"
+    "> /dev/nvme"
+    "mkfs\."
+    "dd if=.* of=/dev/"
+    "chmod 777 /"
+    "chmod -R 777 /"
+    "curl .* \| sh"
+    "curl .* \| bash"
+    "wget .* \| sh"
+    "wget .* \| bash"
+    ":\(\)\{.*:\|:&.*\};"
+    "eval \"\$(curl"
+    "eval \"\$(wget"
+    "mv .* /dev/null"
+    ":(){ :|:& };:"
+)
+
+for pattern in "${DANGEROUS_PATTERNS[@]}"; do
+    if echo "$COMMAND" | grep -qE "$pattern"; then
+        hook_log "BLOCK" "Dangerous command: $pattern"
+        notify_hook_result "block"
+
+        echo "BLOCKED: Dangerous command detected." >&2
+        echo "Pattern matched: $pattern" >&2
+        echo "This command could cause system damage and has been blocked." >&2
+        exit 2
+    fi
+done
+
+# Warning patterns - allow but log
+WARNING_PATTERNS=(
+    "sudo"
+    "rm -rf"
+    "git push.*--force"
+    "git reset --hard"
+    "npm publish"
+    "docker rm"
+    "docker rmi"
+)
+
+for pattern in "${WARNING_PATTERNS[@]}"; do
+    if echo "$COMMAND" | grep -qE "$pattern"; then
+        hook_log "WARN" "Risky command: $pattern"
+    fi
+done
+
+hook_log "OK" "Command approved"
+notify_hook_result "continue"
 exit 0

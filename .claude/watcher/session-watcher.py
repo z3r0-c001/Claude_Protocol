@@ -301,6 +301,29 @@ class SessionWatcher:
                 self.pending_issues = []
                 return json.dumps({"ok": True})
 
+            elif cmd == "hook":
+                # Log hook event from external hook scripts
+                hook_name = request.get("hook", "unknown")
+                event = request.get("event", "")
+                tool = request.get("tool", "")
+                result = request.get("result", "")
+
+                # Format: [HOOK] PreToolUse:Write -> continue
+                label = f"{hook_name}"
+                if tool:
+                    label += f":{tool}"
+                if event:
+                    label += f" ({event})"
+
+                if result == "block":
+                    self.log("BLOCK", f"HOOK {label} -> BLOCKED")
+                elif result == "continue":
+                    self.log("INFO", f"HOOK {label} -> ok")
+                else:
+                    self.log("INFO", f"HOOK {label}")
+
+                return json.dumps({"ok": True})
+
             else:
                 return json.dumps({"error": f"unknown command: {cmd}"})
 
@@ -385,6 +408,10 @@ class SessionWatcher:
         """Cleanup on exit"""
         if self.pid_file.exists():
             self.pid_file.unlink()
+        # Clean up guard file so next session spawns fresh
+        guard_file = self.flags_dir / "watcher-spawned.guard"
+        if guard_file.exists():
+            guard_file.unlink()
         self.log("INFO", "Watcher stopped")
         self.log("INFO", "=" * 50)
 

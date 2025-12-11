@@ -5,6 +5,7 @@
 # Source shared logger
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "${SCRIPT_DIR}/hook-logger.sh"
+notify_hook_start "Bash"
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -15,6 +16,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 # If no command, allow through
 if [ -z "$COMMAND" ]; then
     hook_log "OK" "No command to check"
+    notify_hook_result "continue"
     cat << 'EOF'
 {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}
 EOF
@@ -47,6 +49,7 @@ DANGEROUS_PATTERNS=(
 for pattern in "${DANGEROUS_PATTERNS[@]}"; do
     if echo "$COMMAND" | grep -qE "$pattern"; then
         hook_log "BLOCK" "Dangerous pattern: $pattern"
+        notify_hook_result "block"
         cat << EOF
 {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Dangerous command pattern detected: $pattern. This command could cause system damage."}}
 EOF
@@ -55,6 +58,7 @@ EOF
 done
 
 hook_log "OK" "Command approved"
+notify_hook_result "continue"
 cat << 'EOF'
 {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}
 EOF

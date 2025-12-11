@@ -2,6 +2,11 @@
 # PostToolUse hook: Check subagent output quality
 # Ensures subagent responses are complete and actionable
 
+# Source shared logging
+SCRIPT_DIR="$(dirname "$0")"
+source "$SCRIPT_DIR/hook-logger.sh"
+notify_hook_start "Task"
+
 OUTPUT="$1"
 OUTPUT_MODE="${2:-json}"
 
@@ -78,4 +83,5 @@ else
   fi
 fi
 
+notify_hook_result "continue"
 exit 0

@@ -2,6 +2,11 @@
 # Stop hook: Check for honesty issues in responses
 # Flags overconfident or uncertain language
 
+# Source shared logging
+SCRIPT_DIR="$(dirname "$0")"
+source "$SCRIPT_DIR/hook-logger.sh"
+notify_hook_start "Stop"
+
 RESPONSE="$1"
 OUTPUT_MODE="${2:-json}"
 
@@ -68,4 +73,5 @@ else
   fi
 fi
 
+notify_hook_result "continue"
 exit 0

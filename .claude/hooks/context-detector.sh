@@ -2,6 +2,11 @@
 # PostToolUse hook: Detect context and suggest agents
 # Auto-invokes agents based on file patterns
 
+# Source shared logging
+SCRIPT_DIR="$(dirname "$0")"
+source "$SCRIPT_DIR/hook-logger.sh"
+notify_hook_start "Write"
+
 FILE_PATH="$1"
 OUTPUT_MODE="${2:-json}"
 
@@ -51,4 +56,5 @@ else
   fi
 fi
 
+notify_hook_result "continue"
 exit 0

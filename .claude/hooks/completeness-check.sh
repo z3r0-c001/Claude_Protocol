@@ -2,6 +2,11 @@
 # PreToolUse hook: Check content completeness before write
 # Blocks placeholder code from being written
 
+# Source shared logging
+SCRIPT_DIR="$(dirname "$0")"
+source "$SCRIPT_DIR/hook-logger.sh"
+notify_hook_start "Write"
+
 CONTENT="$1"
 FILE_PATH="${2:-unknown}"
 OUTPUT_MODE="${3:-json}"
@@ -70,5 +75,10 @@ else
   fi
 fi
 
-[ "$DECISION" = "block" ] && exit 1
+if [ "$DECISION" = "block" ]; then
+  notify_hook_result "block"
+  exit 1
+fi
+
+notify_hook_result "continue"
 exit 0

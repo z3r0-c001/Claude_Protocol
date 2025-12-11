@@ -127,6 +127,14 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/spawn-watcher-hook.sh\" 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/laziness-injector.sh\""
+          },
+          {
+            "type": "command",
             "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/skill-activation-prompt.py\""
           },
           {
@@ -142,11 +150,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-write-check.sh\" \"$TOOL_INPUT\" 2>/dev/null || true"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-write-check.sh\""
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/completeness-check.sh\" \"$TOOL_INPUT\" 2>/dev/null || true"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/laziness-prewrite-check.sh\""
           }
         ]
       },
@@ -155,7 +163,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/dangerous-command-check.sh\" \"$TOOL_INPUT\" 2>/dev/null || true"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/dangerous-command-check.sh\""
           }
         ]
       }
@@ -202,7 +210,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/laziness-check.sh\" . json 2>/dev/null || true"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/laziness-check.sh\" \"$ASSISTANT_RESPONSE\""
           },
           {
             "type": "command",
