@@ -1,7 +1,7 @@
 #!/bin/bash
 # Laziness Check - Stop Hook
 # Validates Claude's response for lazy patterns before completion
-# Reads transcript directly to check the last assistant response
+# Reads JSON from stdin, outputs JSON to stdout
 
 # Source shared logger
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -9,37 +9,25 @@ if [ -f "${SCRIPT_DIR}/hook-logger.sh" ]; then
     source "${SCRIPT_DIR}/hook-logger.sh"
 else
     hook_log() { :; }
-    notify_hook_start() { :; }
-    notify_hook_result() { :; }
 fi
-
-notify_hook_start "Stop"
 
 # Read JSON input from stdin
 INPUT=$(cat)
 
-# Prevent infinite loops - if we're already in a stop hook, approve
+# Prevent infinite loops - if we're already in a stop hook, allow through
 STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
 if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
-    notify_hook_result "continue"
-    echo '{"decision": "approve"}'
     exit 0
 fi
 
 # Get transcript path from input
 TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty')
 if [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH" ]; then
-    hook_log "OK" "No transcript, approving"
-    notify_hook_result "continue"
-    echo '{"decision": "approve"}'
     exit 0
 fi
 
-hook_log "INFO" "Checking transcript: $(basename "$TRANSCRIPT_PATH")"
-
 # Get the most recent assistant response from transcript
-# Use tac to read file in reverse, find first assistant message with text
-LAST_RESPONSE=$(tac "$TRANSCRIPT_PATH" | while read -r line; do
+LAST_RESPONSE=$(tac "$TRANSCRIPT_PATH" 2>/dev/null | while read -r line; do
     TYPE=$(echo "$line" | jq -r '.type // empty' 2>/dev/null)
     if [ "$TYPE" = "assistant" ]; then
         echo "$line" | jq -r '.message.content[]? | select(.type=="text") | .text' 2>/dev/null
@@ -48,9 +36,6 @@ LAST_RESPONSE=$(tac "$TRANSCRIPT_PATH" | while read -r line; do
 done)
 
 if [ -z "$LAST_RESPONSE" ]; then
-    hook_log "OK" "No response text found"
-    notify_hook_result "continue"
-    echo '{"decision": "approve"}'
     exit 0
 fi
 
@@ -74,9 +59,6 @@ fi
 
 # Skip laziness check if work was done, offering choices, or asking questions
 if [ "$WORK_DONE" = "true" ] || [ "$USER_CHOICE" = "true" ] || [ "$ASKING_QUESTION" = "true" ]; then
-    hook_log "OK" "Valid response (work=$WORK_DONE, choice=$USER_CHOICE, question=$ASKING_QUESTION)"
-    notify_hook_result "continue"
-    echo '{"decision": "approve"}'
     exit 0
 fi
 
@@ -99,31 +81,12 @@ if echo "$LAST_RESPONSE" | grep -qiE '\b(for brevity|beyond the scope|i.ll leave
 fi
 
 if [ -n "$LAZY_FOUND" ]; then
-    hook_log "BLOCK" "Lazy patterns: ${LAZY_FOUND}"
-    notify_hook_result "block"
-
-    # Write violation to file for next prompt injection
-    VIOLATION_FILE="${PROJECT_DIR}/.claude/flags/laziness-violation.md"
-    cat << VIOLATION > "$VIOLATION_FILE"
-# LAZINESS VIOLATION DETECTED
-
-Your previous response was flagged for lazy patterns: **${LAZY_FOUND}**
-
-You told the user what to do instead of doing it yourself. This is unacceptable.
-
-**REQUIRED ACTION**: In your next response, actually DO the work. Do not suggest, delegate, or tell the user to do things. Take action.
-
-Timestamp: $(date -Iseconds)
-VIOLATION
-
-    # Exit 0 required for JSON to be processed by Claude Code
-    cat << EOF
-{"decision": "block", "reason": "LAZY RESPONSE BLOCKED. You used: ${LAZY_FOUND}. DO NOT suggest or delegate - actually DO the work yourself. Rewrite your response to take action instead of telling the user what to do."}
-EOF
+    # Block with reason - forces Claude to continue
+    cat << ENDJSON
+{"decision": "block", "reason": "LAZY RESPONSE DETECTED: ${LAZY_FOUND}. You must DO the work, not tell the user what to do. Rewrite your response to take action."}
+ENDJSON
     exit 0
 fi
 
-hook_log "OK" "No lazy patterns detected"
-notify_hook_result "continue"
-echo '{"decision": "approve"}'
+# No issues - exit 0 with no output means continue
 exit 0

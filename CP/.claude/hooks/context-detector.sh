@@ -1,60 +1,45 @@
 #!/bin/bash
 # PostToolUse hook: Detect context and suggest agents
-# Auto-invokes agents based on file patterns
+# Reads JSON from stdin, outputs context via hookSpecificOutput
 
-# Source shared logging
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/hook-logger.sh"
-notify_hook_start "Write"
+source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
 
-FILE_PATH="$1"
-OUTPUT_MODE="${2:-json}"
+# Read JSON input from stdin
+INPUT=$(cat)
+
+# Extract file path
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+
+if [ -z "$FILE_PATH" ]; then
+    exit 0
+fi
 
 SUGGESTIONS=""
 
 # Pattern-based agent suggestions
-# Format: pattern:agent:reason
-
-RULES=(
-  "auth|password|token|credential|login|session:security-scanner:File contains authentication logic"
-  "encrypt|decrypt|hash|crypto|secret:security-scanner:File contains cryptographic operations"
-  "api|endpoint|route|controller:security-scanner:File handles API endpoints"
-  "test|spec|__tests__|.test.|.spec.:test-coverage-enforcer:Test file modified"
-  "package.json|requirements.txt|Cargo.toml|go.mod:dependency-auditor:Dependency file modified"
-  "Dockerfile|docker-compose|kubernetes|k8s:security-scanner:Container configuration modified"
-  "sql|query|database|migration:security-scanner:Database operations detected"
-  "config|settings|env:security-scanner:Configuration file modified"
-  "performance|cache|optimize|index:performance-analyzer:Performance-related code"
-  "README|CHANGELOG|docs/:fact-checker:Documentation modified"
+declare -A RULES=(
+    ["auth|password|token|credential|login|session"]="security-scanner"
+    ["encrypt|decrypt|hash|crypto|secret"]="security-scanner"
+    ["test|spec|__tests__|.test.|.spec."]="test-coverage-enforcer"
+    ["package.json|requirements.txt|Cargo.toml|go.mod"]="dependency-auditor"
+    ["performance|cache|optimize|index"]="performance-analyzer"
 )
 
-# Check each rule
-for rule in "${RULES[@]}"; do
-  pattern="${rule%%:*}"
-  rest="${rule#*:}"
-  agent="${rest%%:*}"
-  reason="${rest#*:}"
-
-  if echo "$FILE_PATH" | grep -qiE "$pattern"; then
-    SUGGESTIONS="${SUGGESTIONS}{\"agent\":\"$agent\",\"reason\":\"$reason\",\"file\":\"$FILE_PATH\"},"
-  fi
+for pattern in "${!RULES[@]}"; do
+    if echo "$FILE_PATH" | grep -qiE "$pattern"; then
+        agent="${RULES[$pattern]}"
+        SUGGESTIONS="${SUGGESTIONS}${agent}, "
+    fi
 done
 
 # Remove trailing comma
-SUGGESTIONS="${SUGGESTIONS%,}"
+SUGGESTIONS="${SUGGESTIONS%, }"
 
-if [ "$OUTPUT_MODE" = "json" ]; then
-  if [ -z "$SUGGESTIONS" ]; then
-    echo "{\"hook\":\"context-detector\",\"status\":\"pass\",\"file\":\"$FILE_PATH\",\"agent_suggestions\":[]}"
-  else
-    echo "{\"hook\":\"context-detector\",\"status\":\"suggest\",\"file\":\"$FILE_PATH\",\"agent_suggestions\":[$SUGGESTIONS]}"
-  fi
-else
-  if [ -n "$SUGGESTIONS" ]; then
-    echo "Suggested agents for $FILE_PATH:"
-    echo "$SUGGESTIONS" | tr ',' '\n'
-  fi
+if [ -n "$SUGGESTIONS" ]; then
+    cat << ENDJSON
+{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"AGENT SUGGESTION for $FILE_PATH: Consider running $SUGGESTIONS"}}
+ENDJSON
 fi
 
-notify_hook_result "continue"
 exit 0

@@ -4,11 +4,12 @@
 # Exit code 2 + stderr = BLOCK
 
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || {
-    hook_log() { :; }
-    notify_hook_start() { :; }
-    notify_hook_result() { :; }
-}
+if [ -f "$SCRIPT_DIR/hook-logger.sh" ]; then
+    source "$SCRIPT_DIR/hook-logger.sh"
+fi
+hook_log() { :; }
+notify_hook_start() { :; }
+notify_hook_result() { :; }
 
 notify_hook_start "Write"
 
@@ -46,6 +47,8 @@ PROTECTED_PATTERNS=(
     "secrets\."
     "id_rsa"
     "id_ed25519"
+    "\.\./\.\."
+    "\.\./"
 )
 
 for pattern in "${PROTECTED_PATTERNS[@]}"; do

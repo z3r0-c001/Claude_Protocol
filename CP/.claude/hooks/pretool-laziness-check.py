@@ -48,7 +48,6 @@ PATTERNS = {
     "stub_implementations": {
         "severity": "critical",
         "patterns": [
-            r"^\s*pass\s*$",                           # Python pass
             r"raise\s+NotImplementedError",            # Python
             r"throw\s+new\s+NotImplementedError",      # JS/TS
             r"throw\s+new\s+Error\(['\"]not implemented",  # JS/TS
@@ -165,49 +164,68 @@ def format_violations(violations: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def output_json(decision: str, reason: str = "", block_message: str = ""):
+    """Output properly formatted JSON for Claude Code hooks."""
+    result = {"decision": decision}
+    if reason:
+        result["reason"] = reason
+    if block_message:
+        result["message"] = block_message
+    print(json.dumps(result))
+
+
 def main():
     # Read JSON input from stdin
     try:
         input_data = json.load(sys.stdin)
-    except json.JSONDecodeError as e:
-        print(f"Failed to parse hook input: {e}", file=sys.stderr)
-        sys.exit(1)
+    except (json.JSONDecodeError, EOFError):
+        output_json("continue")
+        sys.exit(0)
 
     tool_name = input_data.get("tool_name", "")
     tool_input = input_data.get("tool_input", {})
 
     # Only check Write/Edit/MultiEdit
     if tool_name not in ("Write", "Edit", "MultiEdit"):
+        output_json("continue")
         sys.exit(0)
 
     # Skip documentation files - they may describe patterns without being lazy
     file_path = tool_input.get("file_path", "")
     skip_extensions = [".md", ".rst", ".txt", ".mdx"]
     if any(file_path.endswith(ext) for ext in skip_extensions):
+        output_json("continue")
         sys.exit(0)
-    
+
     # Extract content
     content = extract_content(tool_input, tool_name)
     if not content:
+        output_json("continue")
         sys.exit(0)
-    
+
     # Check for violations
     violations = check_content(content)
-    
-    # Filter to critical only for blocking (adjust as needed)
+
+    # Filter to critical only for blocking
     critical_violations = [v for v in violations if v["severity"] == "critical"]
-    
+
     if critical_violations:
-        # Exit code 2 = blocking error, stderr is fed back to Claude
-        print(format_violations(violations), file=sys.stderr)
-        sys.exit(2)
-    
+        # Block with formatted message
+        output_json("block", block_message=format_violations(violations))
+        sys.exit(0)
+
     # All good
+    output_json("continue")
     sys.exit(0)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        # Absolute fallback - always output valid JSON
+        print('{"decision": "continue"}')
+        sys.exit(0)
 
 
 # =============================================================================

@@ -29,7 +29,3 @@ hook_log() {
     # Append to hook log (silently fail if can't write)
     echo "$log_line" >> "$HOOK_LOG" 2>/dev/null || true
 }
-
-# Stub functions for compatibility (watcher not included in CP)
-notify_hook_start() { :; }
-notify_hook_result() { :; }

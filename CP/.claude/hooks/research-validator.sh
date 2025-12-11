@@ -1,56 +1,56 @@
 #!/bin/bash
 # SubagentStop hook: Validate research subagent output
-# Ensures research findings are well-structured and actionable
+# Reads JSON from stdin
 
-# Source shared logging
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/hook-logger.sh"
-notify_hook_start "Task"
+source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
 
-OUTPUT="$1"
-OUTPUT_MODE="${2:-json}"
+# Read JSON input from stdin
+INPUT=$(cat)
+
+# Prevent infinite loops
+STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
+if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
+    exit 0
+fi
+
+# Get transcript to analyze subagent output
+TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty')
+if [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH" ]; then
+    exit 0
+fi
+
+# Get last response from subagent
+LAST_OUTPUT=$(tac "$TRANSCRIPT_PATH" 2>/dev/null | while read -r line; do
+    TYPE=$(echo "$line" | jq -r '.type // empty' 2>/dev/null)
+    if [ "$TYPE" = "assistant" ]; then
+        echo "$line" | jq -r '.message.content[]? | select(.type=="text") | .text' 2>/dev/null
+        break
+    fi
+done)
+
+if [ -z "$LAST_OUTPUT" ]; then
+    exit 0
+fi
 
 ISSUES=""
-STATUS="pass"
 
-# Check for proper structure
-if ! echo "$OUTPUT" | grep -qiE "finding|conclusion|result|summary"; then
-  ISSUES="${ISSUES}{\"type\":\"unstructured_output\",\"severity\":\"suggest\",\"suggestion\":\"Research output should include clear findings or conclusions\"},"
-  STATUS="suggest"
+# Check for unsourced claims
+if ! echo "$LAST_OUTPUT" | grep -qiE "source|reference|according to|based on|from"; then
+    ISSUES="${ISSUES}unsourced; "
 fi
 
-# Check for sources
-if ! echo "$OUTPUT" | grep -qiE "source|reference|according to|based on|from"; then
-  ISSUES="${ISSUES}{\"type\":\"unsourced_claims\",\"severity\":\"warn\",\"suggestion\":\"Research should cite sources for claims\"},"
-  STATUS="warning"
+# Check for overconfidence
+if echo "$LAST_OUTPUT" | grep -qiE "definitely|certainly|guaranteed|always|never" && \
+   ! echo "$LAST_OUTPUT" | grep -qiE "may|might|could|uncertain"; then
+    ISSUES="${ISSUES}overconfident; "
 fi
 
-# Check for actionable next steps
-if ! echo "$OUTPUT" | grep -qiE "recommend|suggest|next step|action|should"; then
-  ISSUES="${ISSUES}{\"type\":\"no_recommendations\",\"severity\":\"suggest\",\"suggestion\":\"Research should include actionable recommendations\"},"
-  [ "$STATUS" = "pass" ] && STATUS="suggest"
+if [ -n "$ISSUES" ]; then
+    cat << ENDJSON
+{"decision": "block", "reason": "RESEARCH QUALITY ISSUE: ${ISSUES}. Please cite sources and acknowledge uncertainty."}
+ENDJSON
+    exit 0
 fi
 
-# Check for uncertainty acknowledgment where appropriate
-if echo "$OUTPUT" | grep -qiE "definitely|certainly|always|never|guaranteed" && ! echo "$OUTPUT" | grep -qiE "uncertain|unclear|may|might|could"; then
-  ISSUES="${ISSUES}{\"type\":\"overconfident_research\",\"severity\":\"warn\",\"suggestion\":\"Research should acknowledge uncertainty where appropriate\"},"
-  STATUS="warning"
-fi
-
-# Remove trailing comma
-ISSUES="${ISSUES%,}"
-
-if [ "$OUTPUT_MODE" = "json" ]; then
-  if [ -z "$ISSUES" ]; then
-    echo '{"hook":"research-validator","status":"pass"}'
-  else
-    echo "{\"hook\":\"research-validator\",\"status\":\"$STATUS\",\"issues\":[$ISSUES]}"
-  fi
-else
-  if [ "$STATUS" != "pass" ]; then
-    echo "Research validation issues: $STATUS"
-  fi
-fi
-
-notify_hook_result "continue"
 exit 0

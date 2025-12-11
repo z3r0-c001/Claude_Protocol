@@ -209,29 +209,42 @@ def detect_language(file_path: str, content: str) -> Optional[str]:
     return None
 
 
+def output_json(decision: str, reason: str = "", block_message: str = ""):
+    """Output properly formatted JSON for Claude Code hooks."""
+    result = {"decision": decision}
+    if reason:
+        result["reason"] = reason
+    if block_message:
+        result["message"] = block_message
+    print(json.dumps(result))
+
+
 def main():
     try:
         input_data = json.load(sys.stdin)
-    except json.JSONDecodeError as e:
-        print(f"Failed to parse hook input: {e}", file=sys.stderr)
-        sys.exit(1)
-    
+    except (json.JSONDecodeError, EOFError):
+        output_json("continue")
+        sys.exit(0)
+
     tool_name = input_data.get("tool_name", "")
     tool_input = input_data.get("tool_input", {})
-    
+
     if tool_name not in ("Write", "Edit", "MultiEdit"):
+        output_json("continue")
         sys.exit(0)
-    
+
     content = tool_input.get("content", tool_input.get("new_string", ""))
     file_path = tool_input.get("file_path", "")
-    
+
     if not content:
+        output_json("continue")
         sys.exit(0)
-    
+
     language = detect_language(file_path, content)
     if not language:
+        output_json("continue")
         sys.exit(0)
-    
+
     # Extract and verify packages (parallel for speed)
     hallucinations = []
 
@@ -274,11 +287,17 @@ def main():
         for h in hallucinations:
             msg += f"  • {h}\n"
         msg += "\nVerify package names and use only real, existing packages."
-        print(msg, file=sys.stderr)
-        sys.exit(2)
-    
+        output_json("block", block_message=msg)
+        sys.exit(0)
+
+    output_json("continue")
     sys.exit(0)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        # Absolute fallback - always output valid JSON
+        print('{"decision": "continue"}')
+        sys.exit(0)

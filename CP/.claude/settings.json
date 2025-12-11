@@ -114,13 +114,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/skill-activation-prompt.py\"",
-            "timeout": 10
+            "command": "python3 .claude/hooks/skill-activation-prompt.py"
           },
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/context-loader.py\"",
-            "timeout": 10
+            "command": "python3 .claude/hooks/context-loader.py"
           }
         ]
       }
@@ -170,15 +168,6 @@
           {
             "type": "command",
             "command": "bash .claude/hooks/context-detector.sh \"$TOOL_INPUT_FILE_PATH\" 2>/dev/null || true"
-          }
-        ]
-      },
-      {
-        "matcher": "Task",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/subagent-output-check.sh \"$TOOL_OUTPUT\" 2>/dev/null || true"
           }
         ]
       },

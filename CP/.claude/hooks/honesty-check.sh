@@ -1,66 +1,68 @@
 #!/bin/bash
 # Stop hook: Check for honesty issues in responses
-# Focuses on overconfidence detection (the primary honesty concern)
-#
-# Philosophy:
-# - Overconfidence is bad (claiming certainty without evidence)
-# - Hedging is GOOD (shows appropriate uncertainty)
-# - Suggesting next steps to users is FINE (not delegation)
-# - Avoiding implementation work IS bad (covered by laziness-check)
+# Reads JSON from stdin, outputs JSON to stdout for blocking
 
-# Source shared logging
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/hook-logger.sh"
-notify_hook_start "Stop"
+source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
 
-RESPONSE="$1"
-OUTPUT_MODE="${2:-json}"
+# Read JSON input from stdin
+INPUT=$(cat)
 
-FLAGS=""
-STATUS="pass"
+# Prevent infinite loops
+STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
+if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
+    exit 0
+fi
 
-# Check for overconfident language (the main honesty concern)
-# These are absolute claims that are rarely justified
-OVERCONFIDENT_PATTERNS=(
-  "definitely will"
-  "certainly will"
-  "guaranteed to"
-  "100% certain"
-  "without question"
-  "no doubt about"
-  "absolutely certain"
+# Get transcript path
+TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty')
+if [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH" ]; then
+    exit 0
+fi
+
+# Get last response
+LAST_RESPONSE=$(tac "$TRANSCRIPT_PATH" 2>/dev/null | while read -r line; do
+    TYPE=$(echo "$line" | jq -r '.type // empty' 2>/dev/null)
+    if [ "$TYPE" = "assistant" ]; then
+        echo "$line" | jq -r '.message.content[]? | select(.type=="text") | .text' 2>/dev/null
+        break
+    fi
+done)
+
+if [ -z "$LAST_RESPONSE" ]; then
+    exit 0
+fi
+
+# Check for overconfident language
+OVERCONFIDENT=""
+PATTERNS=(
+    "definitely will"
+    "certainly will"
+    "guaranteed to"
+    "100% certain"
+    "without question"
+    "no doubt about"
+    "absolutely certain"
 )
 
-for pattern in "${OVERCONFIDENT_PATTERNS[@]}"; do
-  if echo "$RESPONSE" | grep -qiE "$pattern"; then
-    FLAGS="${FLAGS}overconfident:$pattern;"
-    STATUS="warning"
-  fi
+for pattern in "${PATTERNS[@]}"; do
+    if echo "$LAST_RESPONSE" | grep -qiE "$pattern"; then
+        OVERCONFIDENT="${OVERCONFIDENT}${pattern}; "
+    fi
 done
 
 # Check for false certainty about external facts
-# Pattern: "X is Y" without "I believe", "according to", etc.
-# Only flag strong declarative claims about uncertain topics
-if echo "$RESPONSE" | grep -qiE "this will (always|never)" || \
-   echo "$RESPONSE" | grep -qiE "it is (impossible|guaranteed)"; then
-  FLAGS="${FLAGS}false_certainty:absolute_claim;"
-  STATUS="warning"
+if echo "$LAST_RESPONSE" | grep -qiE "this will (always|never)" || \
+   echo "$LAST_RESPONSE" | grep -qiE "it is (impossible|guaranteed)"; then
+    OVERCONFIDENT="${OVERCONFIDENT}absolute_claim; "
 fi
 
-# Remove trailing semicolon
-FLAGS="${FLAGS%;}"
-
-if [ "$OUTPUT_MODE" = "json" ]; then
-  if [ -z "$FLAGS" ]; then
-    echo '{"hook":"honesty-check","status":"pass"}'
-  else
-    echo "{\"hook\":\"honesty-check\",\"status\":\"$STATUS\",\"flags\":\"$FLAGS\"}"
-  fi
-else
-  if [ -n "$FLAGS" ]; then
-    echo "Honesty flags: $FLAGS"
-  fi
+if [ -n "$OVERCONFIDENT" ]; then
+    cat << ENDJSON
+{"decision": "block", "reason": "OVERCONFIDENT LANGUAGE DETECTED: ${OVERCONFIDENT}. Rephrase with appropriate uncertainty (e.g., 'should', 'likely', 'in most cases')."}
+ENDJSON
+    exit 0
 fi
 
-notify_hook_result "continue"
+# No issues
 exit 0
