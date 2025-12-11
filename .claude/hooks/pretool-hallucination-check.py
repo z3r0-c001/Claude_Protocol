@@ -22,9 +22,13 @@ import urllib.request
 import urllib.error
 from typing import Optional
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Cache to avoid repeated lookups in same session
 _package_cache: dict[str, bool] = {}
+
+# Max concurrent requests (be nice to registries)
+MAX_WORKERS = 5
 
 # =============================================================================
 # IMPORT EXTRACTION
@@ -116,8 +120,6 @@ PYTHON_STDLIB = {
     'uu', 'uuid', 'venv', 'warnings', 'wave', 'weakref', 'webbrowser',
     'winreg', 'winsound', 'wsgiref', 'xdrlib', 'xml', 'xmlrpc', 'zipapp',
     'zipfile', 'zipimport', 'zlib', 'zoneinfo',
-    # typing extras
-    'typing_extensions',
 }
 
 # Node built-ins
@@ -230,21 +232,43 @@ def main():
     if not language:
         sys.exit(0)
     
-    # Extract and verify packages
+    # Extract and verify packages (parallel for speed)
     hallucinations = []
-    
+
     if language == 'python':
         packages = extract_python_imports(content)
-        for pkg in packages:
-            if not check_pypi(pkg):
-                hallucinations.append(f"Python package '{pkg}' not found on PyPI")
-    
+        # Filter out stdlib first (no network needed)
+        packages_to_check = [p for p in packages if p not in PYTHON_STDLIB and p not in _package_cache]
+        cached = [p for p in packages if p in _package_cache and not _package_cache[p]]
+
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            futures = {executor.submit(check_pypi, pkg): pkg for pkg in packages_to_check}
+            for future in as_completed(futures):
+                pkg = futures[future]
+                if not future.result():
+                    hallucinations.append(f"Python package '{pkg}' not found on PyPI")
+
+        # Add any previously cached failures
+        for pkg in cached:
+            hallucinations.append(f"Python package '{pkg}' not found on PyPI")
+
     elif language == 'javascript':
         packages = extract_js_imports(content)
-        for pkg in packages:
-            if not check_npm(pkg):
-                hallucinations.append(f"npm package '{pkg}' not found on registry")
-    
+        # Filter out builtins first (no network needed)
+        packages_to_check = [p for p in packages if p not in NODE_BUILTINS and p not in _package_cache]
+        cached = [p for p in packages if p in _package_cache and not _package_cache[p]]
+
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            futures = {executor.submit(check_npm, pkg): pkg for pkg in packages_to_check}
+            for future in as_completed(futures):
+                pkg = futures[future]
+                if not future.result():
+                    hallucinations.append(f"npm package '{pkg}' not found on registry")
+
+        # Add any previously cached failures
+        for pkg in cached:
+            hallucinations.append(f"npm package '{pkg}' not found on registry")
+
     if hallucinations:
         msg = "HALLUCINATION CHECK FAILED - These packages don't exist:\n\n"
         for h in hallucinations:

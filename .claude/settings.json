@@ -115,23 +115,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \".claude/hooks/spawn-watcher-hook.sh\" 2>/dev/null || true"
+            "command": "python3 \".claude/hooks/skill-activation-prompt.py\" 2>/dev/null || true"
           },
           {
             "type": "command",
-            "command": "bash \".claude/hooks/laziness-injector.sh\""
-          },
-          {
-            "type": "command",
-            "command": "python3 \".claude/hooks/skill-activation-prompt.py\""
-          },
-          {
-            "type": "command",
-            "command": "bash \".claude/hooks/query-analyzer.sh\" \"$PROMPT\" 2>/dev/null || true"
-          },
-          {
-            "type": "command",
-            "command": "python3 \".claude/hooks/context-loader.py\""
+            "command": "python3 \".claude/hooks/context-loader.py\" 2>/dev/null || true"
           }
         ]
       }
