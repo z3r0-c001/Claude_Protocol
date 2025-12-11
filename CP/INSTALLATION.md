@@ -32,6 +32,7 @@ git clone https://github.com/z3r0-c001/Claude_Protocol.git
 # Copy to your project
 cp -r Claude_Protocol/.claude /path/to/your/project/
 cp Claude_Protocol/CLAUDE.md /path/to/your/project/
+cp Claude_Protocol/.mcp.json /path/to/your/project/
 ```
 
 ### Method 2: Initialize New Project
@@ -43,6 +44,7 @@ mkdir my-project && cd my-project
 # Copy protocol
 cp -r /path/to/Claude_Protocol/.claude .
 cp /path/to/Claude_Protocol/CLAUDE.md .
+cp /path/to/Claude_Protocol/.mcp.json .
 
 # Initialize with Claude Code
 claude

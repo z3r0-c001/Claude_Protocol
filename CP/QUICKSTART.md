@@ -17,6 +17,7 @@ git clone https://github.com/z3r0-c001/Claude_Protocol.git
 # Copy to your project
 cp -r Claude_Protocol/.claude /path/to/your/project/
 cp Claude_Protocol/CLAUDE.md /path/to/your/project/
+cp Claude_Protocol/.mcp.json /path/to/your/project/
 ```
 
 ## Step 2: Set Permissions
