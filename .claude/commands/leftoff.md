@@ -10,6 +10,12 @@ Save current session state for seamless continuation in a new session.
 
 Unlike `/remember` (surgical facts) or `/recall` (topic search), `/leftoff` captures a **complete session snapshot** - what was done, what's pending, key context, and blockers.
 
+## Prerequisites
+
+This command requires the MCP memory server. If MCP is not available:
+- Try MCP first: `mcp__memory__memory_write`, `mcp__memory__memory_search`, `mcp__memory__memory_delete`
+- Fallback: Save to `.claude/memory/leftoff/[timestamp].json`
+
 ## Usage
 
 `/leftoff [optional summary]`

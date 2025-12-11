@@ -10,6 +10,12 @@ Search persistent memory for relevant information.
 
 `/recall <topic or keyword>`
 
+## Prerequisites
+
+This command requires the MCP memory server. If MCP is not available:
+- Try MCP first: `mcp__memory__memory_search`
+- Fallback: Search local `.claude/memory/` directory for JSON files
+
 ## Process
 
 1. Parse the search query from user input

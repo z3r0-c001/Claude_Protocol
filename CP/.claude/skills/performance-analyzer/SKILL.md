@@ -137,9 +137,7 @@ Integrates with:
 - CI/CD pipelines for performance regression detection
 - Profiling tools for runtime analysis
 
-## Files
+## Notes
 
-- `detect-complexity.sh`: Algorithmic complexity detection
-- `detect-memory.sh`: Memory issue detection
-- `detect-io.sh`: I/O bottleneck detection
-- `detect-db.sh`: Database issue detection
+Detection commands are documented inline above. Claude executes these directly.
+No external scripts required - all logic is self-contained in this skill.

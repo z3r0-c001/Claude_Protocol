@@ -18,6 +18,12 @@ Store information in persistent memory for future sessions.
 - **corrections**: Mistakes and their corrections
 - **patterns**: Recurring solutions, common code patterns
 
+## Prerequisites
+
+This command requires the MCP memory server. If MCP is not available, save to local file instead:
+- Try MCP first: `mcp__memory__memory_write`
+- Fallback: Save to `.claude/memory/[category]/[key].json`
+
 ## Process
 
 1. Parse the input to extract:

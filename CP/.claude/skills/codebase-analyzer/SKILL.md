@@ -18,10 +18,12 @@ This skill provides systematic codebase analysis for protocol initialization.
 
 ### Step 1: Project Type Detection
 
-```bash
-# Run detection script
-./scripts/detect-project.sh
-```
+Detect project type by checking for:
+
+- `package.json` → Node.js project
+- `requirements.txt` / `pyproject.toml` → Python project
+- `Cargo.toml` → Rust project
+- `go.mod` → Go project
 
 Detects:
 - Package manager (npm, yarn, pnpm, pip, cargo, go mod)
@@ -30,10 +32,7 @@ Detects:
 
 ### Step 2: Framework Detection
 
-```bash
-# Check for framework indicators
-./scripts/detect-framework.sh
-```
+Check package.json dependencies / pyproject.toml / imports for framework indicators.
 
 Detects:
 - Frontend: React, Vue, Angular, Svelte, Next.js, Nuxt
@@ -43,10 +42,7 @@ Detects:
 
 ### Step 3: Structure Mapping
 
-```bash
-# Map directory structure
-./scripts/map-structure.sh
-```
+Use `tree -L 2 -d` or `ls -la` to map directory structure.
 
 Maps:
 - Source directories
@@ -57,10 +53,7 @@ Maps:
 
 ### Step 4: Pattern Detection
 
-```bash
-# Detect coding patterns
-./scripts/detect-patterns.sh
-```
+Analyze source files to detect coding patterns.
 
 Detects:
 - Naming conventions (files, functions, classes)
@@ -70,10 +63,7 @@ Detects:
 
 ### Step 5: Key File Identification
 
-```bash
-# Find important files
-./scripts/find-key-files.sh
-```
+Search for common entry points and configuration files.
 
 Finds:
 - Entry points
@@ -104,10 +94,7 @@ This skill is used by:
 - `codebase-analyzer` agent for detailed analysis
 - Protocol initialization script
 
-## Files
+## Notes
 
-- `detect-project.sh`: Project type detection
-- `detect-framework.sh`: Framework detection
-- `map-structure.sh`: Structure mapping
-- `detect-patterns.sh`: Pattern detection
-- `find-key-files.sh`: Key file identification
+Analysis steps are performed inline by Claude using the documented commands.
+No external scripts required - all logic is self-contained in this skill.

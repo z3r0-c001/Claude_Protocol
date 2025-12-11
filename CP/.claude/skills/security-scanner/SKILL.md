@@ -112,9 +112,7 @@ Integrates with:
 - PreToolUse hooks for dangerous command blocking
 - CI/CD pipelines for automated scanning
 
-## Files
+## Notes
 
-- `scan-injections.sh`: Injection vulnerability scanner
-- `scan-secrets.sh`: Hardcoded secrets scanner
-- `scan-deps.sh`: Dependency vulnerability scanner
-- `scan-config.sh`: Configuration issue scanner
+Scanning commands are documented inline above. Claude executes these directly.
+No external scripts required - all logic is self-contained in this skill.

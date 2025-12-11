@@ -10,96 +10,100 @@ Run comprehensive validation of all Claude Code infrastructure components.
 
 Execute these validation checks in order:
 
-### 1. Hook Validation
+### 1. Hook Exit Code Protocol
 
-Test each hook outputs valid JSON. Run these commands and verify output:
+Claude Code hooks use exit codes, not JSON output:
 
-**UserPromptSubmit hook:**
+| Exit Code | Meaning |
+|-----------|---------|
+| 0 | Continue (allow operation) |
+| 2 | Block (with stderr message explaining why) |
+| Other | Error (operation continues but logged) |
+
+### 2. Hook Syntax Validation
+
+Verify all hooks have valid syntax:
+
+**Python hooks:**
 ```bash
-echo '{"prompt": "test prompt"}' | python3 .claude/hooks/skill-activation-prompt.py
-```
-Expected format: `{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit"}}`
-
-**PreToolUse hooks:**
-```bash
-echo '{"tool_input": {"command": "ls"}}' | bash .claude/hooks/safety-check.sh
-echo '{"tool_input": {"content": "valid code"}}' | bash .claude/hooks/completeness-check.sh
-```
-Expected format: `{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}`
-
-**PostToolUse hook:**
-```bash
-echo '{"tool_name": "Edit", "tool_input": {"file_path": "/test.js"}}' | bash .claude/hooks/file-edit-tracker.sh
-```
-Expected format: `{"hookSpecificOutput":{"hookEventName":"PostToolUse"}}`
-
-**Stop hooks:**
-```bash
-echo '{}' | bash .claude/hooks/laziness-check.sh
-echo '{}' | bash .claude/hooks/honesty-check.sh
-echo '{}' | bash .claude/hooks/stop-verify.sh
-```
-Expected format: `{"decision": "approve"}`
-
-### 2. JSON Format Requirements
-
-Verify each hook output matches these required formats:
-
-| Hook Type | Required Fields |
-|-----------|-----------------|
-| PreToolUse | `hookSpecificOutput.hookEventName` = "PreToolUse", `hookSpecificOutput.permissionDecision` = "allow"/"deny"/"ask" |
-| PostToolUse | `hookSpecificOutput.hookEventName` = "PostToolUse" |
-| UserPromptSubmit | `hookSpecificOutput.hookEventName` = "UserPromptSubmit" |
-| Stop | `decision` = "approve"/"block" |
-
-### 3. Edge Case Testing
-
-Test hooks handle edge cases without crashing:
-
-```bash
-echo '' | python3 .claude/hooks/skill-activation-prompt.py
-echo '{}' | bash .claude/hooks/safety-check.sh
-echo 'not json' | python3 .claude/hooks/skill-activation-prompt.py
+python3 -m py_compile .claude/hooks/skill-activation-prompt.py
+python3 -m py_compile .claude/hooks/context-loader.py
+python3 -m py_compile .claude/hooks/dangerous-command-check.py
+python3 -m py_compile .claude/hooks/pretool-laziness-check.py
+python3 -m py_compile .claude/hooks/pretool-hallucination-check.py
 ```
 
-All must output valid JSON (never crash or output nothing).
-
-### 4. Blocking Behavior Tests
-
-Test hooks correctly block problematic content:
-
-**Safety hook blocks dangerous commands:**
+**Bash hooks:**
 ```bash
-echo '{"tool_input": {"command": "sudo rm -rf /"}}' | bash .claude/hooks/safety-check.sh
+bash -n .claude/hooks/pre-write-check.sh
+bash -n .claude/hooks/file-edit-tracker.sh
+bash -n .claude/hooks/context-detector.sh
 ```
-Expected: `permissionDecision` = "deny"
 
-**Laziness hook blocks lazy suggestions (without work context):**
-```bash
-echo '{"response": "You could try adding a function."}' | bash .claude/hooks/laziness-check.sh
-```
-Expected: `decision` = "block"
+All should exit 0 (no syntax errors).
 
-**Laziness hook allows summaries after work:**
+### 3. Hook Behavior Tests
+
+**Test UserPromptSubmit hooks output valid JSON:**
 ```bash
-echo '{"response": "I fixed the bug and updated the file."}' | bash .claude/hooks/laziness-check.sh
+echo '{"user_prompt": "test"}' | python3 .claude/hooks/skill-activation-prompt.py
+echo '{"user_prompt": "test"}' | python3 .claude/hooks/context-loader.py
 ```
-Expected: `decision` = "approve"
+Expected: Valid JSON with `{"decision": "continue"}` format.
+
+**Test PreToolUse hooks allow safe operations:**
+```bash
+echo '{"tool_name": "Write", "tool_input": {"file_path": "/tmp/test.txt"}}' | bash .claude/hooks/pre-write-check.sh
+echo $?
+```
+Expected: Exit 0
+
+**Test PreToolUse hooks block dangerous operations:**
+```bash
+echo '{"tool_name": "Bash", "tool_input": {"command": "sudo rm -rf /"}}' | python3 .claude/hooks/dangerous-command-check.py
+echo $?
+```
+Expected: Exit 2 with stderr message
+
+**Test path protection:**
+```bash
+echo '{"tool_name": "Write", "tool_input": {"file_path": "/etc/passwd"}}' | bash .claude/hooks/pre-write-check.sh
+echo $?
+```
+Expected: Exit 2 (blocked)
+
+### 4. Edge Case Testing
+
+Test hooks handle edge cases gracefully:
+
+```bash
+echo '' | python3 .claude/hooks/skill-activation-prompt.py && echo "OK: empty input"
+echo '{}' | python3 .claude/hooks/skill-activation-prompt.py && echo "OK: empty JSON"
+echo 'not json' | python3 .claude/hooks/skill-activation-prompt.py && echo "OK: invalid JSON"
+```
+
+All should output valid JSON and exit 0 (not crash).
 
 ### 5. Skills Validation
 
 ```bash
 ls -la .claude/skills/*/SKILL.md
-cat .claude/skills/skill-rules.json | jq .
+cat .claude/skills/skill-rules.json | jq . > /dev/null && echo "skill-rules.json: valid"
 ```
 
 ### 6. Settings Validation
 
 ```bash
-cat .claude/settings.json | jq .
+cat .claude/settings.json | jq . > /dev/null && echo "settings.json: valid"
 ```
 
-### 7. Generate Report
+### 7. Agent Validation
+
+```bash
+ls .claude/agents/core/*.md .claude/agents/quality/*.md .claude/agents/domain/*.md .claude/agents/workflow/*.md 2>/dev/null | wc -l
+```
+
+### 8. Generate Report
 
 Create a validation report with this structure:
 
@@ -108,21 +112,30 @@ Create a validation report with this structure:
 
 ## Hook Status
 
-| Hook | Type | JSON Valid | Format OK | Blocking OK |
-|------|------|------------|-----------|-------------|
-| skill-activation-prompt.py | UserPromptSubmit | [status] | [status] | N/A |
-| safety-check.sh | PreToolUse | [status] | [status] | [status] |
-| completeness-check.sh | PreToolUse | [status] | [status] | [status] |
-| file-edit-tracker.sh | PostToolUse | [status] | [status] | N/A |
-| laziness-check.sh | Stop | [status] | [status] | [status] |
-| honesty-check.sh | Stop | [status] | [status] | [status] |
-| stop-verify.sh | Stop | [status] | [status] | N/A |
+| Hook | Type | Syntax | Safe Allow | Dangerous Block |
+|------|------|--------|------------|-----------------|
+| skill-activation-prompt.py | UserPromptSubmit | [OK/FAIL] | N/A | N/A |
+| context-loader.py | UserPromptSubmit | [OK/FAIL] | N/A | N/A |
+| pre-write-check.sh | PreToolUse | [OK/FAIL] | [OK/FAIL] | [OK/FAIL] |
+| dangerous-command-check.py | PreToolUse | [OK/FAIL] | [OK/FAIL] | [OK/FAIL] |
+| pretool-laziness-check.py | PreToolUse | [OK/FAIL] | [OK/FAIL] | N/A |
+| pretool-hallucination-check.py | PreToolUse | [OK/FAIL] | [OK/FAIL] | N/A |
+| file-edit-tracker.sh | PostToolUse | [OK/FAIL] | N/A | N/A |
+| context-detector.sh | PostToolUse | [OK/FAIL] | N/A | N/A |
 
-## Skills Status
-[List skills and their status]
+## Config Status
 
-## Settings Status
-[Verify settings.json is valid]
+| File | Valid JSON | Notes |
+|------|------------|-------|
+| settings.json | [OK/FAIL] | |
+| skill-rules.json | [OK/FAIL] | |
+
+## Summary
+
+- Hooks: [X] valid / [Y] total
+- Skills: [count] found
+- Agents: [count] found
+- Configs: [OK/FAIL]
 
 ## Issues Found
 [List any issues]
@@ -140,5 +153,5 @@ Create a validation report with this structure:
 Run this after:
 - Creating new hooks
 - Modifying hook logic
-- Setting up infrastructure with /init-infrastructure
+- Setting up infrastructure with /proto-init
 - Before committing hook changes

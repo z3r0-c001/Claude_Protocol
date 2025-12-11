@@ -137,9 +137,7 @@ Integrates with:
 - CI/CD pipelines for coverage gates
 - PR checks for coverage requirements
 
-## Files
+## Notes
 
-- `analyze-coverage.sh`: Coverage analysis script
-- `find-gaps.sh`: Gap detection script
-- `check-quality.sh`: Test quality checker
-- `generate-tests.sh`: Test generation helper
+Analysis commands are documented inline above. Claude executes these directly.
+No external scripts required - all logic is self-contained in this skill.

@@ -172,12 +172,18 @@ def main():
     except json.JSONDecodeError as e:
         print(f"Failed to parse hook input: {e}", file=sys.stderr)
         sys.exit(1)
-    
+
     tool_name = input_data.get("tool_name", "")
     tool_input = input_data.get("tool_input", {})
-    
+
     # Only check Write/Edit/MultiEdit
     if tool_name not in ("Write", "Edit", "MultiEdit"):
+        sys.exit(0)
+
+    # Skip documentation files - they may describe patterns without being lazy
+    file_path = tool_input.get("file_path", "")
+    skip_extensions = [".md", ".rst", ".txt", ".mdx"]
+    if any(file_path.endswith(ext) for ext in skip_extensions):
         sys.exit(0)
     
     # Extract content

@@ -6,6 +6,12 @@ description: Resume from a saved session state. Usage: /resume [session-id]
 
 Retrieve and load a previously saved session state.
 
+## Prerequisites
+
+This command requires the MCP memory server. If MCP is not available:
+- Try MCP first: `mcp__memory__memory_search`
+- Fallback: Search local `.claude/memory/leftoff/` directory for JSON files
+
 ## Purpose
 
 Complement to `/leftoff` - retrieves saved session snapshots and offers to continue work.

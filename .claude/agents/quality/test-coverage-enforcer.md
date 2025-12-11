@@ -7,7 +7,7 @@ tools:
   - Bash
   - Grep
   - Glob
-model: claude-opus-4-5-20251101
+model: claude-sonnet-4-20250514
 ---
 
 # Test Coverage Enforcer Agent

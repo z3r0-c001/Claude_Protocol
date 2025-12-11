@@ -163,7 +163,7 @@
       "contentPatterns": []
     }
   },
-  "quality-audit": {
+  "quality-control": {
     "type": "guardrail",
     "enforcement": "require",
     "priority": "high",
@@ -172,7 +172,8 @@
         "validate",
         "audit",
         "check quality",
-        "verify"
+        "verify",
+        "quality control"
       ],
       "intentPatterns": []
     },

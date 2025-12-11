@@ -115,11 +115,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \".claude/hooks/skill-activation-prompt.py\" 2>/dev/null || true"
+            "command": "python3 .claude/hooks/skill-activation-prompt.py 2>/dev/null || true"
           },
           {
             "type": "command",
-            "command": "python3 \".claude/hooks/context-loader.py\" 2>/dev/null || true"
+            "command": "python3 .claude/hooks/context-loader.py 2>/dev/null || true"
           }
         ]
       }
@@ -130,16 +130,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \".claude/hooks/pre-write-check.sh\""
+            "command": "bash .claude/hooks/pre-write-check.sh"
           },
           {
             "type": "command",
-            "command": "python3 \".claude/hooks/pretool-laziness-check.py\"",
+            "command": "python3 .claude/hooks/pretool-laziness-check.py",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "python3 \".claude/hooks/pretool-hallucination-check.py\"",
+            "command": "python3 .claude/hooks/pretool-hallucination-check.py",
             "timeout": 15
           }
         ]
@@ -149,7 +149,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \".claude/hooks/dangerous-command-check.py\""
+            "command": "python3 .claude/hooks/dangerous-command-check.py"
           }
         ]
       }
@@ -160,15 +160,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \".claude/hooks/file-edit-tracker.sh\" 2>/dev/null || true"
+            "command": "bash .claude/hooks/file-edit-tracker.sh 2>/dev/null || true"
           },
           {
             "type": "command",
-            "command": "bash \".claude/hooks/post-write-validate.sh\" \"$TOOL_INPUT_FILE_PATH\" json 2>/dev/null || true"
+            "command": "bash .claude/hooks/post-write-validate.sh \"$TOOL_INPUT_FILE_PATH\" json 2>/dev/null || true"
           },
           {
             "type": "command",
-            "command": "bash \".claude/hooks/context-detector.sh\" \"$TOOL_INPUT_FILE_PATH\" 2>/dev/null || true"
+            "command": "bash .claude/hooks/context-detector.sh \"$TOOL_INPUT_FILE_PATH\" 2>/dev/null || true"
           }
         ]
       },
@@ -177,7 +177,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \".claude/hooks/subagent-output-check.sh\" \"$TOOL_OUTPUT\" 2>/dev/null || true"
+            "command": "bash .claude/hooks/subagent-output-check.sh \"$TOOL_OUTPUT\" 2>/dev/null || true"
           }
         ]
       },
@@ -186,7 +186,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \".claude/hooks/research-quality-check.sh\" \"$TOOL_OUTPUT\" 2>/dev/null || true"
+            "command": "bash .claude/hooks/research-quality-check.sh \"$TOOL_OUTPUT\" 2>/dev/null || true"
           }
         ]
       }
@@ -196,15 +196,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \".claude/hooks/laziness-check.sh\" \"$ASSISTANT_RESPONSE\""
+            "command": "bash .claude/hooks/laziness-check.sh \"$ASSISTANT_RESPONSE\""
           },
           {
             "type": "command",
-            "command": "bash \".claude/hooks/honesty-check.sh\" \"$ASSISTANT_RESPONSE\" 2>/dev/null || true"
+            "command": "bash .claude/hooks/honesty-check.sh \"$ASSISTANT_RESPONSE\" 2>/dev/null || true"
           },
           {
             "type": "command",
-            "command": "bash \".claude/hooks/stop-verify.sh\" 2>/dev/null || true"
+            "command": "bash .claude/hooks/stop-verify.sh 2>/dev/null || true"
           }
         ]
       }
@@ -214,7 +214,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \".claude/hooks/research-validator.sh\" \"$TOOL_OUTPUT\" 2>/dev/null || true"
+            "command": "bash .claude/hooks/research-validator.sh \"$TOOL_OUTPUT\" 2>/dev/null || true"
           }
         ]
       }
