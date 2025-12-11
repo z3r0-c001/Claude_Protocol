@@ -2,6 +2,8 @@
 
 Complete reference for the Claude Bootstrap Protocol MCP Memory Server.
 
+> **Note:** The MCP memory server is **optional**. The protocol works without it - you just won't have persistent memory across sessions. Set this up only if you want cross-session memory features like `/remember` and `/recall`.
+
 ## Overview
 
 The MCP (Model Context Protocol) Memory Server provides persistent memory across Claude sessions. It stores:

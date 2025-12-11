@@ -4,16 +4,19 @@ Complete installation guide for Claude Bootstrap Protocol.
 
 ## Prerequisites
 
-- **Node.js**: Version 20.0.0 or higher
-- **npm**: Version 9.0.0 or higher
+- **Python**: Version 3.8 or higher (for hooks)
 - **Claude Code**: Latest version installed
+- **Node.js**: Version 18.0.0 or higher (only if using MCP memory server)
 
 ### Check Prerequisites
 
 ```bash
-node --version   # Should be v20.0.0+
-npm --version    # Should be 9.0.0+
-claude --version # Verify Claude Code is installed
+python3 --version  # Should be 3.8+
+claude --version   # Verify Claude Code is installed
+
+# Only needed if using MCP memory server:
+node --version     # Should be v18.0.0+
+npm --version      # Should be 9.0.0+
 ```
 
 ## Installation Methods
@@ -28,7 +31,6 @@ git clone https://github.com/z3r0-c001/Claude_Protocol.git
 
 # Copy to your project
 cp -r Claude_Protocol/.claude /path/to/your/project/
-cp Claude_Protocol/.mcp.json /path/to/your/project/
 cp Claude_Protocol/CLAUDE.md /path/to/your/project/
 ```
 
@@ -40,34 +42,11 @@ mkdir my-project && cd my-project
 
 # Copy protocol
 cp -r /path/to/Claude_Protocol/.claude .
-cp /path/to/Claude_Protocol/.mcp.json .
 cp /path/to/Claude_Protocol/CLAUDE.md .
 
 # Initialize with Claude Code
 claude
 # Then run: /proto-init
-```
-
-## Build the MCP Memory Server
-
-The MCP server provides persistent memory across sessions.
-
-```bash
-cd .claude/mcp/memory-server
-npm install
-npm run build
-```
-
-### Verify Build
-
-```bash
-ls dist/index.js  # Should exist after build
-```
-
-### Expected Output
-
-```
-added 15 packages in 2s
 ```
 
 ## Set Hook Permissions
@@ -76,6 +55,7 @@ Make hook scripts executable:
 
 ```bash
 chmod +x .claude/hooks/*.sh
+chmod +x .claude/hooks/*.py
 chmod +x scripts/*.sh
 ```
 
@@ -91,10 +71,9 @@ Expected directories:
 - `agents/`
 - `commands/`
 - `hooks/`
-- `mcp/`
-- `memory/`
 - `skills/`
 - `settings.json`
+- `mcp/` (optional - for memory server)
 
 ### 2. Validate JSON Files
 
@@ -102,20 +81,8 @@ Expected directories:
 # Check settings.json
 python3 -c "import json; json.load(open('.claude/settings.json'))" && echo "settings.json: OK"
 
-# Check .mcp.json
-python3 -c "import json; json.load(open('.mcp.json'))" && echo ".mcp.json: OK"
-
 # Check skill-rules.json
 python3 -c "import json; json.load(open('.claude/skills/skill-rules.json'))" && echo "skill-rules.json: OK"
-```
-
-### 3. Test MCP Server
-
-```bash
-cd .claude/mcp/memory-server
-node dist/index.js
-# Should output: "Claude Memory Server running on stdio"
-# Press Ctrl+C to exit
 ```
 
 ## Initialize Protocol
@@ -144,13 +111,44 @@ This will:
 ### Restart Claude Code
 
 After installation, restart Claude Code to load:
-- MCP servers from `.mcp.json`
 - Hooks from `.claude/settings.json`
 - Commands from `.claude/commands/`
+- MCP servers from `.mcp.json` (if configured)
+
+## Optional: Enable Persistent Memory (MCP Server)
+
+The MCP memory server provides persistent memory across sessions. This is optional - the protocol works without it.
+
+### Setup MCP Server
+
+```bash
+# Copy MCP config to your project
+cp /path/to/Claude_Protocol/.mcp.json /path/to/your/project/
+
+# Build memory server
+cd .claude/mcp/memory-server
+npm install
+npm run build
+```
+
+### Verify Build
+
+```bash
+ls dist/index.js  # Should exist after build
+```
+
+### Test MCP Server
+
+```bash
+cd .claude/mcp/memory-server
+node dist/index.js
+# Should output: "Claude Memory Server running on stdio"
+# Press Ctrl+C to exit
+```
 
 ### Verify MCP Connection
 
-In Claude Code, check MCP tools are available:
+After restarting Claude Code, check MCP tools are available:
 
 ```
 What MCP tools are available?
@@ -169,7 +167,7 @@ You should see:
 ```
 your-project/
 ├── CLAUDE.md                    # Project documentation
-├── .mcp.json                    # MCP server configuration
+├── .mcp.json                    # MCP server configuration (optional)
 ├── .claude/
 │   ├── settings.json            # Hooks and permissions
 │   ├── agents/

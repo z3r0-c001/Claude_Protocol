@@ -4,8 +4,9 @@ Get up and running with Claude Bootstrap Protocol in 5 minutes.
 
 ## Prerequisites
 
-- Node.js 20+ installed
+- Python 3.8+ installed (for hooks)
 - Claude Code installed
+- Node.js 18+ (only if using MCP memory server)
 
 ## Step 1: Copy Protocol Files
 
@@ -15,26 +16,18 @@ git clone https://github.com/z3r0-c001/Claude_Protocol.git
 
 # Copy to your project
 cp -r Claude_Protocol/.claude /path/to/your/project/
-cp Claude_Protocol/.mcp.json /path/to/your/project/
 cp Claude_Protocol/CLAUDE.md /path/to/your/project/
 ```
 
-## Step 2: Build MCP Server
-
-```bash
-cd /path/to/your/project/.claude/mcp/memory-server
-npm install
-npm run build
-```
-
-## Step 3: Set Permissions
+## Step 2: Set Permissions
 
 ```bash
 cd /path/to/your/project
 chmod +x .claude/hooks/*.sh
+chmod +x .claude/hooks/*.py
 ```
 
-## Step 4: Initialize
+## Step 3: Initialize
 
 ```bash
 # Start Claude Code
@@ -50,7 +43,7 @@ Answer the interactive questions:
 3. Tech stack
 4. Memory preferences (JSON or SQLite)
 
-## Step 5: Verify
+## Step 4: Verify
 
 ```bash
 # Check status
@@ -69,9 +62,13 @@ Answer the interactive questions:
 | `/feature <desc>` | Implement a feature |
 | `/fix <issue>` | Fix a bug |
 | `/test` | Run tests |
+| `/lint [--fix]` | Run linters |
 | `/commit <msg>` | Commit changes |
-| `/remember <cat> <text>` | Save to memory |
-| `/recall <topic>` | Search memory |
+| `/pr [title]` | Create pull request |
+| `/leftoff [summary]` | Save session for later |
+| `/resume` | Resume saved session |
+| `/remember <cat> <text>` | Save to memory (requires MCP) |
+| `/recall <topic>` | Search memory (requires MCP) |
 
 ### Example Session
 
@@ -113,15 +110,30 @@ All quality gates passed.
    /recall authentication
    ```
 
+## Optional: Enable Persistent Memory
+
+For cross-session memory persistence, set up the MCP server:
+
+```bash
+# Copy MCP config
+cp Claude_Protocol/.mcp.json /path/to/your/project/
+
+# Build memory server
+cd /path/to/your/project/.claude/mcp/memory-server
+npm install && npm run build
+```
+
+After setup, restart Claude Code to enable memory commands (`/remember`, `/recall`).
+
 ## Troubleshooting
 
-### MCP tools not available?
+### Hooks not running?
+- Verify: `chmod +x .claude/hooks/*.sh && chmod +x .claude/hooks/*.py`
+- Check settings.json is valid JSON
+
+### MCP tools not available? (if using memory server)
 - Restart Claude Code after installation
 - Check: `node .claude/mcp/memory-server/dist/index.js`
-
-### Hooks not running?
-- Verify: `chmod +x .claude/hooks/*.sh`
-- Check settings.json is valid JSON
 
 ### More help?
 - See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)

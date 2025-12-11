@@ -312,6 +312,56 @@ Search memory for information.
 
 ---
 
+## Session Commands
+
+### /leftoff
+
+Save session state for seamless continuation later.
+
+**Usage:**
+```
+/leftoff [summary]
+```
+
+**Examples:**
+```
+/leftoff                           # Auto-generate summary
+/leftoff Working on auth module    # Manual summary
+```
+
+**What it saves:**
+- Current working context
+- Files being edited
+- In-progress tasks
+- Recent decisions
+
+**Note:** Keeps last 3 sessions automatically.
+
+---
+
+### /resume
+
+Resume from a saved session state.
+
+**Usage:**
+```
+/resume [session-id]
+```
+
+**Examples:**
+```
+/resume                    # Resume most recent session
+/resume 2024-01-15-auth    # Resume specific session
+```
+
+**Process:**
+1. Lists available sessions if no ID given
+2. Loads session context
+3. Restores working state
+4. Continues from where you left off
+
+---
+
 ## Git Commands
 
 ### /commit
@@ -430,8 +480,10 @@ Sanitize a codebase before making it public.
 | `/lint [--fix]` | Run linters |
 | `/search <query>` | Search codebase |
 | `/validate` | Run validations |
-| `/remember <cat> <text>` | Save to memory |
-| `/recall <topic>` | Search memory |
+| `/remember <cat> <text>` | Save to memory (requires MCP) |
+| `/recall <topic>` | Search memory (requires MCP) |
+| `/leftoff [summary]` | Save session state |
+| `/resume [id]` | Resume saved session |
 | `/commit <msg>` | Commit changes |
 | `/pr [title]` | Create PR |
 | `/docs` | Generate docs |

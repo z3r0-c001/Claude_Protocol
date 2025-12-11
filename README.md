@@ -19,21 +19,26 @@ git clone https://github.com/z3r0-c001/Claude_Protocol.git
 
 # Copy to your project
 cp -r Claude_Protocol/.claude /path/to/your/project/
-cp Claude_Protocol/.mcp.json /path/to/your/project/
 cp Claude_Protocol/CLAUDE.md /path/to/your/project/
-
-# Build MCP server this step happens automatically when you run /proto-init but you can do it yourself if you want 
-cd /path/to/your/project/.claude/mcp/memory-server
-npm install
-npm run build
 
 # Set permissions
 cd /path/to/your/project
 chmod +x .claude/hooks/*.sh
+chmod +x .claude/hooks/*.py
 
 # Initialize with Claude Code
 claude
 # Then run: /proto-init
+```
+
+### Optional: Enable Persistent Memory (MCP Server)
+
+For persistent memory across sessions, also set up the MCP server:
+
+```bash
+cp Claude_Protocol/.mcp.json /path/to/your/project/
+cd /path/to/your/project/.claude/mcp/memory-server
+npm install && npm run build
 ```
 
 See [Quick Start Guide](docs/QUICKSTART.md) for detailed instructions.
@@ -59,10 +64,11 @@ See [Quick Start Guide](docs/QUICKSTART.md) for detailed instructions.
 - Asks permission for major decisions
 - Notices failures and provides suggestions
 
-### Persistent Memory
-- MCP-based memory server
+### Persistent Memory (Optional)
+- MCP-based memory server for cross-session persistence
 - Stores user preferences, learnings, corrections
 - Auto-loads context at session start
+- Protocol works without MCP - memory features are optional
 
 ### Quality Enforcement
 - Zero-tolerance for placeholder code
@@ -80,7 +86,7 @@ See [Quick Start Guide](docs/QUICKSTART.md) for detailed instructions.
 ```
 your-project/
 ├── CLAUDE.md                    # Project documentation
-├── .mcp.json                    # MCP server configuration
+├── .mcp.json                    # MCP server configuration (optional)
 ├── .claude/
 │   ├── settings.json            # Hooks and permissions
 │   ├── configs/                 # Permission templates
@@ -94,8 +100,8 @@ your-project/
 │   ├── skills/                  # Skill definitions (6 total)
 │   │   └── skill-rules.json     # Auto-activation config
 │   ├── mcp/
-│   │   └── memory-server/       # MCP memory server
-│   └── memory/                  # Persistent storage (runtime)
+│   │   └── memory-server/       # MCP memory server (optional)
+│   └── memory/                  # Persistent storage (runtime, optional)
 ├── scripts/                     # Utility scripts
 └── docs/                        # Documentation
 ```
@@ -112,10 +118,15 @@ your-project/
 | `/fix <issue>` | Fix a bug |
 | `/refactor <target>` | Refactor code |
 | `/test` | Run tests |
+| `/lint [--fix]` | Run linters |
+| `/search <query>` | Search codebase |
 | `/commit <msg>` | Commit with validation |
-| `/remember <cat> <text>` | Save to memory |
-| `/recall <query>` | Search memory |
-| `/update-docs` | Sync docs with code |
+| `/pr [title]` | Create pull request |
+| `/leftoff [summary]` | Save session state |
+| `/resume [id]` | Resume saved session |
+| `/remember <cat> <text>` | Save to memory (requires MCP) |
+| `/recall <query>` | Search memory (requires MCP) |
+| `/docs` | Generate documentation |
 | `/reposanitizer` | Sanitize for public release |
 
 See [Commands Reference](docs/COMMANDS.md) for complete list.
@@ -149,7 +160,7 @@ See [Agents Reference](docs/AGENTS.md) for details.
 
 See [Hooks Reference](docs/HOOKS.md) for details.
 
-## Memory Categories
+## Memory Categories (Optional - requires MCP server)
 
 | Category | Auto-Save | Description |
 |----------|-----------|-------------|
@@ -159,7 +170,7 @@ See [Hooks Reference](docs/HOOKS.md) for details.
 | patterns | Yes | Recurring solutions |
 | decisions | No (ask) | Major choices |
 
-See [MCP Server Documentation](docs/MCP.md) for details.
+See [MCP Server Documentation](docs/MCP.md) for setup details.
 
 ## Quality Gates
 
@@ -173,9 +184,9 @@ All generated code must pass:
 
 ## Requirements
 
-- **Node.js**: Version 20.0.0 or higher
-- **npm**: Version 9.0.0 or higher
+- **Python**: Version 3.8 or higher (for hooks)
 - **Claude Code**: Latest version
+- **Node.js**: Version 18.0.0 or higher (only if using MCP memory server)
 
 ## Contributing
 
