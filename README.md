@@ -31,17 +31,7 @@ claude
 # Then run: /proto-init
 ```
 
-### Optional: Enable Persistent Memory (MCP Server)
-
-For persistent memory across sessions, also set up the MCP server:
-
-```bash
-cp Claude_Protocol/.mcp.json /path/to/your/project/
-cd /path/to/your/project/.claude/mcp/memory-server
-npm install && npm run build
-```
-
-See [Quick Start Guide](docs/QUICKSTART.md) for detailed instructions.
+The `/proto-init` command will guide you through setup, including optional MCP memory server configuration for persistent memory across sessions.
 
 ## Documentation
 

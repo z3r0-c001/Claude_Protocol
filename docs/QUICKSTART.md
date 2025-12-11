@@ -112,18 +112,7 @@ All quality gates passed.
 
 ## Optional: Enable Persistent Memory
 
-For cross-session memory persistence, set up the MCP server:
-
-```bash
-# Copy MCP config
-cp Claude_Protocol/.mcp.json /path/to/your/project/
-
-# Build memory server
-cd /path/to/your/project/.claude/mcp/memory-server
-npm install && npm run build
-```
-
-After setup, restart Claude Code to enable memory commands (`/remember`, `/recall`).
+The `/proto-init` command handles MCP memory server setup automatically when you choose to enable persistent memory. No manual installation required.
 
 ## Troubleshooting
 

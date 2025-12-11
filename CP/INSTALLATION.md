@@ -118,48 +118,12 @@ After installation, restart Claude Code to load:
 
 The MCP memory server provides persistent memory across sessions. This is optional - the protocol works without it.
 
-### Setup MCP Server
+**MCP is set up automatically by `/proto-init`** when you choose to enable persistent memory. The initialization command will:
+1. Copy the MCP configuration
+2. Install and build the memory server
+3. Verify the connection
 
-```bash
-# Copy MCP config to your project
-cp /path/to/Claude_Protocol/.mcp.json /path/to/your/project/
-
-# Build memory server
-cd .claude/mcp/memory-server
-npm install
-npm run build
-```
-
-### Verify Build
-
-```bash
-ls dist/index.js  # Should exist after build
-```
-
-### Test MCP Server
-
-```bash
-cd .claude/mcp/memory-server
-node dist/index.js
-# Should output: "Claude Memory Server running on stdio"
-# Press Ctrl+C to exit
-```
-
-### Verify MCP Connection
-
-After restarting Claude Code, check MCP tools are available:
-
-```
-What MCP tools are available?
-```
-
-You should see:
-- `mcp__memory__memory_read`
-- `mcp__memory__memory_write`
-- `mcp__memory__memory_search`
-- `mcp__memory__memory_list`
-- `mcp__memory__memory_delete`
-- `mcp__memory__memory_prune`
+No manual setup required.
 
 ## Directory Structure After Installation
 

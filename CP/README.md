@@ -14,14 +14,9 @@ A quality-enforced, research-first protocol for Claude Code that prevents lazy c
 ```bash
 # 1. Copy to your project
 cp -r .claude /path/to/your/project/
-cp .mcp.json /path/to/your/project/
 cp CLAUDE.md /path/to/your/project/
 
-# 2. Install MCP memory server
-cd /path/to/your/project/.claude/mcp/memory-server
-npm install && npm run build
-
-# 3. Start Claude Code
+# 2. Start Claude Code
 cd /path/to/your/project
 claude
 ```
