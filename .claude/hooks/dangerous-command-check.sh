@@ -41,11 +41,11 @@ DANGEROUS_PATTERNS=(
     "curl .* \| bash"
     "wget .* \| sh"
     "wget .* \| bash"
-    ":\(\)\{.*:\|:&.*\};"
-    "eval \"\$(curl"
-    "eval \"\$(wget"
+    "eval.*curl"
+    "eval.*wget"
     "mv .* /dev/null"
-    ":(){ :|:& };:"
+    ":\\(\\)\\{.*:\\|:&.*\\};"
+    ":\\(\\) *\\{ *:\\|:& *\\};"
 )
 
 for pattern in "${DANGEROUS_PATTERNS[@]}"; do

@@ -49,7 +49,7 @@ PROTECTED_PATTERNS=(
 )
 
 for pattern in "${PROTECTED_PATTERNS[@]}"; do
-    if echo "$FILE_PATH" | grep -qE "$pattern"; then
+    if echo "$FILE_PATH" | grep -qE -- "$pattern"; then
         ISSUES="${ISSUES}• Protected path: $pattern\n"
     fi
 done
@@ -67,7 +67,7 @@ if [ -n "$CONTENT" ]; then
     )
 
     for pattern in "${SECRET_PATTERNS[@]}"; do
-        if echo "$CONTENT" | grep -qiE "$pattern"; then
+        if echo "$CONTENT" | grep -qiE -- "$pattern"; then
             ISSUES="${ISSUES}• Potential secret in content: $pattern\n"
         fi
     done
