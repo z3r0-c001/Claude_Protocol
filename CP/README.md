@@ -11,12 +11,36 @@ A quality-enforced, research-first protocol for Claude Code that prevents lazy c
 
 ## Quick Start
 
+### Option 1: Install Script (Recommended)
+
 ```bash
-# 1. Copy to your project
+# Clone the repo
+git clone https://github.com/z3r0-c001/Claude_Protocol.git
+cd Claude_Protocol
+
+# Run installer
+./install.sh
+```
+
+The installer will:
+- Prompt for target directory (current or custom)
+- Copy all files with correct permissions
+- Verify installation
+- Check dependencies
+
+### Option 2: Manual Installation
+
+```bash
+# Copy to your project
 cp -r .claude /path/to/your/project/
 cp CLAUDE.md /path/to/your/project/
+cp .mcp.json /path/to/your/project/
 
-# 2. Start Claude Code
+# Set permissions
+chmod +x /path/to/your/project/.claude/hooks/*.sh
+chmod +x /path/to/your/project/.claude/hooks/*.py
+
+# Start Claude Code
 cd /path/to/your/project
 claude
 ```
