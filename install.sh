@@ -23,19 +23,32 @@ echo -e "${NC}"
 # Get the directory where this script is located (source)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Check if we're in the cloned repo directory
+if [ -f "$SCRIPT_DIR/CLAUDE.md" ] && [ -d "$SCRIPT_DIR/.claude" ]; then
+    IN_REPO=true
+else
+    echo -e "${RED}Error: Cannot find Claude Protocol files in $SCRIPT_DIR${NC}"
+    echo -e "Make sure you're running this script from the cloned repository."
+    exit 1
+fi
+
 # Prompt for target directory
 echo -e "${YELLOW}Where would you like to install Claude Protocol?${NC}"
 echo ""
 echo "  1) Current directory ($(pwd))"
-echo "  2) Specify a different directory"
+echo "  2) Parent directory ($(dirname "$(pwd)"))"
+echo "  3) Specify a different directory"
 echo ""
-read -p "Choice [1/2]: " choice
+read -p "Choice [1/2/3]: " choice
 
 case "$choice" in
     1|"")
         TARGET_DIR="$(pwd)"
         ;;
     2)
+        TARGET_DIR="$(dirname "$(pwd)")"
+        ;;
+    3)
         read -p "Enter target directory path: " TARGET_DIR
         # Expand ~ to home directory
         TARGET_DIR="${TARGET_DIR/#\~/$HOME}"
@@ -46,20 +59,79 @@ case "$choice" in
         ;;
 esac
 
-# Validate target directory
-if [ ! -d "$TARGET_DIR" ]; then
+# Resolve to absolute path
+TARGET_DIR="$(cd "$TARGET_DIR" 2>/dev/null && pwd)" || {
     echo -e "${YELLOW}Directory '$TARGET_DIR' does not exist.${NC}"
     read -p "Create it? [y/N]: " create_dir
     if [[ "$create_dir" =~ ^[Yy]$ ]]; then
         mkdir -p "$TARGET_DIR"
+        TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
         echo -e "${GREEN}Created directory: $TARGET_DIR${NC}"
     else
         echo -e "${RED}Exiting.${NC}"
         exit 1
     fi
+}
+
+# Check if source and target are the same
+if [ "$SCRIPT_DIR" = "$TARGET_DIR" ]; then
+    echo ""
+    echo -e "${GREEN}You're already in the Claude Protocol directory!${NC}"
+    echo ""
+    echo -e "The protocol is ready to use. No installation needed."
+    echo ""
+    echo -e "To copy to another project, run:"
+    echo -e "  ${BLUE}./install.sh${NC}"
+    echo -e "  Then choose option 3 and specify your project path."
+    echo ""
+    echo -e "Or manually copy these files to your project:"
+    echo -e "  ${BLUE}cp -r .claude /path/to/your/project/${NC}"
+    echo -e "  ${BLUE}cp CLAUDE.md .mcp.json /path/to/your/project/${NC}"
+    echo ""
+
+    # Still verify dependencies
+    echo -e "${BLUE}Checking dependencies...${NC}"
+
+    ERRORS=0
+    if command -v python3 &> /dev/null; then
+        PYTHON_VERSION=$(python3 --version 2>&1)
+        echo -e "${GREEN}  ✓ $PYTHON_VERSION${NC}"
+    else
+        echo -e "${RED}  ✗ Python 3 not found (required for hooks)${NC}"
+        ERRORS=$((ERRORS + 1))
+    fi
+
+    if command -v jq &> /dev/null; then
+        echo -e "${GREEN}  ✓ jq installed${NC}"
+    else
+        echo -e "${RED}  ✗ jq not found (required for hooks)${NC}"
+        ERRORS=$((ERRORS + 1))
+    fi
+
+    if command -v node &> /dev/null; then
+        NODE_VERSION=$(node --version 2>&1)
+        echo -e "${GREEN}  ✓ Node.js $NODE_VERSION${NC}"
+    else
+        echo -e "${YELLOW}  ! Node.js not found (optional, for MCP server)${NC}"
+    fi
+
+    if command -v claude &> /dev/null; then
+        echo -e "${GREEN}  ✓ Claude Code CLI installed${NC}"
+    else
+        echo -e "${YELLOW}  ! Claude Code CLI not found${NC}"
+        echo -e "${YELLOW}    Install: npm install -g @anthropic-ai/claude-code${NC}"
+    fi
+
+    echo ""
+    if [ "$ERRORS" -eq 0 ]; then
+        echo -e "${GREEN}Ready to use! Run 'claude' then '/proto-init'${NC}"
+    else
+        echo -e "${YELLOW}Please install missing dependencies first.${NC}"
+    fi
+    exit 0
 fi
 
-# Check if .claude already exists
+# Check if .claude already exists in target
 if [ -d "$TARGET_DIR/.claude" ]; then
     echo -e "${YELLOW}Warning: $TARGET_DIR/.claude already exists.${NC}"
     read -p "Overwrite? [y/N]: " overwrite
