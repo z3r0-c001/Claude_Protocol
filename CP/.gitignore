@@ -1,0 +1,17 @@
+# Runtime files (created during use)
+.claude/memory/*.json
+.claude/logs/
+.claude/flags/
+.claude/watcher/
+
+# Node modules (install fresh)
+.claude/mcp/memory-server/node_modules/
+.claude/mcp/memory-server/dist/
+
+# Local overrides
+CLAUDE.local.md
+.claude/settings.local.json
+
+# OS files
+.DS_Store
+Thumbs.db
