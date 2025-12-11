@@ -147,23 +147,31 @@ echo -e "${BLUE}Installing Claude Protocol to: $TARGET_DIR${NC}"
 echo ""
 
 # Copy files
-echo -e "${GREEN}[1/5]${NC} Copying .claude directory..."
+echo -e "${GREEN}[1/6]${NC} Copying .claude directory..."
 cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR/"
 
-echo -e "${GREEN}[2/5]${NC} Copying CLAUDE.md..."
+echo -e "${GREEN}[2/6]${NC} Copying configuration files..."
 cp "$SCRIPT_DIR/CLAUDE.md" "$TARGET_DIR/"
+cp "$SCRIPT_DIR/.mcp.json" "$TARGET_DIR/" 2>/dev/null || true
+cp "$SCRIPT_DIR/.gitignore" "$TARGET_DIR/" 2>/dev/null || true
 
-echo -e "${GREEN}[3/5]${NC} Copying MCP configuration..."
-if [ -f "$SCRIPT_DIR/.mcp.json" ]; then
-    cp "$SCRIPT_DIR/.mcp.json" "$TARGET_DIR/"
-fi
+echo -e "${GREEN}[3/6]${NC} Copying documentation..."
+cp "$SCRIPT_DIR/README.md" "$TARGET_DIR/" 2>/dev/null || true
+cp "$SCRIPT_DIR/HOOKS.md" "$TARGET_DIR/" 2>/dev/null || true
+cp "$SCRIPT_DIR/INSTALLATION.md" "$TARGET_DIR/" 2>/dev/null || true
+cp "$SCRIPT_DIR/QUICKSTART.md" "$TARGET_DIR/" 2>/dev/null || true
+cp "$SCRIPT_DIR/TROUBLESHOOTING.md" "$TARGET_DIR/" 2>/dev/null || true
 
-echo -e "${GREEN}[4/5]${NC} Setting executable permissions on hooks..."
+echo -e "${GREEN}[4/6]${NC} Copying install script..."
+cp "$SCRIPT_DIR/install.sh" "$TARGET_DIR/" 2>/dev/null || true
+
+echo -e "${GREEN}[5/6]${NC} Setting executable permissions on hooks..."
 chmod +x "$TARGET_DIR/.claude/hooks/"*.sh 2>/dev/null || true
 chmod +x "$TARGET_DIR/.claude/hooks/"*.py 2>/dev/null || true
 
-echo -e "${GREEN}[5/5]${NC} Setting executable permissions on scripts..."
+echo -e "${GREEN}[6/6]${NC} Setting executable permissions on scripts..."
 chmod +x "$TARGET_DIR/.claude/scripts/"*.sh 2>/dev/null || true
+chmod +x "$TARGET_DIR/install.sh" 2>/dev/null || true
 
 # Verify installation
 echo ""
