@@ -33,18 +33,19 @@ This protocol automatically:
 ```bash
 # Clone the repository
 git clone https://github.com/z3r0-c001/Claude_Protocol.git
+cd Claude_Protocol
 
-# Copy to your project
-cp -r Claude_Protocol/.claude /path/to/your/project/
-cp Claude_Protocol/CLAUDE.md /path/to/your/project/
-cp Claude_Protocol/.mcp.json /path/to/your/project/
+# Run the installer
+./install.sh
 
-# Set permissions
-cd /path/to/your/project
-chmod +x .claude/hooks/*.sh
-chmod +x .claude/hooks/*.py
+# Follow prompts to select target directory
+# The installer will:
+#   - Copy all protocol files
+#   - Set permissions on hooks
+#   - Verify dependencies
 
 # Initialize with Claude Code
+cd /path/to/your/project
 claude
 # Then run: /proto-init
 ```

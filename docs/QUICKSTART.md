@@ -9,30 +9,32 @@ Get up and running with Claude Bootstrap Protocol in 5 minutes.
 ## Prerequisites
 
 - Python 3.8+ installed (for hooks)
+- jq installed (for hooks) - `apt install jq` or `brew install jq`
 - Claude Code installed
 - Node.js 18+ (only if using MCP memory server)
 
-## Step 1: Copy Protocol Files
+## Step 1: Clone and Install
 
 ```bash
 # Clone the repository
 git clone https://github.com/z3r0-c001/Claude_Protocol.git
+cd Claude_Protocol
 
-# Copy to your project
-cp -r Claude_Protocol/.claude /path/to/your/project/
-cp Claude_Protocol/CLAUDE.md /path/to/your/project/
-cp Claude_Protocol/.mcp.json /path/to/your/project/
+# Run the installer
+./install.sh
+
+# Follow the prompts:
+#   1) Install to current directory
+#   2) Install to parent directory
+#   3) Specify a different directory
 ```
 
-## Step 2: Set Permissions
+The installer automatically:
+- Copies all protocol files (.claude/, CLAUDE.md, docs/, etc.)
+- Sets executable permissions on hooks
+- Verifies dependencies (Python 3, jq, Node.js)
 
-```bash
-cd /path/to/your/project
-chmod +x .claude/hooks/*.sh
-chmod +x .claude/hooks/*.py
-```
-
-## Step 3: Initialize
+## Step 2: Initialize
 
 ```bash
 # Start Claude Code

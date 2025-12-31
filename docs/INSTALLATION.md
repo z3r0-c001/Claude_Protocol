@@ -9,6 +9,7 @@ Complete installation guide for Claude Bootstrap Protocol.
 ## Prerequisites
 
 - **Python**: Version 3.8 or higher (for hooks)
+- **jq**: JSON processor (for hooks)
 - **Claude Code**: Latest version installed
 - **Node.js**: Version 18.0.0 or higher (only if using MCP memory server)
 
@@ -16,6 +17,7 @@ Complete installation guide for Claude Bootstrap Protocol.
 
 ```bash
 python3 --version  # Should be 3.8+
+jq --version       # Should be 1.6+
 claude --version   # Verify Claude Code is installed
 
 # Only needed if using MCP memory server:
@@ -23,46 +25,63 @@ node --version     # Should be v18.0.0+
 npm --version      # Should be 9.0.0+
 ```
 
-## Installation Methods
-
-### Method 1: Copy to Existing Project
-
-Copy the protocol files to your project root:
+### Install jq (if missing)
 
 ```bash
-# Clone or download the protocol
+# Ubuntu/Debian
+sudo apt install jq
+
+# macOS
+brew install jq
+
+# Windows (via Chocolatey)
+choco install jq
+```
+
+## Installation Methods
+
+### Method 1: Using install.sh (Recommended)
+
+The installer script handles all file copying and permissions:
+
+```bash
+# Clone the repository
+git clone https://github.com/z3r0-c001/Claude_Protocol.git
+cd Claude_Protocol
+
+# Run the installer
+./install.sh
+
+# Follow the prompts:
+#   1) Install to current directory
+#   2) Install to parent directory
+#   3) Specify a different directory (e.g., /path/to/your/project)
+```
+
+The installer automatically:
+- Copies .claude/, CLAUDE.md, .mcp.json, docs/, scripts/
+- Sets executable permissions on all hooks and scripts
+- Verifies Python 3, jq, Node.js dependencies
+- Checks for existing installations
+
+### Method 2: Manual Installation
+
+If you prefer manual control:
+
+```bash
+# Clone the repository
 git clone https://github.com/z3r0-c001/Claude_Protocol.git
 
 # Copy to your project
 cp -r Claude_Protocol/.claude /path/to/your/project/
 cp Claude_Protocol/CLAUDE.md /path/to/your/project/
 cp Claude_Protocol/.mcp.json /path/to/your/project/
-```
+cp -r Claude_Protocol/docs /path/to/your/project/
 
-### Method 2: Initialize New Project
-
-```bash
-# Create project directory
-mkdir my-project && cd my-project
-
-# Copy protocol
-cp -r /path/to/Claude_Protocol/.claude .
-cp /path/to/Claude_Protocol/CLAUDE.md .
-cp /path/to/Claude_Protocol/.mcp.json .
-
-# Initialize with Claude Code
-claude
-# Then run: /proto-init
-```
-
-## Set Hook Permissions
-
-Make hook scripts executable:
-
-```bash
+# Set permissions
+cd /path/to/your/project
 chmod +x .claude/hooks/*.sh
 chmod +x .claude/hooks/*.py
-chmod +x scripts/*.sh
 ```
 
 ## Verify Installation

@@ -157,10 +157,15 @@ cp "$SCRIPT_DIR/.gitignore" "$TARGET_DIR/" 2>/dev/null || true
 
 echo -e "${GREEN}[3/6]${NC} Copying documentation..."
 cp "$SCRIPT_DIR/README.md" "$TARGET_DIR/" 2>/dev/null || true
-cp "$SCRIPT_DIR/HOOKS.md" "$TARGET_DIR/" 2>/dev/null || true
-cp "$SCRIPT_DIR/INSTALLATION.md" "$TARGET_DIR/" 2>/dev/null || true
-cp "$SCRIPT_DIR/QUICKSTART.md" "$TARGET_DIR/" 2>/dev/null || true
-cp "$SCRIPT_DIR/TROUBLESHOOTING.md" "$TARGET_DIR/" 2>/dev/null || true
+cp "$SCRIPT_DIR/LICENSE" "$TARGET_DIR/" 2>/dev/null || true
+cp "$SCRIPT_DIR/CHANGELOG"*.md "$TARGET_DIR/" 2>/dev/null || true
+cp "$SCRIPT_DIR/protocol-manifest.json" "$TARGET_DIR/" 2>/dev/null || true
+if [ -d "$SCRIPT_DIR/docs" ]; then
+    cp -r "$SCRIPT_DIR/docs" "$TARGET_DIR/"
+fi
+if [ -d "$SCRIPT_DIR/scripts" ]; then
+    cp -r "$SCRIPT_DIR/scripts" "$TARGET_DIR/"
+fi
 
 echo -e "${GREEN}[4/6]${NC} Copying install script..."
 cp "$SCRIPT_DIR/install.sh" "$TARGET_DIR/" 2>/dev/null || true
