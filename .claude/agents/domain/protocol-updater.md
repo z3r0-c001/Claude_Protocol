@@ -12,8 +12,7 @@ tools:
   - mcp__memory__memory_read
   - mcp__memory__memory_write
   - mcp__memory__memory_search
-model: claude-sonnet-4-20250514
-supports_plan_mode: true
+model: sonnet
 ---
 
 # Protocol Updater Agent

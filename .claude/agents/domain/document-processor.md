@@ -7,8 +7,7 @@ tools:
   - Grep
   - Glob
   - Bash
-model: claude-sonnet-4-20250514
-supports_plan_mode: true
+model: sonnet
 ---
 
 # Document Processor Agent

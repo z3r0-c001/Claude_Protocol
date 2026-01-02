@@ -8,8 +8,7 @@ tools:
   - Bash
   - mcp__memory__memory_read
   - mcp__memory__memory_search
-model: claude-sonnet-4-20250514
-supports_plan_mode: true
+model: sonnet
 ---
 
 # Protocol Analyzer Agent
@@ -87,7 +86,7 @@ grep -L "supports_plan_mode" .claude/agents/**/*.md
 **Detection rules:**
 | Pattern | Detection | Suggestion |
 |---------|-----------|------------|
-| Missing `supports_plan_mode` | grep -L | Add `supports_plan_mode: true` |
+| Missing `supports_plan_mode` | grep -L | Add `` |
 | Old hook JSON | grep "decision.*continue" | Use `{"continue": true}` |
 | Missing description | grep -L "description:" | Add description field |
 | Non-kebab-case files | filename regex | Rename to kebab-case |
@@ -186,7 +185,7 @@ None found.
    - agents/quality/tester.md
    - agents/domain/security-scanner.md
 
-   **Fix:** Add `supports_plan_mode: true` to YAML frontmatter
+   **Fix:** Add `` to YAML frontmatter
    **Auto-fix available:** Yes
 
 ### Minor Issues (2)

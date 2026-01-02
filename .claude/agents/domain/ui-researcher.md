@@ -8,8 +8,7 @@ tools:
   - WebSearch
   - WebFetch
   - Task
-model: claude-sonnet-4-20250514
-supports_plan_mode: true
+model: sonnet
 ---
 
 # UI Researcher Agent
