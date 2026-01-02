@@ -1,89 +1,71 @@
 # Changelog
 
-**Current Version:** 1.1.2
+**Current Version:** 1.1.3
 **Date:** 2026-01-02
 
 > This file is overwritten with each release. For historical changes, see git history.
 
 ---
 
-## v1.1.2 - Changelog & Install Improvements
+## v1.1.3 - Protocol Audit & Official Spec Alignment
 
-Consolidate versioned changelogs into single file, integrate /commit with /git skill, add install.sh origin cleanup.
+Comprehensive audit against official Claude Code documentation. Aligned agents, cleaned distribution, fixed command references.
 
-### Changes
-
-| File | Change |
-|------|--------|
-| `.claude/commands/commit.md` | Lines 126-127: Changed `CHANGELOG-vX.X.X.md` to single `CHANGELOG.md`; Lines 145-156: Added "Before Pushing" section mandating `/git` before push |
-| `.claude/commands/git.md` | Lines 64-70: Changed changelog check from `ls -la CHANGELOG-v*.md` to `cat CHANGELOG.md`; Line 101: Updated fix instruction to reference single CHANGELOG.md |
-| `CLAUDE.md` | Line 9: Version 1.1.1 → 1.1.2; Line 109: Changed changelog reference from versioned to single file |
-| `protocol-manifest.json` | Line 3: Version 1.1.1 → 1.1.2; Line 4: Date updated to 2026-01-02 |
-| `CHANGELOG.md` | Replaced versioned files (CHANGELOG-v1.1.0.md, CHANGELOG-v1.1.1.md) with single overwritten file |
-| `install.sh` | Lines 256-270: Added prompt after successful install to delete origin (cloned repo) directory |
-
-### Deleted
-
-| File | Reason |
-|------|--------|
-| `CHANGELOG-v1.1.0.md` | Consolidated into single CHANGELOG.md |
-| `CP/CHANGELOG-v1.1.0.md` | Consolidated into single CHANGELOG.md |
-| `CP/CHANGELOG-v1.1.1.md` | Consolidated into single CHANGELOG.md |
-
----
-
-## v1.1.1 - Protocol Fixes
-
-Fix protocol documentation inconsistencies, standardize hook output format, and add missing manifest entries.
-
-### Changes
+### Distribution Hygiene
 
 | File | Change |
 |------|--------|
-| docs/TROUBLESHOOTING.md | Node.js version requirement: v20 → v18 for consistency |
-| docs/INSTALLATION.md | Updated counts: commands (14→24), hooks (13→20), skills (6→15) |
-| protocol-manifest.json | Fixed repository URL, added missing component descriptions |
-| .claude/hooks/dangerous-command-check.py | Standardized JSON output format |
-| .claude/commands/commit.md | Single CHANGELOG.md instead of versioned files |
-| CLAUDE.md | Updated version to 1.1.1 |
+| `.gitignore` | Added `protocol-manifest.local.json` to excluded files |
+| `.claude/protocol-manifest.local.json` | Removed from git (per-installation state, not distribution) |
 
----
+### Install Script Improvements
 
-## v1.1.0 - Protocol Enhancement Release
+| File | Change |
+|------|--------|
+| `install.sh` | Step [6/8]: Generate `protocol-manifest.local.json` with installation timestamp |
+| `install.sh` | Step [8/8]: Automatically build MCP memory server (`npm install && npm run build`) |
+| `install.sh` | Updated step numbering from 6 to 8 steps |
 
-Major update adding self-updating protocol, frontend design system, document processing, and comprehensive documentation overhaul.
+### Schema Compliance
 
-### New Features
+| File | Change |
+|------|--------|
+| `.mcp.json` | Removed non-standard `mcpConfig` section and `description` field |
 
-**Self-Updating Protocol System**
-- `protocol-manifest.json` - Master manifest with 81 components, SHA-256 checksums
-- `.claude/agents/domain/protocol-updater.md` - Agent for GitHub updates with interactive approval
-- `.claude/commands/proto-update.md` - Command with --check, --analyze, --auto options
+### Agent Alignment (22 files)
 
-**Frontend Design System**
-- `.claude/agents/domain/frontend-designer.md` - UI/UX design agent
-- `.claude/agents/domain/ui-researcher.md` - Research agent for UI patterns
-- `.claude/skills/frontend-design/SKILL.md` - Complete frontend workflow skill
-- `.claude/skills/design-system/SKILL.md` - Design tokens and consistency
+All agent files updated to match official Claude Code agent specification:
 
-**Document Processing System**
-- `.claude/agents/domain/document-processor.md` - Large document chunking agent
-- `.claude/hooks/doc-size-detector.py` - Detect large files, suggest chunking
-- `.claude/commands/doc-ingest.md`, `doc-search.md`, `doc-list.md` - Document commands
+| Change | Files Affected |
+|--------|----------------|
+| Removed `supports_plan_mode: true` | All 21 agents |
+| Changed `model: claude-opus-4-5-20251101` → `model: opus` | 6 agents |
+| Changed `model: claude-sonnet-4-20250514` → `model: sonnet` | 15 agents |
+| Updated format documentation | `AGENT_PROTOCOL.md` |
 
-**Workflow Agents**
-- `.claude/agents/workflow/brainstormer.md` - Socratic questioning agent
-- `.claude/agents/workflow/orchestrator.md` - Multi-agent coordination
+**Agents updated:**
+- `core/`: architect, performance-analyzer, research-analyzer
+- `domain/`: codebase-analyzer, dependency-auditor, document-processor, frontend-designer, protocol-analyzer, protocol-generator, protocol-updater, ui-researcher
+- `quality/`: fact-checker, hallucination-checker, honesty-evaluator, laziness-destroyer, reviewer, security-scanner, test-coverage-enforcer, tester
+- `workflow/`: brainstormer, orchestrator
 
-### Updated Components
+### Documentation Updates
 
-- All quality agents: Standardized JSON output per AGENT_PROTOCOL.md
-- All core agents: Added plan mode support
-- All hooks: Enhanced validation, JSON output format
-- Documentation: Moved to docs/ directory with disclaimers
+| File | Change |
+|------|--------|
+| `skill-rules.json` | Added `_meta` field documenting as custom protocol extension |
+| `CLAUDE.md` | Fixed 7 invalid command references (`/init` → `/proto-init`, removed non-existent commands) |
+| `CLAUDE.md` | Added missing commands: `/proto-status`, `/proto-update`, `/git`, `/search`, `/orchestrate` |
+| `CLAUDE.md` | Added new sections: Documentation Processing, Session commands |
+| `CLAUDE.md` | Updated agent trigger references to match actual commands |
+| `CLAUDE.md` | Version 1.1.2 → 1.1.3 |
+| `protocol-manifest.json` | Version 1.1.2 → 1.1.3 |
 
-### License Change
+### Verified Correct (No Changes Needed)
 
-CC BY-NC-SA 4.0 with clarifications:
-- Internal business use: PERMITTED
-- Selling, SaaS, commercial products: PROHIBITED
+| Item | Finding |
+|------|---------|
+| Python shebangs | Already `#!/usr/bin/env python3` |
+| Hook overlap | Complementary, not duplicative |
+| `run-hook.sh` wrapper | Kept for project/global fallback |
+| Skill field names | `tools:` in agents, `allowed-tools:` in skills (distinct) |
