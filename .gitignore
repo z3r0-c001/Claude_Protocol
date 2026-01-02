@@ -21,6 +21,7 @@
 
 # Local settings (user-specific)
 .claude/settings.local.json
+protocol-manifest.local.json
 
 # Watcher (not part of distribution)
 .claude/watcher/
