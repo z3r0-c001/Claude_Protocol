@@ -7,6 +7,7 @@ tools:
   - WebSearch
   - WebFetch
 model: opus
+color: magenta
 ---
 
 # Hallucination Checker Agent

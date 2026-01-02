@@ -8,6 +8,7 @@ tools:
   - Glob
   - Think
 model: opus
+color: blue
 ---
 
 # Architect Agent

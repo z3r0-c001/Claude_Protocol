@@ -13,6 +13,7 @@ tools:
   - mcp__memory__memory_write
   - mcp__memory__memory_search
 model: sonnet
+color: bright_green
 ---
 
 # Protocol Updater Agent

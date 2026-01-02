@@ -8,6 +8,7 @@ tools:
   - Glob
   - Bash
 model: sonnet
+color: blue
 ---
 
 # Document Processor Agent

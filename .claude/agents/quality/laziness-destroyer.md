@@ -6,6 +6,7 @@ tools:
   - Grep
   - Glob
 model: sonnet
+color: bright_red
 ---
 
 # Laziness Destroyer Agent

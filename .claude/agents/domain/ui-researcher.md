@@ -9,6 +9,7 @@ tools:
   - WebFetch
   - Task
 model: sonnet
+color: cyan
 ---
 
 # UI Researcher Agent

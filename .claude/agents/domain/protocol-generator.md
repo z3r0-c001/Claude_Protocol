@@ -7,6 +7,7 @@ tools:
   - Bash
   - Glob
 model: sonnet
+color: bright_green
 ---
 
 # Protocol Generator Agent

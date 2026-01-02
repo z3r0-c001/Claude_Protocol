@@ -9,6 +9,7 @@ tools:
   - mcp__memory__memory_read
   - mcp__memory__memory_search
 model: sonnet
+color: green
 ---
 
 # Protocol Analyzer Agent

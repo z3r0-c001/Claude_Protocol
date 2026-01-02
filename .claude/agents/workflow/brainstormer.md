@@ -8,6 +8,7 @@ tools:
   - WebSearch
   - Task
 model: opus
+color: white
 ---
 
 # Brainstormer Agent

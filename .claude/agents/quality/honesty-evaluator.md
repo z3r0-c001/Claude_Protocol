@@ -4,6 +4,7 @@ description: "Audits intellectual honesty of responses. Ensures appropriate unce
 tools:
   - Read
 model: sonnet
+color: bright_magenta
 ---
 
 # Honesty Evaluator Agent

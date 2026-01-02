@@ -7,6 +7,7 @@ tools:
   - Glob
   - Think
 model: opus
+color: bright_blue
 ---
 
 # Research Analyzer Agent

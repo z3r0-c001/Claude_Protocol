@@ -8,6 +8,7 @@ tools:
   - Bash
   - Think
 model: sonnet
+color: cyan
 ---
 
 # Performance Analyzer Agent

@@ -8,6 +8,7 @@ tools:
   - Grep
   - Glob
 model: sonnet
+color: bright_yellow
 ---
 
 # Test Coverage Enforcer Agent

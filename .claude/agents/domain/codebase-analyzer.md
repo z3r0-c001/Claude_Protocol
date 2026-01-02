@@ -7,6 +7,7 @@ tools:
   - Glob
   - Bash
 model: sonnet
+color: green
 ---
 
 # Codebase Analyzer Agent

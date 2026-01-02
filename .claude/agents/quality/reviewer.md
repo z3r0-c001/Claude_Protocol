@@ -7,6 +7,7 @@ tools:
   - Glob
   - Bash
 model: sonnet
+color: yellow
 ---
 
 # Code Reviewer Agent

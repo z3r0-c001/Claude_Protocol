@@ -8,6 +8,7 @@ tools:
   - Grep
   - Glob
 model: sonnet
+color: green
 ---
 
 # Tester Agent

@@ -7,6 +7,7 @@ tools:
   - Grep
   - Glob
 model: sonnet
+color: bright_yellow
 ---
 
 # Dependency Auditor Agent

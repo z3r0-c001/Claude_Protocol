@@ -8,6 +8,7 @@ tools:
   - Grep
   - Bash
 model: opus
+color: bright_cyan
 ---
 
 # Fact Checker Agent

@@ -7,6 +7,7 @@ tools:
   - Glob
   - Task
 model: opus
+color: bright_white
 ---
 
 # Orchestrator Agent

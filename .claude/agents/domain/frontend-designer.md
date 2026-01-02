@@ -11,6 +11,7 @@ tools:
   - WebFetch
   - Task
 model: opus
+color: bright_cyan
 ---
 
 # Frontend Designer Agent
