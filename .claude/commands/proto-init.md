@@ -103,6 +103,32 @@ Ask these questions ONE AT A TIME. Wait for response after each.
 
 **WAIT** → Continue
 
+### A2b. Description Audit
+**EVALUATE** the user's description for:
+- Clarity: Does it explain what the project does?
+- Specificity: Does it mention the core functionality?
+- Brevity: Is it one clear sentence?
+- Value proposition: Does it explain why someone would use it?
+
+**IF description could be improved, SAY:**
+> Let me suggest a refined version:
+>
+> **Original:** "[user's description]"
+> **Suggested:** "[your improved version]"
+>
+> Changes made:
+> - [specific improvement 1]
+> - [specific improvement 2]
+>
+> Would you like to use the suggested version, keep yours, or provide a new one?
+
+**WAIT FOR APPROVAL** → Use approved version, then continue
+
+**IF description is already clear and effective:**
+> Great description! Clear and actionable. Moving on...
+
+→ Continue
+
 ### A3. Project Type
 **ASK:**
 > What type of project is this?
