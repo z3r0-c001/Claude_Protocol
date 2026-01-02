@@ -123,13 +123,13 @@ Will **WARN** if:
 
 ## For Large Changes (10+ files)
 
-1. Create CHANGELOG-vX.X.X.md with complete file-by-file details
+1. Update CHANGELOG.md with complete file-by-file details (single file, overwritten each release)
 2. Reference changelog in commit:
 
 ```
 Release v1.2.0: Feature name and key highlights
 
-See CHANGELOG-v1.2.0.md for complete file-by-file breakdown (47 files).
+See CHANGELOG.md for complete file-by-file breakdown (47 files).
 
 Key changes:
 - New authentication system with JWT and refresh tokens
@@ -139,6 +139,21 @@ Key changes:
 🤖 Generated with Claude Code
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
+
+---
+
+## Before Pushing
+
+**MANDATORY: Run `/git` before ANY push operation.**
+
+The /git skill performs pre-push verification:
+- Location check (must be in CP directory)
+- Commit message audit (blocks generic messages)
+- Version bump verification
+- CHANGELOG.md update check
+- Tag creation reminder
+
+**Never push without running /git first.**
 
 ---
 
