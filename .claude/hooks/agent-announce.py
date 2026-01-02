@@ -141,12 +141,16 @@ def print_banner(agent_name: str, color_name: str):
 
     # Create banner
     name_display = agent_name.upper().replace("-", " ")
-    width = max(len(name_display) + 6, 40)
+    width = max(len(name_display) + 8, 40)
+
+    # Calculate padding: width = 2(spaces) + 2(emoji) + 2(spaces) + name + padding
+    # So padding = width - 6 - len(name_display)
+    padding = width - len(name_display) - 6
 
     # Print to stderr so it doesn't interfere with JSON output
     banner = f"""
 {color}{bold}╭{'─' * width}╮
-│  {icon}  {name_display}{' ' * (width - len(name_display) - 5)}│
+│  {icon}  {name_display}{' ' * padding}│
 ╰{'─' * width}╯{reset}
 """
     print(banner, file=sys.stderr)
