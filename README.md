@@ -1,6 +1,6 @@
-# Claude Bootstrap Protocol
+# Claude Protocol
 
-A self-invoking protocol that generates customized Claude Code tooling for any project.
+Quality-enforced Claude Code infrastructure. Install once, get persistent memory, automated quality gates, and 80+ specialized agents that configure themselves for your stack.
 
 ## Notice
 
