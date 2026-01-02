@@ -6,9 +6,9 @@
     "description": "Claude Protocol - Unified quality enforcement and autonomous operation"
   },
   "repository": {
-    "url": "https://github.com/user/Claude_Protocol",
+    "url": "https://github.com/z3r0-c001/Claude_Protocol",
     "branch": "main",
-    "raw_base": "https://raw.githubusercontent.com/user/Claude_Protocol/main"
+    "raw_base": "https://raw.githubusercontent.com/z3r0-c001/Claude_Protocol/main"
   },
   "components": {
     "agents": {
@@ -16,7 +16,7 @@
         "version": "1.0.0",
         "checksum": "sha256:e790b48b0341e587b77acc87f4fb12422082d15e2493f94c5bdbd36835ec9535",
         "file": ".claude/agents/AGENT_PROTOCOL.md",
-        "description": ""
+        "description": "Master agent protocol defining standards for all specialized agents."
       },
       "workflow/brainstormer": {
         "version": "1.0.0",
@@ -150,19 +150,19 @@
         "version": "1.0.0",
         "checksum": "sha256:4b18b2677225d4ba236857719475e5f8275d2dfff29624b23ce23432df40f886",
         "file": ".claude/skills/dev-guidelines/SKILL.md",
-        "description": ">"
+        "description": "Development guidelines and coding standards for consistent, maintainable code."
       },
       "doc-processor": {
         "version": "1.0.0",
         "checksum": "sha256:1eb0e4c3ebef74dafffead8ef2e327a61c8bade3b48d72ae97b2233237fc1177",
         "file": ".claude/skills/doc-processor/SKILL.md",
-        "description": ">"
+        "description": "Process large documentation files into searchable chunks and summaries."
       },
       "project-bootstrap": {
         "version": "1.0.0",
         "checksum": "sha256:2f6902c31fa7214f708dde3f506d9e27d876a5a6e7890d8b1e21799aa5034e5e",
         "file": ".claude/skills/project-bootstrap/SKILL.md",
-        "description": ">"
+        "description": "Bootstrap new projects with discovery, analysis, and initial configuration."
       },
       "protocol-generator": {
         "version": "1.0.0",
@@ -174,7 +174,7 @@
         "version": "1.0.0",
         "checksum": "sha256:5b5eee2ff62ccd9092176753497e43465a7bb94deb0791daac7e357c8be68551",
         "file": ".claude/skills/memorizer/SKILL.md",
-        "description": ">"
+        "description": "Persistent memory management for storing and recalling information across sessions."
       },
       "quality-audit": {
         "version": "1.0.0",
@@ -192,7 +192,7 @@
         "version": "1.0.0",
         "checksum": "sha256:b372693b325b5894300f17db917678609c45161a18271a57ed963a2356871389",
         "file": ".claude/skills/workflow/SKILL.md",
-        "description": ">"
+        "description": "Development workflow automation for features, fixes, commits, and releases."
       },
       "security-scanner": {
         "version": "1.0.0",
@@ -216,13 +216,13 @@
         "version": "1.0.0",
         "checksum": "sha256:b4e409a684304e77b75b10c07a72ad6c845b9758c7c810689d260ddaf23c5f52",
         "file": ".claude/skills/honesty-guardrail/SKILL.md",
-        "description": ">"
+        "description": "Always-active honesty protocol ensuring accurate claims and uncertainty acknowledgment."
       },
       "quality-control": {
         "version": "1.0.0",
         "checksum": "sha256:6aedd8f20eee22539526d1e7f7bcbc592ad6a7475b99658fd43038a833fbd921",
         "file": ".claude/skills/quality-control/SKILL.md",
-        "description": ">"
+        "description": "Comprehensive quality validation suite including syntax, lint, completeness, and correctness checks."
       },
       "frontend-design": {
         "version": "1.0.0",
@@ -338,7 +338,7 @@
         "version": "1.0.0",
         "checksum": "sha256:968a71badf4a7d3844bb8ab830eb5b52d727b0b5dca329973c7ae45cafed712b",
         "file": ".claude/commands/manage-tools.md",
-        "description": ""
+        "description": "Manage tool permissions and auto-approved tool configurations."
       },
       "test": {
         "version": "1.0.0",
@@ -388,109 +388,115 @@
         "version": "1.0.0",
         "checksum": "sha256:4c48c2a1882aad35988492088f36390f345f088acdff875940e0b3885a88b883",
         "file": ".claude/hooks/post-write-validate.sh",
-        "description": ""
+        "description": "Validates written files for syntax errors and completeness after write operations."
       },
       "context-detector.sh": {
         "version": "1.0.0",
         "checksum": "sha256:0147d68f52e5e2259a393eb3d4de5cd98ccec57594bc933a16057840f1aa16ef",
         "file": ".claude/hooks/context-detector.sh",
-        "description": ""
+        "description": "Detects file context and suggests appropriate agents based on file type and content."
       },
       "research-quality-check.sh": {
         "version": "1.0.0",
         "checksum": "sha256:173a315ef16c873163de761b9dcfdc7c745dad5d8ec03f778e9ad9d15bc93a73",
         "file": ".claude/hooks/research-quality-check.sh",
-        "description": ""
+        "description": "Validates research quality from web fetches and searches for completeness."
       },
       "stop-verify.sh": {
         "version": "1.0.0",
         "checksum": "sha256:30b4cb337b7d941bbc4da0c65955172cccbe653a719092637b8d559dfaee4e8b",
         "file": ".claude/hooks/stop-verify.sh",
-        "description": ""
+        "description": "Final verification before stopping to ensure all quality checks pass."
       },
       "file-edit-tracker.sh": {
         "version": "1.0.0",
         "checksum": "sha256:4fe0f5ab68e889685eebd777ada6afef321844a958191cda412eadba8d647408",
         "file": ".claude/hooks/file-edit-tracker.sh",
-        "description": ""
+        "description": "Tracks file edits for session state and change monitoring."
       },
       "run-hook.sh": {
         "version": "1.0.0",
         "checksum": "sha256:006d295d30f677248240ee3976486582a1541d802baa92e61a220f47d6afadf3",
         "file": ".claude/hooks/run-hook.sh",
-        "description": ""
+        "description": "Utility wrapper for running hooks with proper environment setup."
       },
       "research-validator.sh": {
         "version": "1.0.0",
         "checksum": "sha256:7323bde768ee91c9d92f9d1cf8c1f6310f6c494e4d42efdc08ac3d089baece24",
         "file": ".claude/hooks/research-validator.sh",
-        "description": ""
+        "description": "Validates research output from subagents for accuracy and completeness."
       },
       "hook-logger.sh": {
         "version": "1.0.0",
         "checksum": "sha256:f77ec9617dcb2d580a5f5b302b6e1c82a109322d12650f5ed035d03bf67b16c8",
         "file": ".claude/hooks/hook-logger.sh",
-        "description": ""
+        "description": "Logs hook executions for debugging and monitoring."
       },
       "laziness-check.sh": {
         "version": "1.0.0",
         "checksum": "sha256:3b57fde42e4a7339e3af154869de16eeb8e98f7665653c1e911977b243bbd746",
         "file": ".claude/hooks/laziness-check.sh",
-        "description": ""
+        "description": "Detects placeholder code, TODOs, and incomplete implementations in Stop hook."
       },
       "pre-write-check.sh": {
         "version": "1.0.0",
         "checksum": "sha256:71e6c18e22fb6f2203e2a7a39c36303fb96103198868d8e05fc3580ff4aa062d",
         "file": ".claude/hooks/pre-write-check.sh",
-        "description": ""
+        "description": "Blocks writes to protected directories and validates paths before file operations."
       },
       "honesty-check.sh": {
         "version": "1.0.0",
         "checksum": "sha256:699a5213b7dbd6b6f7d2381547e43a69612d4c568923ba8923fc5d34872cc9db",
         "file": ".claude/hooks/honesty-check.sh",
-        "description": ""
+        "description": "Validates responses for overclaiming and ensures uncertainty is acknowledged."
       },
       "agent-handoff-validator.py": {
         "version": "1.0.0",
         "checksum": "sha256:0c693d5b32ba399881f47d2a449277d078ff0b52bf07b211a6d295b4dbd15641",
         "file": ".claude/hooks/agent-handoff-validator.py",
-        "description": ""
+        "description": "Validates agent handoffs to ensure proper context transfer between agents."
       },
       "doc-size-detector.py": {
         "version": "1.0.0",
         "checksum": "sha256:051f0d5d0eb33787189390e7c6f820b69d944a1a9c44cfc34d7211b191d3fee7",
         "file": ".claude/hooks/doc-size-detector.py",
-        "description": ""
+        "description": "Detects large documentation files and suggests doc-ingest for processing."
       },
       "context-loader.py": {
         "version": "1.0.0",
         "checksum": "sha256:1e3b036f96ecbde4e29ebd0ad150249023add7140715996db68fa502aa43c440",
         "file": ".claude/hooks/context-loader.py",
-        "description": ""
+        "description": "Loads project context and checks for protocol updates on startup."
       },
       "pretool-laziness-check.py": {
         "version": "1.0.0",
         "checksum": "sha256:8fd1ec3f600b023cbc5e4250259329c8396d5236fbebf9eb63b8ec317faa8537",
         "file": ".claude/hooks/pretool-laziness-check.py",
-        "description": ""
+        "description": "Blocks Write/Edit with placeholder code, TODOs, or delegation phrases."
       },
       "skill-activation-prompt.py": {
         "version": "1.0.0",
         "checksum": "sha256:48b1711063b19676147c1e27e758865e371ba0fa85af026108d6f7bebbffd162",
         "file": ".claude/hooks/skill-activation-prompt.py",
-        "description": ""
+        "description": "Suggests relevant skills based on user prompt keywords and patterns."
       },
       "dangerous-command-check.py": {
         "version": "1.0.0",
-        "checksum": "sha256:feb88c2e2d9f9851f26c793968d3a42095c569fe70fac8a62b4d5c0d2f38a82c",
+        "checksum": "sha256:ee8efccae184afb96591d6b2ffdc796295a8a166bcd60653d2eff7b6bddd8aac",
         "file": ".claude/hooks/dangerous-command-check.py",
-        "description": ""
+        "description": "Blocks dangerous bash commands like rm -rf /, chmod 777, and piped curls."
       },
       "pretool-hallucination-check.py": {
         "version": "1.0.0",
         "checksum": "sha256:87bd62d8d65c6a9d1fc180ce96b78cfb2b102a4ce55bc8469c343e93fad4e409",
         "file": ".claude/hooks/pretool-hallucination-check.py",
-        "description": ""
+        "description": "Verifies imported packages exist on PyPI/npm before allowing writes."
+      },
+      "commit-message-validator.sh": {
+        "version": "1.0.0",
+        "checksum": "sha256:bd1e3f831ba5423078f49abd2726829dd5379bc2095a3f72fb9835d679a4fb4b",
+        "file": ".claude/hooks/commit-message-validator.sh",
+        "description": "Validates commit messages against protocol standards for specificity and detail."
       }
     },
     "config": {
