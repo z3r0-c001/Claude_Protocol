@@ -6,7 +6,7 @@ The definitive Claude Code infrastructure protocol combining quality enforcement
 
 | Property | Value |
 |----------|-------|
-| Version | 1.1.1 |
+| Version | 1.1.2 |
 | Mode | Unified Protocol |
 | Philosophy | Research-first + Quality-enforced |
 | Validation | Zero-error tolerance |
@@ -106,7 +106,7 @@ Fix authentication token refresh in session handler
 - tests/auth.test.ts: Added tests for token refresh edge cases
 ```
 
-**For large changes:** Create a CHANGELOG-vX.X.X.md documenting all changes with file-by-file details.
+**For large changes:** Update CHANGELOG.md (single file, overwritten each release) with file-by-file details.
 
 ## Quick Reference
 
