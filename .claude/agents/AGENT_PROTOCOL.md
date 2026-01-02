@@ -15,20 +15,20 @@ tools:
   - Write
   - Grep
   - Task
-model: opus
+model: claude-opus-4-5-20251101
+supports_plan_mode: true
 ---
 ```
 
-### Frontmatter Fields (Official Claude Code)
+### Frontmatter Fields
 
 | Field | Required | Description |
 |-------|----------|-------------|
 | `name` | Yes | Kebab-case identifier (e.g., `security-scanner`) |
 | `description` | Yes | When to use, starts with action verb |
-| `tools` | No | Array of tools (inherits all if omitted) |
-| `model` | No | `opus`, `sonnet`, `haiku`, or `inherit` |
-| `permissionMode` | No | `default`, `acceptEdits`, `bypassPermissions`, `plan` |
-| `skills` | No | Comma-separated skill names to auto-load |
+| `tools` | Yes | Array of tools agent can use |
+| `model` | Yes | Claude model version |
+| `supports_plan_mode` | No | Boolean, enables two-phase execution |
 
 ## Execution Modes
 
@@ -200,10 +200,10 @@ Agents must run sequentially when:
 
 ## Backward Compatibility
 
-All agents follow the official Claude Code agent format:
-- Use `permissionMode: plan` for plan-mode behavior
-- Default behavior is execute-only
-- Legacy agents work without modification
+Agents without `supports_plan_mode: true`:
+- Treated as execute-only by orchestrator
+- Existing behavior unchanged
+- Can be upgraded incrementally
 
 ## Examples
 

@@ -9,20 +9,6 @@ import json
 import sys
 import re
 
-
-def output_json(decision: str, reason: str = "", block_message: str = ""):
-    """Output properly formatted JSON for Claude Code hooks."""
-    if decision == "continue":
-        print('{"continue": true}')
-        return
-    result = {"decision": decision}
-    if reason:
-        result["reason"] = reason
-    if block_message:
-        result["message"] = block_message
-    print(json.dumps(result))
-
-
 DANGEROUS_PATTERNS = [
     # Filesystem destruction
     (r"rm\s+-rf\s+/(?:\s|$)", "Recursive deletion of root filesystem"),
@@ -66,27 +52,25 @@ DANGEROUS_PATTERNS = [
 def main():
     try:
         input_data = json.load(sys.stdin)
-    except (json.JSONDecodeError, EOFError):
-        output_json("continue")
-        sys.exit(0)
-
+    except json.JSONDecodeError as e:
+        print(f"Failed to parse hook input: {e}", file=sys.stderr)
+        sys.exit(1)
+    
     tool_name = input_data.get("tool_name", "")
     tool_input = input_data.get("tool_input", {})
-
+    
     if tool_name != "Bash":
-        output_json("continue")
         sys.exit(0)
-
+    
     command = tool_input.get("command", "")
     if not command:
-        output_json("continue")
         sys.exit(0)
-
+    
     violations = []
     for pattern, description in DANGEROUS_PATTERNS:
         if re.search(pattern, command, re.IGNORECASE):
             violations.append(description)
-
+    
     if violations:
         msg = "DANGEROUS COMMAND BLOCKED:\n\n"
         msg += f"  Command: {command[:100]}{'...' if len(command) > 100 else ''}\n\n"
@@ -94,17 +78,11 @@ def main():
         for v in violations:
             msg += f"    • {v}\n"
         msg += "\nUse a safer alternative or get explicit user approval."
-        output_json("block", block_message=msg)
-        sys.exit(0)
-
-    output_json("continue")
+        print(msg, file=sys.stderr)
+        sys.exit(2)
+    
     sys.exit(0)
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception:
-        # Absolute fallback - always output valid JSON
-        print('{"continue": true}')
-        sys.exit(0)
+    main()

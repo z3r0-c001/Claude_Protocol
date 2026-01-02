@@ -1,10 +1,4 @@
 {
-  "_meta": {
-    "description": "CUSTOM EXTENSION - Not part of official Claude Code",
-    "purpose": "Auto-suggests skills based on prompt keywords and file patterns",
-    "implementation": "Parsed by skill-activation-prompt.py hook on UserPromptSubmit",
-    "note": "Claude Code does not natively support skill auto-activation. This is a protocol-specific feature."
-  },
   "dev-guidelines": {
     "type": "domain",
     "enforcement": "suggest",

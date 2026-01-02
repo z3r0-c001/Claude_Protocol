@@ -2,21 +2,20 @@
 
 A self-invoking protocol that generates customized Claude Code tooling for any project.
 
-## Important Notice
+## Notice
 
-**This protocol is designed specifically for Claude and Claude Code.** It was developed in Claude Code, for Claude Code, leveraging Claude's unique capabilities including tool use, agent orchestration, and contextual understanding. While the concepts may inspire similar systems for other AI assistants, this implementation is tailored to Claude's architecture.
+**This protocol is designed for Claude Code.** While concepts may inspire similar systems, this implementation is tailored to Claude's architecture.
 
 ### Caveat Emptor
 
-**No AI system is infallible.** Despite the extensive quality checks, validation hooks, and guardrails implemented in this protocol:
+**No AI system is infallible.** Despite extensive quality checks and guardrails:
 
-- Claude may still make mistakes, generate incorrect code, or misunderstand requirements
-- Hooks and validation scripts may have bugs or edge cases not covered
-- Generated tooling should always be reviewed by a human before use in production
-- The protocol provides guardrails, not guarantees
-- Always verify critical code, security-sensitive operations, and architectural decisions
+- Claude may still make mistakes or misunderstand requirements
+- Hooks and validation scripts may have bugs or uncovered edge cases
+- Generated tooling should be reviewed before production use
+- Always verify critical code and security-sensitive operations
 
-**Use this protocol as a productivity enhancement, not a replacement for human judgment.**
+**Use as a productivity enhancement, not a replacement for human judgment.**
 
 ## Overview
 
@@ -25,7 +24,7 @@ This protocol automatically:
 2. **Generates** CLAUDE.md, skills, agents, hooks, commands
 3. **Validates** all generated files with zero-error tolerance
 4. **Enforces** quality via laziness-destroyer and hallucination-checker
-5. **Remembers** user preferences, learnings, decisions across sessions
+5. **Remembers** preferences, learnings, decisions across sessions
 6. **Updates** itself from GitHub with interactive approval
 
 ## Quick Start
@@ -38,19 +37,11 @@ cd Claude_Protocol
 # Run the installer
 ./install.sh
 
-# Follow prompts to select target directory
-# The installer will:
-#   - Copy all protocol files
-#   - Set permissions on hooks
-#   - Verify dependencies
-
 # Initialize with Claude Code
 cd /path/to/your/project
 claude
-# Then run: /proto-init
+# Run: /proto-init
 ```
-
-The `/proto-init` command will guide you through setup, including optional MCP memory server configuration for persistent memory across sessions.
 
 ## Documentation
 
@@ -69,71 +60,59 @@ The `/proto-init` command will guide you through setup, including optional MCP m
 ## Features
 
 ### Autonomous Operation
-- Claude automatically knows what to do based on context
-- Asks permission for major decisions
-- Notices failures and provides suggestions
-- Auto-invokes appropriate agents based on file context
+- Context-aware actions without constant prompting
+- Permission requests for major decisions
+- Failure detection with suggestions
+- Auto-invokes agents based on file context
 
 ### Self-Updating Protocol
 - Automatic update checks on startup (every 24 hours)
-- Interactive approval for each change with diffs
+- Interactive approval with diffs for each change
 - Smart analysis for optimization suggestions
 - Preserves user customizations
-- Run `/proto-update` to check for and apply updates
 
 ### Persistent Memory (Optional)
-- MCP-based memory server for cross-session persistence
-- Stores user preferences, learnings, corrections
+- MCP-based server for cross-session persistence
+- Stores preferences, learnings, corrections
 - Auto-loads context at session start
-- Protocol works without MCP - memory features are optional
 
 ### Quality Enforcement
 - Zero-tolerance for placeholder code
 - Package/API verification before suggesting
 - Security scanning on sensitive code
-- Code review automation
-- Honesty guardrails to prevent overclaiming
+- Honesty guardrails prevent overclaiming
 
-### Smart Agent Invocation
-- Context-aware agent suggestions
-- Automatic security scanning on auth code
-- Performance analysis on hot paths
-- Frontend design assistance on UI files
-
-### Skill Auto-Activation
-- Skills suggest themselves based on prompt keywords
-- Pattern matching for intent detection
-- File-based triggers for domain-specific assistance
+### Agent Visual Banners
+- Colored terminal banners when agents run
+- Distinct colors per agent category:
+  - Red: Security/quality agents
+  - Blue: Architecture/core agents
+  - Green: Domain/analysis agents
+  - Yellow: Review/planning agents
+  - Cyan: Exploration agents
 
 ## Directory Structure
 
 ```
 your-project/
-├── CLAUDE.md                    # Project documentation
-├── .mcp.json                    # MCP server configuration (optional)
+├── CLAUDE.md                    # Project instructions
+├── .mcp.json                    # MCP server config (optional)
 ├── .claude/
 │   ├── settings.json            # Hooks and permissions
-│   ├── protocol-manifest.local.json  # Local installation state
-│   ├── configs/                 # Permission templates
-│   │   ├── permissions-permissive.json
-│   │   └── permissions-restricted.json
 │   ├── agents/
-│   │   ├── core/                # architect, reviewer, tester
-│   │   ├── quality/             # laziness-destroyer, hallucination-checker
-│   │   ├── domain/              # security-scanner, frontend-designer, protocol-updater
-│   │   └── workflow/            # fact-checker, brainstormer
-│   ├── commands/                # Slash commands (25+)
-│   ├── hooks/                   # Hook scripts (18+)
+│   │   ├── core/                # architect, performance-analyzer, research-analyzer
+│   │   ├── quality/             # laziness-destroyer, hallucination-checker, etc.
+│   │   ├── domain/              # codebase-analyzer, frontend-designer, etc.
+│   │   └── workflow/            # brainstormer, orchestrator
+│   ├── commands/                # Slash commands (25)
+│   ├── hooks/                   # Hook scripts (20)
 │   ├── skills/                  # Skill definitions
-│   │   ├── skill-rules.json     # Auto-activation config
-│   │   ├── frontend-design/     # UI/UX workflow
-│   │   ├── design-system/       # Design tokens
-│   │   └── ...
-│   ├── scripts/                 # Utility scripts
-│   ├── mcp/
-│   │   └── memory-server/       # MCP memory server (optional)
-│   └── memory/                  # Persistent storage (runtime)
-├── scripts/                     # Utility scripts
+│   │   ├── skill-rules.json
+│   │   ├── frontend-design/
+│   │   ├── design-system/
+│   │   └── doc-processor/
+│   └── mcp/
+│       └── memory-server/       # MCP memory server (optional)
 └── docs/                        # Documentation
 ```
 
@@ -142,16 +121,17 @@ your-project/
 ### Initialization
 | Command | Description |
 |---------|-------------|
-| `/proto-init` | Initialize protocol for a project |
+| `/proto-init` | Initialize protocol for project |
 | `/bootstrap` | Generate CLAUDE.md and tooling |
 | `/proto-status` | Show protocol state and health |
+| `/proto-help` | List protocol commands |
 
 ### Development
 | Command | Description |
 |---------|-------------|
-| `/feature <desc>` | Implement a feature with TDD |
-| `/fix <issue>` | Fix a bug with test-first approach |
-| `/refactor <target>` | Refactor code with agent pipeline |
+| `/feature <desc>` | Implement feature with TDD |
+| `/fix <issue>` | Fix bug with test-first approach |
+| `/refactor <target>` | Refactor with agent pipeline |
 | `/test [pattern]` | Run tests |
 | `/lint [--fix]` | Run linters |
 | `/search <query>` | Search codebase |
@@ -160,13 +140,13 @@ your-project/
 | Command | Description |
 |---------|-------------|
 | `/validate` | Run full validation suite |
-| `/verify` | Research verification |
-| `/audit` | Quality audit |
+| `/orchestrate` | Coordinate multi-agent workflows |
 
 ### Git & Docs
 | Command | Description |
 |---------|-------------|
 | `/commit <msg>` | Commit with validation |
+| `/git` | Pre-push checklist |
 | `/pr [title]` | Create pull request |
 | `/docs` | Generate documentation |
 
@@ -178,20 +158,20 @@ your-project/
 | `/remember <cat> <text>` | Save to memory |
 | `/recall <query>` | Search memory |
 
+### Documentation Processing
+| Command | Description |
+|---------|-------------|
+| `/doc-ingest <path>` | Process large docs into chunks |
+| `/doc-search <query>` | Search processed documents |
+| `/doc-list` | List processed documentation |
+
 ### Protocol Management
 | Command | Description |
 |---------|-------------|
 | `/proto-update` | Check for and apply updates |
-| `/proto-update --check` | Dry run - show available updates |
-| `/proto-update --analyze` | Full analysis with suggestions |
-
-### Specialized
-| Command | Description |
-|---------|-------------|
-| `/reposanitizer` | Sanitize for public release |
+| `/proto-update --check` | Dry run - show available |
+| `/proto-update --analyze` | Analysis with suggestions |
 | `/manage-tools` | Manage protocol tooling |
-
-See [Commands Reference](docs/COMMANDS.md) for complete list.
 
 ## Agents
 
@@ -199,51 +179,50 @@ See [Commands Reference](docs/COMMANDS.md) for complete list.
 | Agent | Purpose | Invocation |
 |-------|---------|------------|
 | laziness-destroyer | Blocks placeholder code | Stop hook |
-| hallucination-checker | Verifies packages/APIs exist | Stop hook |
+| hallucination-checker | Verifies packages/APIs | Stop hook |
 | honesty-evaluator | Checks for overclaiming | Stop hook |
 | security-scanner | Finds vulnerabilities | Auto on auth files |
 | fact-checker | Verifies factual claims | `/verify` |
 | reviewer | Code review | `/pr` |
 | tester | Test generation | `/feature`, `/fix` |
+| test-coverage-enforcer | Ensures test coverage | `/coverage` |
 
 ### Core Agents
 | Agent | Purpose | Invocation |
 |-------|---------|------------|
 | architect | System design and planning | `/refactor`, manual |
-| research-analyzer | Synthesizes research findings | `/verify` |
+| research-analyzer | Synthesizes research | `/verify` |
 | performance-analyzer | Performance optimization | Auto on hot paths |
-| codebase-analyzer | Project structure analysis | `/proto-init` |
-| protocol-generator | Generates protocol artifacts | `/bootstrap` |
 
 ### Domain Agents
 | Agent | Purpose | Invocation |
 |-------|---------|------------|
-| frontend-designer | UI/UX design and components | Auto on frontend files |
-| ui-researcher | Research UI patterns and libraries | Via frontend-designer |
-| protocol-updater | Fetch and apply protocol updates | `/proto-update` |
+| codebase-analyzer | Project structure analysis | `/proto-init` |
+| protocol-generator | Generates protocol artifacts | `/bootstrap` |
+| protocol-updater | Fetches and applies updates | `/proto-update` |
 | protocol-analyzer | Smart optimization suggestions | `/proto-update --analyze` |
+| frontend-designer | UI/UX design and components | Auto on frontend files |
+| ui-researcher | Research UI patterns | Via frontend-designer |
+| dependency-auditor | Check dependency health | Auto on package files |
+| document-processor | Process large documentation | `/doc-ingest` |
 
 ### Workflow Agents
 | Agent | Purpose | Invocation |
 |-------|---------|------------|
 | brainstormer | Socratic design refinement | "I want to build..." |
-
-See [Agents Reference](docs/AGENTS.md) for details.
+| orchestrator | Multi-agent coordination | `/orchestrate` |
 
 ## Skills
 
 ### Auto-Activated Skills
-Skills suggest themselves based on prompts via `skill-rules.json`:
-
-| Trigger Keywords | Skill | Type |
-|------------------|-------|------|
-| `implement`, `create`, `build`, `refactor` | dev-guidelines | Domain |
-| `UI`, `component`, `button`, `form`, `layout` | frontend-design | Domain |
-| `design system`, `tokens`, `theme` | design-system | Domain |
-| `I want to build`, `help me plan`, `brainstorm` | brainstormer | Workflow |
-| `best practice`, `should I`, `correct way` | research-verifier | Workflow |
-| `security`, `vulnerability`, `authentication` | security-scanner | Domain |
-| `performance`, `optimize`, `slow` | performance-analyzer | Domain |
+| Trigger Keywords | Skill |
+|------------------|-------|
+| `implement`, `create`, `build`, `refactor` | dev-guidelines |
+| `UI`, `component`, `button`, `form`, `layout` | frontend-design |
+| `design system`, `tokens`, `theme` | design-system |
+| `I want to build`, `help me plan`, `brainstorm` | brainstormer |
+| `security`, `vulnerability`, `authentication` | security-scanner |
+| `performance`, `optimize`, `slow` | performance-analyzer |
 
 ### Core Skills
 | Skill | Purpose |
@@ -252,7 +231,7 @@ Skills suggest themselves based on prompts via `skill-rules.json`:
 | quality-control | Validation suite |
 | workflow | Feature/fix/commit workflows |
 | memorizer | Memory management |
-| honesty-guardrail | Always-active honesty protocol |
+| honesty-guardrail | Always-active honesty |
 | dev-guidelines | Development patterns |
 
 ### Frontend Skills
@@ -260,27 +239,23 @@ Skills suggest themselves based on prompts via `skill-rules.json`:
 |-------|---------|
 | frontend-design | Complete frontend workflow |
 | design-system | Design tokens and consistency |
-
-See [Skills Reference](docs/SKILLS.md) for details.
+| doc-processor | Large document processing |
 
 ## Hooks
 
 | Hook Event | Scripts | Purpose |
 |------------|---------|---------|
 | UserPromptSubmit | context-loader.py, skill-activation-prompt.py | Load context, skill activation |
-| PreToolUse (Write) | pre-write-check.sh, completeness-check.sh | Block protected dirs, check completeness |
-| PreToolUse (Bash) | dangerous-command-check.sh | Block dangerous commands |
-| PostToolUse (Write) | file-edit-tracker.sh, post-write-validate.sh | Track edits, validate |
-| PostToolUse (Task) | subagent-output-check.sh | Validate subagent output |
+| PreToolUse (Write) | pre-write-check.sh | Block protected directories |
+| PreToolUse (Bash) | dangerous-command-check.py | Block dangerous commands |
+| PreToolUse (Task) | agent-announce.py | Display colored agent banners |
+| PostToolUse (Write) | file-edit-tracker.sh, post-write-validate.sh, context-detector.sh | Track edits, validate |
+| PostToolUse (Task) | agent-handoff-validator.py | Validate agent output |
 | PostToolUse (Web) | research-quality-check.sh | Validate research quality |
 | Stop | laziness-check.sh, honesty-check.sh, stop-verify.sh | Quality gates |
 | SubagentStop | research-validator.sh | Validate research |
 
-**Note:** Hooks are shell scripts and Python scripts that may contain bugs. If you encounter unexpected behavior, please check the hook implementation and report issues.
-
-See [Hooks Reference](docs/HOOKS.md) for details.
-
-## Memory Categories (Optional - requires MCP server)
+## Memory Categories (Optional)
 
 | Category | Auto-Save | Description |
 |----------|-----------|-------------|
@@ -289,8 +264,6 @@ See [Hooks Reference](docs/HOOKS.md) for details.
 | corrections | Yes | Mistakes and fixes |
 | patterns | Yes | Recurring solutions |
 | decisions | No (ask) | Major choices |
-
-See [MCP Server Documentation](docs/MCP.md) for setup details.
 
 ## Quality Gates
 
@@ -303,68 +276,41 @@ All generated code must pass:
 
 **Pass threshold: 100% (zero errors tolerated)**
 
-## Self-Updating Protocol
-
-The protocol can update itself from GitHub:
-
-```bash
-# Check for updates (dry run)
-/proto-update --check
-
-# Interactive update with approval
-/proto-update
-
-# Full analysis with optimization suggestions
-/proto-update --analyze
-
-# Auto-accept non-breaking updates
-/proto-update --auto
-```
-
-On startup, Claude will notify you if updates are available (checked every 24 hours).
-
 ## Requirements
 
-- **Python**: Version 3.8 or higher (for hooks)
+- **Python**: 3.8+ (for hooks)
 - **Claude Code**: Latest version
-- **Node.js**: Version 18.0.0 or higher (only if using MCP memory server)
+- **Node.js**: 18.0.0+ (only for MCP memory server)
 
 ## Known Limitations
 
-- Hooks may have edge cases not covered - review unexpected behavior
+- Hooks may have edge cases not covered
 - Quality checks catch common issues but aren't exhaustive
-- Memory server is optional and requires Node.js
+- Memory server requires Node.js
 - Self-updating requires network access to GitHub
-- Agent suggestions are based on patterns and may not always be optimal
+- Agent suggestions are pattern-based and may not always be optimal
 
 ## Acknowledgments
 
-The **brainstormer** agent's Socratic questioning approach was inspired by the excellent work in [obra/superpowers](https://github.com/obra/superpowers). We appreciate the creative methodology shared in that project which influenced our design refinement workflow.
+The **brainstormer** agent's Socratic questioning approach was inspired by [obra/superpowers](https://github.com/obra/superpowers).
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Make changes following the protocol guidelines
+3. Make changes following protocol guidelines
 4. Run `/validate` to ensure quality
 5. Submit a pull request
 
 ## License
 
-This work is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/) with clarifications.
+[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
-**Permitted:**
-- Personal use, learning, research, hobby projects
-- Internal use by companies and organizations
-- Use by educational, government, and nonprofit organizations
-- Modifications (must use same license)
+**Permitted:** Personal use, learning, research, hobby projects, internal company use, educational/nonprofit use, modifications (same license)
 
-**Prohibited:**
-- Selling this work or derivatives
-- Including in commercial products for sale
-- Offering as a paid service (SaaS, consulting)
+**Prohibited:** Selling this work, including in commercial products, offering as paid service
 
-See the [LICENSE](LICENSE) file for full details including attribution requirements.
+See [LICENSE](LICENSE) for full details.
 
 ## Support
 
