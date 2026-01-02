@@ -7,65 +7,52 @@
 
 ---
 
-## v1.1.3 - Protocol Audit & Official Spec Alignment
+## v1.1.3 - Proto-Init Improvements & Minimal Colorization
 
-Comprehensive audit against official Claude Code documentation. Aligned agents, cleaned distribution, fixed command references.
+Enhanced initialization flow, simplified visual styling, and project summary updates.
 
-### Distribution Hygiene
-
-| File | Change |
-|------|--------|
-| `.gitignore` | Added `protocol-manifest.local.json` to excluded files |
-| `.claude/protocol-manifest.local.json` | Removed from git (per-installation state, not distribution) |
-
-### Install Script Improvements
+### Proto-Init Enhancements
 
 | File | Change |
 |------|--------|
-| `install.sh` | Step [6/8]: Generate `protocol-manifest.local.json` with installation timestamp |
-| `install.sh` | Step [8/8]: Automatically build MCP memory server (`npm install && npm run build`) |
-| `install.sh` | Updated step numbering from 6 to 8 steps |
+| `proto-init.md` | Split A4 (Tech Stack) into 3 separate questions: A4a (Languages), A4b (Frameworks), A4c (Database) |
+| `proto-init.md` | Added A2b (Description Audit) - Claude reviews and suggests improvements to project description |
+| `proto-init.md` | Each question now includes helpful examples |
 
-### Schema Compliance
-
-| File | Change |
-|------|--------|
-| `.mcp.json` | Removed non-standard `mcpConfig` section and `description` field |
-
-### Agent Alignment (22 files)
-
-All agent files updated to match official Claude Code agent specification:
-
-| Change | Files Affected |
-|--------|----------------|
-| Removed `supports_plan_mode: true` | All 21 agents |
-| Changed `model: claude-opus-4-5-20251101` → `model: opus` | 6 agents |
-| Changed `model: claude-sonnet-4-20250514` → `model: sonnet` | 15 agents |
-| Updated format documentation | `AGENT_PROTOCOL.md` |
-
-**Agents updated:**
-- `core/`: architect, performance-analyzer, research-analyzer
-- `domain/`: codebase-analyzer, dependency-auditor, document-processor, frontend-designer, protocol-analyzer, protocol-generator, protocol-updater, ui-researcher
-- `quality/`: fact-checker, hallucination-checker, honesty-evaluator, laziness-destroyer, reviewer, security-scanner, test-coverage-enforcer, tester
-- `workflow/`: brainstormer, orchestrator
-
-### Documentation Updates
+### Agent Colorization (Simplified)
 
 | File | Change |
 |------|--------|
-| `skill-rules.json` | Added `_meta` field documenting as custom protocol extension |
-| `CLAUDE.md` | Fixed 7 invalid command references (`/init` → `/proto-init`, removed non-existent commands) |
-| `CLAUDE.md` | Added missing commands: `/proto-status`, `/proto-update`, `/git`, `/search`, `/orchestrate` |
-| `CLAUDE.md` | Added new sections: Documentation Processing, Session commands |
-| `CLAUDE.md` | Updated agent trigger references to match actual commands |
-| `CLAUDE.md` | Version 1.1.2 → 1.1.3 |
-| `protocol-manifest.json` | Version 1.1.2 → 1.1.3 |
+| `agent-announce.py` | Removed background colors, now uses text colors only |
+| `agent-announce.py` | Semantic coloring: quality=red, core=blue, domain=green, workflow=yellow, explore=cyan |
+| `agent-announce.py` | Simple icons: ● for agents, ◦ for sub-agents |
+| `agent-announce.py` | Reduced from 268 to 147 lines |
 
-### Verified Correct (No Changes Needed)
+### Project Summary Updates
 
-| Item | Finding |
-|------|---------|
-| Python shebangs | Already `#!/usr/bin/env python3` |
-| Hook overlap | Complementary, not duplicative |
-| `run-hook.sh` wrapper | Kept for project/global fallback |
-| Skill field names | `tools:` in agents, `allowed-tools:` in skills (distinct) |
+| File | Change |
+|------|--------|
+| `CLAUDE.md` | Updated summary: "Quality-enforced protocol with automated hooks, specialized agents, and persistent memory" |
+| `README.md` | Updated summary with clear value proposition and feature highlights |
+| `protocol-manifest.json` | Updated description to match new branding |
+
+### Proto-Update Fixes
+
+| File | Change |
+|------|--------|
+| `context-loader.py` | Added fallback to main manifest when local manifest missing |
+| `context-loader.py` | Handles both `repository.url` and `source.url` formats |
+| `context-loader.py` | Fixed nested component structure counting |
+| `protocol-manifest.json` | Added missing `git.md` command entry |
+| `protocol-manifest.json` | Added missing `agent-announce.py` hook entry |
+
+### Statistics
+
+| Metric | Value |
+|--------|-------|
+| Total lines | ~20,450 |
+| Total files | 131 |
+| Agents | 21 |
+| Commands | 25 |
+| Hooks | 21 |
+| Skills | 16 |
