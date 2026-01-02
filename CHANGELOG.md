@@ -46,13 +46,22 @@ Enhanced initialization flow, simplified visual styling, and project summary upd
 | `protocol-manifest.json` | Added missing `git.md` command entry |
 | `protocol-manifest.json` | Added missing `agent-announce.py` hook entry |
 
+### Security Fixes
+
+| File | Change |
+|------|--------|
+| `file-edit-tracker.sh` | Fixed command injection via FILE_PATH in sed - now uses jq --arg |
+| `context-detector.sh` | Fixed unescaped JSON output - now uses jq for safe construction |
+| `research-quality-check.sh` | Fixed unescaped JSON output - now uses jq for safe construction |
+| All 3 scripts | Added `set -o pipefail` for better error handling |
+
 ### Statistics
 
 | Metric | Value |
 |--------|-------|
-| Total lines | ~20,450 |
+| Total lines | ~20,500 |
 | Total files | 131 |
 | Agents | 21 |
 | Commands | 25 |
-| Hooks | 21 |
+| Hooks | 20 |
 | Skills | 16 |

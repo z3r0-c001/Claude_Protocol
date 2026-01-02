@@ -2,6 +2,8 @@
 # PostToolUse hook: Detect context and suggest agents
 # Reads JSON from stdin, outputs context via hookSpecificOutput
 
+set -o pipefail
+
 SCRIPT_DIR="$(dirname "$0")"
 source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
 
@@ -38,7 +40,10 @@ done
 SUGGESTIONS="${SUGGESTIONS%, }"
 
 if [ -n "$SUGGESTIONS" ]; then
-    echo "{\"continue\": true, \"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"AGENT SUGGESTION for $FILE_PATH: Consider running $SUGGESTIONS\"}}"
+    # Use jq for safe JSON construction (prevents injection via special chars in paths)
+    CONTEXT_MSG="AGENT SUGGESTION for ${FILE_PATH}: Consider running ${SUGGESTIONS}"
+    jq -n --arg ctx "$CONTEXT_MSG" \
+        '{continue: true, hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: $ctx}}'
 else
     echo '{"continue": true}'
 fi
