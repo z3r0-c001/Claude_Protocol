@@ -24,11 +24,37 @@ pwd
 ```
 **MUST be in CP directory.** If not, STOP. Do not push from root.
 
-### 2. Commit Message Audit
+### 2. Individual Commits Per File (MANDATORY)
 
-Review the commit message for the push:
+**Each file MUST be committed separately with its own specific message.**
+
+This ensures GitHub displays unique descriptions next to each file/folder.
+
 ```bash
-git log -1 --format="%B"
+# Check commits being pushed
+git log origin/main..HEAD --oneline
+```
+
+**BLOCK if:**
+- Multiple files in a single commit
+- Same commit message appears for different files
+
+**CORRECT approach:**
+```bash
+git add file1.md && git commit -m "file1.md: Specific description of changes"
+git add file2.py && git commit -m "file2.py: Specific description of changes"
+```
+
+**WRONG approach:**
+```bash
+git add -A && git commit -m "Updated multiple files"  # BLOCKED
+```
+
+### 3. Commit Message Audit
+
+Review each commit message:
+```bash
+git log origin/main..HEAD --format="%s"
 ```
 
 **BLOCK if ANY of these patterns found:**
@@ -38,14 +64,14 @@ git log -1 --format="%B"
 - "WIP"
 - "Changes"
 - "Modified"
-- Per-file descriptions that are just "updated", "changed", "fixed" without specifics
+- Generic descriptions like "updated", "changed", "fixed" without specifics
 
-**REQUIRE:**
-- Specific summary (what action + what changed + why)
-- Per-file breakdown with UNIQUE, SPECIFIC descriptions
-- Each file description explains WHAT function/class/feature changed
+**REQUIRE for each commit:**
+- Format: `filename: Specific description of what changed`
+- Explains WHAT function/class/feature/line changed
+- Unique message per file
 
-### 3. Version Check
+### 4. Version Check
 
 Verify version was bumped:
 ```bash
@@ -57,7 +83,7 @@ grep 'Version' CLAUDE.md | head -1
 - Version MUST be incremented (MAJOR.MINOR.PATCH)
 - Both files must match
 
-### 4. Changelog Check
+### 5. Changelog Check
 
 For ANY push with code changes:
 ```bash
@@ -69,7 +95,7 @@ cat CHANGELOG.md | head -20
 - Contains specific per-file breakdown
 - Describes WHY changes were made
 
-### 5. Tag Verification
+### 6. Tag Verification
 
 Check existing tags:
 ```bash
@@ -91,7 +117,8 @@ When /git is invoked:
 ## Pre-Push Verification
 
 - [x] Location: CP directory confirmed
-- [x] Commit message: Specific per-file details ✓
+- [x] Individual commits: Each file has separate commit ✓
+- [x] Commit messages: Specific per-file details ✓
 - [ ] Version: NOT UPDATED - BLOCKING
 - [ ] Changelog: NOT UPDATED - BLOCKING
 - [ ] Tag: Not created yet
