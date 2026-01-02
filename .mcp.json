@@ -5,13 +5,7 @@
       "args": [".claude/mcp/memory-server/dist/index.js"],
       "env": {
         "MEMORY_PATH": ".claude/memory"
-      },
-      "description": "Persistent memory server for storing learnings, decisions, corrections, and patterns across sessions"
+      }
     }
-  },
-  "mcpConfig": {
-    "autoConnect": true,
-    "persistMemory": true,
-    "memoryPath": ".claude/memory"
   }
 }
