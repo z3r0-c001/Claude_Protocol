@@ -1,6 +1,6 @@
 {
   "protocol": {
-    "version": "1.1.2",
+    "version": "1.1.3",
     "release_date": "2026-01-02",
     "min_claude_code_version": "1.0.0",
     "description": "Claude Code infrastructure protocol with quality enforcement, memory persistence, and automated agent orchestration"
@@ -469,8 +469,8 @@
         "description": "Detects large documentation files and suggests doc-ingest for processing."
       },
       "context-loader.py": {
-        "version": "1.0.0",
-        "checksum": "sha256:1e3b036f96ecbde4e29ebd0ad150249023add7140715996db68fa502aa43c440",
+        "version": "1.1.0",
+        "checksum": "sha256:a68d7de4f1b96ec7eed86e06b4439090f22fa28df47f4e05b8cf77addffa94f3",
         "file": ".claude/hooks/context-loader.py",
         "description": "Loads project context and checks for protocol updates on startup."
       },
@@ -505,8 +505,8 @@
         "description": "Validates commit messages against protocol standards for specificity and detail."
       },
       "agent-announce.py": {
-        "version": "1.0.0",
-        "checksum": "sha256:9dde47fc39cd780fb7820e0cde09f80dade568a760b12b960b8e7b46993a89be",
+        "version": "1.1.0",
+        "checksum": "sha256:0b428c4ae27fe4dcb4cefdbbf511051d929497313c12565c3d8683852cd6ab98",
         "file": ".claude/hooks/agent-announce.py",
         "description": "Displays colored terminal banners when agents are invoked via Task tool."
       }
