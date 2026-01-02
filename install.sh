@@ -264,16 +264,23 @@ if [ "$ERRORS" -eq 0 ]; then
             echo -e "${BLUE}Removing source directory...${NC}"
             rm -rf "$SCRIPT_DIR"
             echo -e "${GREEN}✓ Source directory deleted${NC}"
+            echo ""
+            echo -e "${BLUE}Changing to target directory...${NC}"
+            cd "$TARGET_DIR"
+            echo -e "${GREEN}✓ Now in: $TARGET_DIR${NC}"
         fi
+        echo ""
+        echo -e "Next steps:"
+        echo -e "  1. ${BLUE}claude${NC}"
+        echo -e "  2. Run ${BLUE}/proto-init${NC} to initialize for your project"
     else
         echo -e "${YELLOW}Source directory kept at: $SCRIPT_DIR${NC}"
+        echo ""
+        echo -e "Next steps:"
+        echo -e "  1. ${BLUE}cd $TARGET_DIR${NC}"
+        echo -e "  2. ${BLUE}claude${NC}"
+        echo -e "  3. Run ${BLUE}/proto-init${NC} to initialize for your project"
     fi
-    echo ""
-
-    echo -e "Next steps:"
-    echo -e "  1. ${BLUE}cd $TARGET_DIR${NC}"
-    echo -e "  2. ${BLUE}claude${NC}"
-    echo -e "  3. Run ${BLUE}/proto-init${NC} to initialize for your project"
     echo ""
 else
     echo -e "${YELLOW}╔═══════════════════════════════════════════════════════════╗${NC}"
