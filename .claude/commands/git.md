@@ -61,11 +61,11 @@ grep 'Version' CLAUDE.md | head -1
 
 For ANY push with code changes:
 ```bash
-ls -la CHANGELOG-v*.md | tail -1
+cat CHANGELOG.md | head -20
 ```
 
 **REQUIRE:**
-- CHANGELOG-vX.X.X.md exists for current version
+- CHANGELOG.md updated with current version
 - Contains specific per-file breakdown
 - Describes WHY changes were made
 
@@ -93,12 +93,12 @@ When /git is invoked:
 - [x] Location: CP directory confirmed
 - [x] Commit message: Specific per-file details ✓
 - [ ] Version: NOT UPDATED - BLOCKING
-- [ ] Changelog: NOT FOUND - BLOCKING
+- [ ] Changelog: NOT UPDATED - BLOCKING
 - [ ] Tag: Not created yet
 
 ## BLOCKED - Fix these issues:
 1. Update version in protocol-manifest.json and CLAUDE.md
-2. Create CHANGELOG-v1.1.1.md with per-file details
+2. Update CHANGELOG.md with per-file details for current version
 ```
 
 3. **If ANY check fails: BLOCK and list what needs fixing**
