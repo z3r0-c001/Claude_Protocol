@@ -252,6 +252,24 @@ if [ "$ERRORS" -eq 0 ]; then
     echo -e "${GREEN}║              Installation Complete!                       ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
     echo ""
+
+    # Prompt to delete origin directory
+    echo -e "${YELLOW}Delete the source directory (cloned repo)?${NC}"
+    echo -e "  Source: ${BLUE}$SCRIPT_DIR${NC}"
+    echo ""
+    read -p "Delete source directory? [y/N]: " delete_source
+    if [[ "$delete_source" =~ ^[Yy]$ ]]; then
+        # Safety check: make sure we're not deleting the target
+        if [ "$SCRIPT_DIR" != "$TARGET_DIR" ]; then
+            echo -e "${BLUE}Removing source directory...${NC}"
+            rm -rf "$SCRIPT_DIR"
+            echo -e "${GREEN}✓ Source directory deleted${NC}"
+        fi
+    else
+        echo -e "${YELLOW}Source directory kept at: $SCRIPT_DIR${NC}"
+    fi
+    echo ""
+
     echo -e "Next steps:"
     echo -e "  1. ${BLUE}cd $TARGET_DIR${NC}"
     echo -e "  2. ${BLUE}claude${NC}"
