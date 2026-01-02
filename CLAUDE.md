@@ -6,7 +6,7 @@ The definitive Claude Code infrastructure protocol combining quality enforcement
 
 | Property | Value |
 |----------|-------|
-| Version | 1.1.0 |
+| Version | 1.1.1 |
 | Mode | Unified Protocol |
 | Philosophy | Research-first + Quality-enforced |
 | Validation | Zero-error tolerance |
