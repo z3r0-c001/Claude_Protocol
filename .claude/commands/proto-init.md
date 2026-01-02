@@ -116,12 +116,24 @@ Ask these questions ONE AT A TIME. Wait for response after each.
 
 **WAIT** → Continue
 
-### A4. Tech Stack
+### A4a. Primary Language(s)
 **ASK:**
-> What tech stack are you planning to use?
-> - Primary language(s):
-> - Frameworks:
-> - Database (if any):
+> What primary programming language(s) will this project use?
+> (e.g., Python, TypeScript, Go, Rust, Java)
+
+**WAIT** → Continue
+
+### A4b. Frameworks
+**ASK:**
+> What frameworks or libraries are central to this project?
+> (e.g., React, FastAPI, Django, Express, Axum)
+
+**WAIT** → Continue
+
+### A4c. Database
+**ASK:**
+> What database or data storage will you use? (if any)
+> (e.g., PostgreSQL, MongoDB, SQLite, Redis, None)
 
 **WAIT** → Continue
 
