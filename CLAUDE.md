@@ -1,6 +1,6 @@
-# Claude Protocol (Unified)
+# Claude Protocol
 
-Infrastructure protocol for Claude Code combining quality enforcement, honesty guardrails, and autonomous operation.
+Quality-enforced protocol with automated hooks, specialized agents, and persistent memory.
 
 ## Project Status
 
