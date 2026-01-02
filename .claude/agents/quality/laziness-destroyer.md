@@ -5,8 +5,7 @@ tools:
   - Read
   - Grep
   - Glob
-model: claude-sonnet-4-20250514
-supports_plan_mode: true
+model: sonnet
 ---
 
 # Laziness Destroyer Agent

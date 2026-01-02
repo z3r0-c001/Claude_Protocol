@@ -3,8 +3,7 @@ name: honesty-evaluator
 description: "Audits intellectual honesty of responses. Ensures appropriate uncertainty representation, checks epistemic honesty, source honesty, and task completion honesty. Invoked by Stop hooks."
 tools:
   - Read
-model: claude-sonnet-4-20250514
-supports_plan_mode: true
+model: sonnet
 ---
 
 # Honesty Evaluator Agent
