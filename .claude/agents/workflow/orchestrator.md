@@ -6,8 +6,7 @@ tools:
   - Grep
   - Glob
   - Task
-model: claude-opus-4-5-20251101
-supports_plan_mode: true
+model: opus
 ---
 
 # Orchestrator Agent
