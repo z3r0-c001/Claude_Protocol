@@ -381,6 +381,12 @@
         "checksum": "sha256:943d45802dda1759d31178c49abaa8f38d5525a64604b9bae732484732f311c2",
         "file": ".claude/commands/pr.md",
         "description": "Create a pull request with all checks. Usage: /pr [title]"
+      },
+      "git": {
+        "version": "1.0.0",
+        "checksum": "sha256:b67a7f1fee257941966ab9ce3fafee51c7fccfe458c87303ad2a53458d8ad19b",
+        "file": ".claude/commands/git.md",
+        "description": "MANDATORY pre-push checklist. MUST run before ANY git push. Usage: /git"
       }
     },
     "hooks": {
@@ -497,6 +503,12 @@
         "checksum": "sha256:bd1e3f831ba5423078f49abd2726829dd5379bc2095a3f72fb9835d679a4fb4b",
         "file": ".claude/hooks/commit-message-validator.sh",
         "description": "Validates commit messages against protocol standards for specificity and detail."
+      },
+      "agent-announce.py": {
+        "version": "1.0.0",
+        "checksum": "sha256:9dde47fc39cd780fb7820e0cde09f80dade568a760b12b960b8e7b46993a89be",
+        "file": ".claude/hooks/agent-announce.py",
+        "description": "Displays colored terminal banners when agents are invoked via Task tool."
       }
     },
     "config": {
