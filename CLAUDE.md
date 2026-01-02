@@ -6,7 +6,7 @@ The definitive Claude Code infrastructure protocol combining quality enforcement
 
 | Property | Value |
 |----------|-------|
-| Version | 1.1.2 |
+| Version | 1.1.3 |
 | Mode | Unified Protocol |
 | Philosophy | Research-first + Quality-enforced |
 | Validation | Zero-error tolerance |
@@ -112,12 +112,14 @@ Fix authentication token refresh in session handler
 
 | Task | Command |
 |------|---------|
-| Initialize protocol | `/init` |
+| Initialize protocol | `/proto-init` |
 | Generate tooling | `/bootstrap` |
 | Validate all | `/validate` |
-| Security scan | `/security` |
-| Performance analysis | `/perf` |
-| Test coverage | `/coverage` |
+| Run tests | `/test` |
+| Search codebase | `/search` |
+| Create PR | `/pr` |
+
+*Note: Security, performance, and coverage analysis run automatically during `/proto-init` for existing projects.*
 
 ## Autonomous Behaviors
 
@@ -178,9 +180,9 @@ Agents auto-invoke based on file context with **verbose announcements**:
 ### Domain Agents
 | Agent | Purpose | Trigger |
 |-------|---------|---------|
-| security-scanner | Security vulnerability detection | `/security`, auto |
-| performance-analyzer | Performance issue detection | `/perf`, auto |
-| codebase-analyzer | Project analysis | `/init` |
+| security-scanner | Security vulnerability detection | `/proto-init`, auto |
+| performance-analyzer | Performance issue detection | Auto on perf-related code |
+| codebase-analyzer | Project analysis | `/proto-init` |
 | protocol-generator | Generate protocol artifacts | `/bootstrap` |
 | frontend-designer | UI/UX design, component architecture | Auto on frontend files |
 | ui-researcher | Research UI patterns, libraries, best practices | Manual, via frontend-designer |
@@ -193,9 +195,9 @@ Agents auto-invoke based on file context with **verbose announcements**:
 ### Specialized Agents
 | Agent | Purpose | Trigger |
 |-------|---------|---------|
-| fact-checker | Verify factual claims | `/verify` |
-| research-analyzer | Synthesize research | `/verify` |
-| test-coverage-enforcer | Ensure test coverage | `/coverage` |
+| fact-checker | Verify factual claims | Manual |
+| research-analyzer | Synthesize research | Manual |
+| test-coverage-enforcer | Ensure test coverage | `/test`, auto |
 | dependency-auditor | Check dependency health | Auto on package files |
 | build-error-resolver | Fix build errors | On build failure |
 
@@ -204,8 +206,10 @@ Agents auto-invoke based on file context with **verbose announcements**:
 ### Initialization
 | Command | Description |
 |---------|-------------|
-| `/init` | Initialize protocol, discover project |
+| `/proto-init` | Initialize protocol (comprehensive setup) |
 | `/bootstrap` | Generate CLAUDE.md and project tooling |
+| `/proto-status` | Show protocol state and health |
+| `/proto-update` | Check for and apply protocol updates |
 
 ### Development
 | Command | Description |
@@ -215,30 +219,40 @@ Agents auto-invoke based on file context with **verbose announcements**:
 | `/refactor <target>` | Refactor with agent pipeline |
 | `/test [pattern]` | Run project tests |
 | `/lint [--fix]` | Run linters |
+| `/search <query>` | Search the codebase |
 
 ### Quality
 | Command | Description |
 |---------|-------------|
 | `/validate` | Run full validation suite |
-| `/verify` | Research verification (fact-check + honesty) |
-| `/audit` | Quality audit (laziness + hallucination) |
-| `/security` | Security scan (5 categories) |
-| `/perf` | Performance analysis |
-| `/coverage` | Test coverage analysis |
+| `/orchestrate` | Coordinate multi-agent workflows |
 
 ### Git & Docs
 | Command | Description |
 |---------|-------------|
 | `/commit <msg>` | Safe commit after sanitization |
+| `/git` | Pre-push checklist (mandatory) |
 | `/pr [title]` | Create pull request |
 | `/docs` | Generate documentation |
-| `/dev-docs` | Create/update development context |
 
 ### Memory
 | Command | Description |
 |---------|-------------|
 | `/remember <category> <what>` | Save to persistent memory |
 | `/recall <topic>` | Search memory |
+
+### Documentation Processing
+| Command | Description |
+|---------|-------------|
+| `/doc-ingest <path>` | Process large doc into searchable chunks |
+| `/doc-search <query>` | Search processed documents |
+| `/doc-list` | List processed documentation |
+
+### Session
+| Command | Description |
+|---------|-------------|
+| `/leftoff [summary]` | Save session state for continuation |
+| `/resume [session-id]` | Resume from saved session |
 
 ## Memory System
 
@@ -348,5 +362,5 @@ cp CLAUDE.md /path/to/project/
 
 # Initialize
 cd /path/to/project && claude
-# Then run: /init
+# Then run: /proto-init
 ```
