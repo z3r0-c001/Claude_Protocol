@@ -25,9 +25,11 @@ TIMESTAMP=$(date -Iseconds)
 
 if [ -f "$TRACKER_FILE" ] && [ -s "$TRACKER_FILE" ]; then
     # Check if already tracked
-    if ! grep -q "\"$FILE_PATH\"" "$TRACKER_FILE" 2>/dev/null; then
-        # Add to existing - simple sed append
-        sed -i '$ s/]$/,{"path":"'"$FILE_PATH"'","timestamp":"'"$TIMESTAMP"'"}]/' "$TRACKER_FILE" 2>/dev/null || \
+    if ! jq -e ".files[] | select(.path == \"$FILE_PATH\")" "$TRACKER_FILE" >/dev/null 2>&1; then
+        # Add to existing using jq for proper JSON handling
+        jq --arg path "$FILE_PATH" --arg ts "$TIMESTAMP" \
+           '.files += [{"path": $path, "timestamp": $ts}]' "$TRACKER_FILE" > "${TRACKER_FILE}.tmp" && \
+        mv "${TRACKER_FILE}.tmp" "$TRACKER_FILE" 2>/dev/null || \
         echo "{\"session_start\":\"$TIMESTAMP\",\"files\":[{\"path\":\"$FILE_PATH\",\"timestamp\":\"$TIMESTAMP\"}]}" > "$TRACKER_FILE"
     fi
 else
