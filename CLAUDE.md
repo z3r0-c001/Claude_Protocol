@@ -6,7 +6,7 @@ Quality-enforced protocol with automated hooks, specialized agents, and persiste
 
 | Property | Value |
 |----------|-------|
-| Version | 1.1.4 |
+| Version | 1.1.5 |
 | Philosophy | Research-first, quality-enforced |
 | Validation | Zero-error tolerance |
 
@@ -70,16 +70,18 @@ Quality-enforced protocol with automated hooks, specialized agents, and persiste
 | Matcher | Script | Purpose |
 |---------|--------|---------|
 | Write | pre-write-check.sh | Block protected directories |
+| Write | pretool-laziness-check.py | Pre-validate for placeholders |
+| Write | pretool-hallucination-check.py | Pre-validate packages/APIs |
 | Bash | dangerous-command-check.py | Block dangerous commands |
 | Task | agent-announce.py | Display colored agent banners |
 
 ### PostToolUse
 | Matcher | Script | Purpose |
 |---------|--------|---------|
+| Read | doc-size-detector.py | Detect large files, suggest chunking |
 | Write | file-edit-tracker.sh | Track file edits |
 | Write | post-write-validate.sh | Validate written files |
 | Write | context-detector.sh | Suggest relevant agents |
-| Task | agent-handoff-validator.py | Validate agent output |
 | WebFetch/WebSearch | research-quality-check.sh | Validate research quality |
 
 ### Stop
@@ -93,6 +95,7 @@ Quality-enforced protocol with automated hooks, specialized agents, and persiste
 | Script | Purpose |
 |--------|---------|
 | research-validator.sh | Validate research from subagents |
+| agent-handoff-validator.py | Validate agent output quality |
 
 ## Agents
 
@@ -102,17 +105,17 @@ Quality-enforced protocol with automated hooks, specialized agents, and persiste
 | laziness-destroyer | Block placeholder code | Stop hook |
 | hallucination-checker | Verify packages/APIs exist | Stop hook |
 | honesty-evaluator | Check for overclaiming | Stop hook |
-| fact-checker | Verify factual claims | `/verify` |
+| fact-checker | Verify factual claims | Manual |
 | reviewer | Code review | `/pr` |
 | tester | Test generation | `/feature`, `/fix` |
 | security-scanner | Security vulnerability detection | Auto on auth files |
-| test-coverage-enforcer | Ensure test coverage | `/coverage` |
+| test-coverage-enforcer | Ensure test coverage | `/test --coverage` |
 
 ### Core Agents
 | Agent | Purpose | Trigger |
 |-------|---------|---------|
 | architect | System design and architecture | `/refactor`, manual |
-| research-analyzer | Synthesize research findings | `/verify` |
+| research-analyzer | Synthesize research findings | SubagentStop hook |
 | performance-analyzer | Performance issue detection | Auto on hot paths |
 
 ### Domain Agents
@@ -229,7 +232,8 @@ Memory persists across sessions via MCP server (optional).
 | `UI`, `component`, `button`, `form`, `layout` | frontend-design |
 | `design system`, `tokens`, `theme` | design-system |
 | `I want to build`, `help me plan`, `brainstorm` | brainstormer |
-| `best practice`, `should I`, `correct way` | research-verifier |
+| `security`, `vulnerability`, `authentication` | security-scanner |
+| `performance`, `optimize`, `slow` | performance-analyzer |
 
 ### Core Skills
 | Skill | Purpose |
