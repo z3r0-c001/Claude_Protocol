@@ -1,9 +1,28 @@
 # Changelog
 
-**Current Version:** 1.1.10
+**Current Version:** 1.1.11
 **Date:** 2026-01-06
 
 > This file is overwritten with each release. For historical changes, see git history.
+
+---
+
+## v1.1.11 - Hook Path Resolution Fix
+
+Fixed hooks not working on fresh git clone installations.
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `.claude/hooks/run-hook.sh` | Use SCRIPT_DIR to find hooks relative to script location |
+| `.claude/hooks/run-hook.sh` | No longer requires $CLAUDE_PROJECT_DIR to be set |
+| `.claude/settings.json` | Changed from `$CLAUDE_PROJECT_DIR/.claude/hooks/` to `.claude/hooks/` |
+| `.claude/settings.json` | Relative paths work from project root (Claude Code's working directory) |
+
+### Root Cause
+
+The previous settings.json used `$CLAUDE_PROJECT_DIR` which may not be set in all environments. Combined with run-hook.sh defaulting to `.` when the variable wasn't set, hooks failed to locate their scripts on fresh installations.
 
 ---
 
