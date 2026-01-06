@@ -23,3 +23,20 @@ Thumbs.db
 
 # Local config
 .claude/protocol-manifest.local.json
+
+# Node (for MCP server)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temp files
+*.tmp
+*.bak
+*.swp
+*~
