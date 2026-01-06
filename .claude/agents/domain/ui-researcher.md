@@ -10,6 +10,7 @@ tools:
   - Task
 model: sonnet
 color: cyan
+supports_plan_mode: true
 ---
 
 # UI Researcher Agent
