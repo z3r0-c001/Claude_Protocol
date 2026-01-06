@@ -1,9 +1,61 @@
 # Changelog
 
-**Current Version:** 1.1.5
+**Current Version:** 1.1.6
 **Date:** 2026-01-06
 
 > This file is overwritten with each release. For historical changes, see git history.
+
+---
+
+## v1.1.6 - Research Verifier Skill
+
+Added new skill for verifying best practice claims against authoritative sources with scientific rigor.
+
+### New Skill: research-verifier
+
+| File | Description |
+|------|-------------|
+| `.claude/skills/research-verifier/SKILL.md` | Complete skill implementation |
+
+### Core Mandates
+
+1. **Official Sources First**
+   - ALWAYS check vendor/official docs BEFORE any other source
+   - Community posts, blogs, Stack Overflow are LAST RESORT
+   - Must label community sources as "not officially verified"
+
+2. **Version Alignment**
+   - Match documentation to user's specific version
+   - STOP and prompt user if version mismatch or docs unavailable
+   - Never proceed without user direction when docs missing
+
+3. **Scientific Comparative Analysis**
+   - Anecdotes are NOT evidence
+   - Benchmarks require: methodology, environment, sample size, date
+   - Note commercial bias in vendor comparisons
+   - Mark unverifiable claims as UNVERIFIED
+
+### Source Hierarchy (Mandatory Order)
+
+```
+1. Official Documentation (vendor/maintainer)
+2. Official GitHub/Source Repo (maintainer comments)
+3. RFCs / Specifications
+4. Peer-reviewed research / Published benchmarks
+5. Community sources (LAST - always labeled)
+```
+
+### Trigger Keywords
+
+`best practice`, `should I`, `correct way`, `recommended`, `standard`, `pattern`, `convention`, `proper way`, `official`
+
+### Documentation Updates
+
+| File | Change |
+|------|--------|
+| CLAUDE.md | Added research-verifier to auto-activated skills table |
+| CLAUDE.md | Version 1.1.5 → 1.1.6 |
+| protocol-manifest.json | Version 1.1.5 → 1.1.6 |
 
 ---
 
@@ -13,48 +65,14 @@ Fixed discrepancies between documented claims and actual codebase implementation
 
 ### Critical Fixes
 
-| Issue | Location | Fix |
-|-------|----------|-----|
-| "80+ specialized agents" claim | README.md line 3 | Changed to "21 specialized agents" (actual count) |
-| `/verify` command referenced | README.md, CLAUDE.md | Removed - command doesn't exist |
-| `/coverage` command referenced | README.md, CLAUDE.md | Changed to `/test --coverage` |
-| `research-verifier` skill | CLAUDE.md | Removed - skill directory doesn't exist |
-
-### Hook Documentation Updates
-
-| File | Change |
-|------|--------|
-| README.md | Added PreToolUse (Write): pretool-laziness-check.py, pretool-hallucination-check.py |
-| README.md | Added PostToolUse (Read): doc-size-detector.py |
-| README.md | Fixed SubagentStop: added agent-handoff-validator.py |
-| CLAUDE.md | Same hook documentation updates as README.md |
-
-### Agent Trigger Corrections
-
-| Agent | Old Trigger | New Trigger |
-|-------|-------------|-------------|
-| fact-checker | `/verify` | Manual |
-| research-analyzer | `/verify` | SubagentStop hook |
-| test-coverage-enforcer | `/coverage` | `/test --coverage` |
-
-### Version Bump
-
-| File | Change |
-|------|--------|
-| CLAUDE.md | 1.1.4 → 1.1.5 |
-| protocol-manifest.json | 1.1.4 → 1.1.5 |
+| Issue | Fix |
+|-------|-----|
+| "80+ specialized agents" | Changed to "21 specialized agents" |
+| `/verify` command | Removed - doesn't exist |
+| `/coverage` command | Changed to `/test --coverage` |
 
 ---
 
 ## v1.1.4 - Existing CLAUDE.md Preservation
 
-Added intelligent handling of existing CLAUDE.md files during protocol initialization to prevent accidental overwrites.
-
-### Changes
-
-| File | Change |
-|------|--------|
-| `proto-init.md` | Added B0 section: Analyze Existing CLAUDE.md (CRITICAL - DO FIRST) |
-| `proto-init.md` | B0 reads entire file, extracts/categorizes content |
-| `proto-init.md` | B0 offers 3 options: `merge`, `review`, `replace` (requires CONFIRM) |
-| `proto-init.md` | Updated C3 to merge intelligently: user content as base |
+Added B0 section to proto-init for analyzing and preserving existing CLAUDE.md files.
