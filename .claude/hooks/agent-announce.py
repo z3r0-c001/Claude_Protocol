@@ -7,6 +7,7 @@ Outputs colored banners when agents are invoked with distinct visual styling
 import json
 import sys
 import os
+import hashlib
 from pathlib import Path
 from datetime import datetime
 
@@ -103,6 +104,34 @@ AGENT_THEMES = {
 # Default theme for unknown agents
 DEFAULT_THEME = (Colors.WHITE, Colors.BG_BRIGHT_BLACK, "🤖", "AGENT")
 
+# Random color pool for unknown agents - vibrant, distinct combinations
+RANDOM_COLOR_POOL = [
+    (Colors.WHITE, Colors.BG_RED, "🔴"),
+    (Colors.WHITE, Colors.BG_BLUE, "🔵"),
+    (Colors.BLACK, Colors.BG_GREEN, "🟢"),
+    (Colors.BLACK, Colors.BG_YELLOW, "🟡"),
+    (Colors.WHITE, Colors.BG_MAGENTA, "🟣"),
+    (Colors.BLACK, Colors.BG_CYAN, "🔷"),
+    (Colors.BLACK, Colors.BG_BRIGHT_RED, "🌟"),
+    (Colors.WHITE, Colors.BG_BRIGHT_BLUE, "💎"),
+    (Colors.BLACK, Colors.BG_BRIGHT_GREEN, "✨"),
+    (Colors.BLACK, Colors.BG_BRIGHT_YELLOW, "⚡"),
+    (Colors.BLACK, Colors.BG_BRIGHT_MAGENTA, "🎯"),
+    (Colors.BLACK, Colors.BG_BRIGHT_CYAN, "🚀"),
+    (Colors.BLACK, Colors.BG_WHITE, "⭐"),
+    (Colors.WHITE, Colors.BG_BRIGHT_BLACK, "🔮"),
+]
+
+def get_random_theme_for_agent(agent_name: str) -> tuple:
+    """Generate a deterministic 'random' theme based on agent name hash."""
+    # Use hash to get consistent color for same agent name
+    name_hash = int(hashlib.md5(agent_name.encode()).hexdigest(), 16)
+    color_index = name_hash % len(RANDOM_COLOR_POOL)
+    fg, bg, icon = RANDOM_COLOR_POOL[color_index]
+    # Create category from agent name (first 8 chars uppercase)
+    category = agent_name.upper().replace("-", "")[:8]
+    return (fg, bg, icon, category)
+
 
 def get_agent_theme(agent_name: str) -> tuple:
     """Get theme for agent, checking agent file first, then defaults."""
@@ -147,7 +176,8 @@ def get_agent_theme(agent_name: str) -> tuple:
             except Exception:
                 pass
 
-    return DEFAULT_THEME
+    # Use deterministic random color for unknown agents
+    return get_random_theme_for_agent(agent_name)
 
 
 def set_terminal_title(title: str):
