@@ -83,8 +83,9 @@ When invoked with `execution_mode: execute`:
 ### Phase 1: Fetch Remote Manifest
 
 ```bash
-# Fetch manifest from GitHub
-curl -sL "https://raw.githubusercontent.com/{user}/{repo}/main/protocol-manifest.json"
+# Read URL from local manifest and fetch remote
+RAW_BASE=$(jq -r '.repository.raw_base' protocol-manifest.json)
+curl -sL "${RAW_BASE}/protocol-manifest.json"
 ```
 
 Read local manifest from `.claude/protocol-manifest.local.json`
@@ -127,7 +128,7 @@ For each update, present:
 ### Phase 4: Apply Updates
 
 For each accepted update:
-1. Create backup in `.claude/backups/{timestamp}/`
+1. Create backup in `.claude/backups/{project-name}/`
 2. Fetch new file content from GitHub
 3. Write to local path
 4. Verify checksum matches manifest
