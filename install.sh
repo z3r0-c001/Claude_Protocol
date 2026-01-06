@@ -147,15 +147,15 @@ echo -e "${BLUE}Installing Claude Protocol to: $TARGET_DIR${NC}"
 echo ""
 
 # Copy files
-echo -e "${GREEN}[1/8]${NC} Copying .claude directory..."
+echo -e "${GREEN}[1/6]${NC} Copying .claude directory..."
 cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR/"
 
-echo -e "${GREEN}[2/8]${NC} Copying configuration files..."
+echo -e "${GREEN}[2/6]${NC} Copying configuration files..."
 cp "$SCRIPT_DIR/CLAUDE.md" "$TARGET_DIR/"
 cp "$SCRIPT_DIR/.mcp.json" "$TARGET_DIR/" 2>/dev/null || true
 cp "$SCRIPT_DIR/.gitignore" "$TARGET_DIR/" 2>/dev/null || true
 
-echo -e "${GREEN}[3/8]${NC} Copying documentation..."
+echo -e "${GREEN}[3/6]${NC} Copying documentation..."
 cp "$SCRIPT_DIR/README.md" "$TARGET_DIR/" 2>/dev/null || true
 cp "$SCRIPT_DIR/LICENSE" "$TARGET_DIR/" 2>/dev/null || true
 cp "$SCRIPT_DIR/CHANGELOG"*.md "$TARGET_DIR/" 2>/dev/null || true
@@ -167,76 +167,16 @@ if [ -d "$SCRIPT_DIR/scripts" ]; then
     cp -r "$SCRIPT_DIR/scripts" "$TARGET_DIR/"
 fi
 
-echo -e "${GREEN}[4/8]${NC} Copying install script..."
+echo -e "${GREEN}[4/6]${NC} Copying install script..."
 cp "$SCRIPT_DIR/install.sh" "$TARGET_DIR/" 2>/dev/null || true
 
-echo -e "${GREEN}[5/8]${NC} Setting executable permissions on hooks..."
+echo -e "${GREEN}[5/6]${NC} Setting executable permissions on hooks..."
 chmod +x "$TARGET_DIR/.claude/hooks/"*.sh 2>/dev/null || true
 chmod +x "$TARGET_DIR/.claude/hooks/"*.py 2>/dev/null || true
 
-echo -e "${GREEN}[6/8]${NC} Generating local manifest..."
-# Read version from master manifest
-if [ -f "$TARGET_DIR/protocol-manifest.json" ]; then
-    PROTOCOL_VERSION=$(jq -r '.protocol.version // "1.0.0"' "$TARGET_DIR/protocol-manifest.json" 2>/dev/null || echo "1.0.0")
-    REPO_URL=$(jq -r '.repository.url // "https://github.com/z3r0-c001/Claude_Protocol"' "$TARGET_DIR/protocol-manifest.json" 2>/dev/null || echo "https://github.com/z3r0-c001/Claude_Protocol")
-    REPO_BRANCH=$(jq -r '.repository.branch // "main"' "$TARGET_DIR/protocol-manifest.json" 2>/dev/null || echo "main")
-else
-    PROTOCOL_VERSION="1.0.0"
-    REPO_URL="https://github.com/z3r0-c001/Claude_Protocol"
-    REPO_BRANCH="main"
-fi
-
-# Generate local manifest with installation timestamp
-INSTALL_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-cat > "$TARGET_DIR/.claude/protocol-manifest.local.json" << EOF
-{
-  "installed_version": "$PROTOCOL_VERSION",
-  "installed_at": "$INSTALL_DATE",
-  "source": {
-    "url": "$REPO_URL",
-    "branch": "$REPO_BRANCH"
-  },
-  "components": {},
-  "customizations": {},
-  "update_history": [
-    {
-      "date": "$INSTALL_DATE",
-      "from_version": null,
-      "to_version": "$PROTOCOL_VERSION",
-      "action": "install",
-      "components_affected": "all"
-    }
-  ]
-}
-EOF
-echo -e "${GREEN}  ✓ Created protocol-manifest.local.json${NC}"
-
-echo -e "${GREEN}[7/8]${NC} Setting executable permissions on scripts..."
+echo -e "${GREEN}[6/6]${NC} Setting executable permissions on scripts..."
 chmod +x "$TARGET_DIR/.claude/scripts/"*.sh 2>/dev/null || true
 chmod +x "$TARGET_DIR/install.sh" 2>/dev/null || true
-
-echo -e "${GREEN}[8/8]${NC} Building MCP memory server..."
-if command -v node &> /dev/null && command -v npm &> /dev/null; then
-    MCP_DIR="$TARGET_DIR/.claude/mcp/memory-server"
-    if [ -f "$MCP_DIR/package.json" ]; then
-        (
-            cd "$MCP_DIR"
-            npm install --silent 2>/dev/null
-            npm run build --silent 2>/dev/null
-        )
-        if [ -f "$MCP_DIR/dist/index.js" ]; then
-            echo -e "${GREEN}  ✓ MCP memory server built successfully${NC}"
-        else
-            echo -e "${YELLOW}  ! MCP memory server build failed (memory features may not work)${NC}"
-        fi
-    else
-        echo -e "${YELLOW}  ! MCP memory server package.json not found${NC}"
-    fi
-else
-    echo -e "${YELLOW}  ! Node.js/npm not found - skipping MCP server build${NC}"
-    echo -e "${YELLOW}    To enable memory features later, run:${NC}"
-    echo -e "${YELLOW}    cd $TARGET_DIR/.claude/mcp/memory-server && npm install && npm run build${NC}"
-fi
 
 # Verify installation
 echo ""
