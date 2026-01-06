@@ -9,6 +9,7 @@ tools:
   - Think
 model: opus
 color: blue
+supports_plan_mode: true
 ---
 
 # Architect Agent
