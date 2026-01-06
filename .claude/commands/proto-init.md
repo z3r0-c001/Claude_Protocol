@@ -73,6 +73,31 @@ mkdir -p .claude/memory
 
 ---
 
+## STEP 0.5: MANIFEST VALIDATION
+
+**Check protocol-manifest.json for placeholder URLs:**
+
+```bash
+# Check if manifest has placeholder URL
+if grep -q "user/Claude_Protocol" protocol-manifest.json 2>/dev/null; then
+    echo "⚠️  Placeholder URL detected in protocol-manifest.json"
+fi
+```
+
+**If placeholder detected, AUTO-FIX:**
+```bash
+# Fix placeholder with actual repo URL
+sed -i 's|user/Claude_Protocol|z3r0-c001/Claude_Protocol|g' protocol-manifest.json
+```
+
+**Notify user:**
+> Fixed protocol-manifest.json: Updated placeholder URL to actual repository.
+> Remote updates will now work correctly via /proto-update.
+
+**THEN continue to STEP 1**
+
+---
+
 ## STEP 1: PROJECT TYPE
 
 **ASK:**
