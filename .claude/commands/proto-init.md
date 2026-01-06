@@ -128,6 +128,107 @@ Ask these questions ONE AT A TIME. Wait for response after each.
 
 **WAIT** → Continue
 
+### A2.5. Project Analysis & Refinement (CRITICAL)
+
+**IMMEDIATELY after receiving the description, ANALYZE it:**
+
+1. **Extract key elements:**
+   - Domain keywords (farm, medical, finance, etc.)
+   - Security indicators (sensitive, encrypted, private, secure)
+   - Functionality hints (forms, research, tracking, automation)
+   - Data requirements (storage, sync, export, backup)
+   - User mentions (admin, public, team, personal)
+
+2. **Invoke brainstormer mindset - ASK clarifying questions:**
+
+Based on the description, ask 3-5 targeted questions ONE AT A TIME:
+
+**For security-sensitive projects (detected keywords: sensitive, encrypted, secure, private, confidential):**
+> I notice this involves sensitive data. Let me clarify some security requirements:
+>
+> **Q1:** What type of data will be stored? (personal info, financial, health, proprietary)
+
+**WAIT** → Then ask:
+> **Q2:** Where should data be stored?
+> - `local` - Device only, never leaves the machine
+> - `cloud` - Synced online (specify provider preference)
+> - `hybrid` - Local with optional encrypted backup
+
+**WAIT** → Then ask:
+> **Q3:** Who will access this application?
+> - `single-user` - Just you
+> - `team` - Multiple known users
+> - `public` - Anyone can register
+
+**WAIT** → Continue with domain questions
+
+**For domain-specific projects, ask domain questions:**
+
+*Farm/Agriculture:*
+> **Q:** What types of forms? (government compliance, crop records, livestock tracking, equipment logs)
+
+*Forms/Documents:*
+> **Q:** What's the workflow? (data entry → review → submit? Or fetch → auto-fill → export?)
+
+*Research:*
+> **Q:** What kind of research? (web scraping, database queries, API integrations, document analysis)
+
+3. **Generate project-specific suggestions:**
+
+**SAY:**
+> Based on your description, I recommend these project-specific components:
+>
+> **Suggested Custom Agents:**
+> | Agent | Purpose |
+> |-------|---------|
+> | [domain]-manager | Handle [domain] specific logic |
+> | form-processor | Parse and fill form templates |
+> | data-validator | Validate [domain] data before storage |
+> | [if encrypted] encryption-handler | Manage encryption/decryption |
+>
+> **Security Recommendations:** [if sensitive]
+> - All data encrypted at rest using AES-256
+> - No plaintext storage of sensitive fields
+> - Audit logging for all data access
+> - Consider: field-level encryption for PII
+>
+> **Suggested Skills:**
+> - [domain]-patterns: Domain-specific conventions
+> - [if forms] form-templates: Reusable form structures
+> - [if research] research-workflow: Data gathering patterns
+>
+> Would you like me to:
+> - `accept` - Use these recommendations
+> - `modify` - Adjust the suggestions
+> - `skip` - Continue without custom components
+
+**WAIT FOR RESPONSE**
+
+**If `accept` or `modify`:**
+- Store suggestions in memory for use in Section C
+- Flag for custom agent generation in C6
+
+**If user asks questions or wants to discuss further:**
+- Continue Socratic dialogue
+- Refine requirements until user is satisfied
+- Summarize final decisions before proceeding
+
+4. **Confirm understanding:**
+
+**SAY:**
+> **Project Summary:**
+> - **Core Function:** [restate in clear terms]
+> - **Security Level:** [high/medium/standard]
+> - **Data Handling:** [local/cloud/hybrid]
+> - **Key Features:** [bullet list]
+> - **Custom Components:** [agents/skills to generate]
+>
+> Does this capture your vision? Reply `yes` or tell me what's missing.
+
+**WAIT FOR CONFIRMATION** → Then continue to A3
+
+---
+
 ### A3. Project Type
 **ASK:**
 > What type of project is this?
