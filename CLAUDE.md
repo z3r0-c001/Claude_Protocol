@@ -6,7 +6,7 @@ Quality-enforced protocol with automated hooks, specialized agents, and persiste
 
 | Property | Value |
 |----------|-------|
-| Version | 1.1.5 |
+| Version | 1.1.6 |
 | Philosophy | Research-first, quality-enforced |
 | Validation | Zero-error tolerance |
 
@@ -234,6 +234,7 @@ Memory persists across sessions via MCP server (optional).
 | `I want to build`, `help me plan`, `brainstorm` | brainstormer |
 | `security`, `vulnerability`, `authentication` | security-scanner |
 | `performance`, `optimize`, `slow` | performance-analyzer |
+| `best practice`, `should I`, `correct way`, `recommended` | research-verifier |
 
 ### Core Skills
 | Skill | Purpose |
