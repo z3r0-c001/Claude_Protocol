@@ -108,9 +108,9 @@ def generate_manifest(root: Path) -> dict:
             "description": "Claude Protocol - Unified quality enforcement and autonomous operation"
         },
         "repository": {
-            "url": "https://github.com/user/Claude_Protocol",
+            "url": "https://github.com/z3r0-c001/Claude_Protocol",
             "branch": "main",
-            "raw_base": "https://raw.githubusercontent.com/user/Claude_Protocol/main"
+            "raw_base": "https://raw.githubusercontent.com/z3r0-c001/Claude_Protocol/main"
         },
         "components": {
             "agents": {},
