@@ -4,14 +4,8 @@
 # Exit code 2 + stderr = BLOCK
 
 SCRIPT_DIR="$(dirname "$0")"
-if [ -f "$SCRIPT_DIR/hook-logger.sh" ]; then
-    source "$SCRIPT_DIR/hook-logger.sh"
-fi
-hook_log() { :; }
-notify_hook_start() { :; }
-notify_hook_result() { :; }
-
-notify_hook_start "Write"
+source "$SCRIPT_DIR/hook-colors.sh" 2>/dev/null || true
+HOOK_NAME="pre-write-check"
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -22,9 +16,11 @@ CONTENT=$(echo "$INPUT" | jq -r '.tool_input.content // empty' 2>/dev/null)
 
 # If no file path, allow through
 if [ -z "$FILE_PATH" ]; then
-    notify_hook_result "continue"
+    echo '{"continue": true}'
     exit 0
 fi
+
+hook_status "$HOOK_NAME" "CHECKING" "$(basename "$FILE_PATH")"
 
 ISSUES=""
 
@@ -77,8 +73,7 @@ if [ -n "$CONTENT" ]; then
 fi
 
 if [ -n "$ISSUES" ]; then
-    hook_log "BLOCK" "Protected path or secrets: $FILE_PATH"
-    notify_hook_result "block"
+    hook_status "$HOOK_NAME" "BLOCK" "$FILE_PATH"
 
     # Output JSON block decision
     BLOCK_MSG=$(echo -e "BLOCKED: Cannot write to this location.\n\nIssues:\n${ISSUES}" | jq -Rs .)
@@ -86,7 +81,6 @@ if [ -n "$ISSUES" ]; then
     exit 0
 fi
 
-hook_log "OK" "Path approved: $(basename "$FILE_PATH")"
-notify_hook_result "continue"
+hook_status "$HOOK_NAME" "OK" "$(basename "$FILE_PATH")"
 echo '{"continue": true}'
 exit 0
