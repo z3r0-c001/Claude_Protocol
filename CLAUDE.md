@@ -6,7 +6,7 @@ Quality-enforced protocol with automated hooks, specialized agents, and persiste
 
 | Property | Value |
 |----------|-------|
-| Version | 1.1.7 |
+| Version | 1.1.8 |
 | Philosophy | Research-first, quality-enforced |
 | Validation | Zero-error tolerance |
 
