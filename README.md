@@ -1,6 +1,6 @@
 # Claude Protocol
 
-Quality-enforced Claude Code infrastructure. Install once, get persistent memory, automated quality gates, and 80+ specialized agents that configure themselves for your stack.
+Quality-enforced Claude Code infrastructure. Install once, get persistent memory, automated quality gates, and 21 specialized agents that configure themselves for your stack.
 
 ## Notice
 
@@ -182,16 +182,16 @@ your-project/
 | hallucination-checker | Verifies packages/APIs | Stop hook |
 | honesty-evaluator | Checks for overclaiming | Stop hook |
 | security-scanner | Finds vulnerabilities | Auto on auth files |
-| fact-checker | Verifies factual claims | `/verify` |
+| fact-checker | Verifies factual claims | Manual |
 | reviewer | Code review | `/pr` |
 | tester | Test generation | `/feature`, `/fix` |
-| test-coverage-enforcer | Ensures test coverage | `/coverage` |
+| test-coverage-enforcer | Ensures test coverage | `/test --coverage` |
 
 ### Core Agents
 | Agent | Purpose | Invocation |
 |-------|---------|------------|
 | architect | System design and planning | `/refactor`, manual |
-| research-analyzer | Synthesizes research | `/verify` |
+| research-analyzer | Synthesizes research | SubagentStop hook |
 | performance-analyzer | Performance optimization | Auto on hot paths |
 
 ### Domain Agents
@@ -246,14 +246,14 @@ your-project/
 | Hook Event | Scripts | Purpose |
 |------------|---------|---------|
 | UserPromptSubmit | context-loader.py, skill-activation-prompt.py | Load context, skill activation |
-| PreToolUse (Write) | pre-write-check.sh | Block protected directories |
+| PreToolUse (Write) | pre-write-check.sh, pretool-laziness-check.py, pretool-hallucination-check.py | Block protected dirs, pre-validate code |
 | PreToolUse (Bash) | dangerous-command-check.py | Block dangerous commands |
 | PreToolUse (Task) | agent-announce.py | Display colored agent banners |
+| PostToolUse (Read) | doc-size-detector.py | Detect large files, suggest chunking |
 | PostToolUse (Write) | file-edit-tracker.sh, post-write-validate.sh, context-detector.sh | Track edits, validate |
-| PostToolUse (Task) | agent-handoff-validator.py | Validate agent output |
 | PostToolUse (Web) | research-quality-check.sh | Validate research quality |
 | Stop | laziness-check.sh, honesty-check.sh, stop-verify.sh | Quality gates |
-| SubagentStop | research-validator.sh | Validate research |
+| SubagentStop | research-validator.sh, agent-handoff-validator.py | Validate research and agent output |
 
 ## Memory Categories (Optional)
 
