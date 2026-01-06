@@ -105,43 +105,71 @@ ls .claude/agents/core/*.md .claude/agents/quality/*.md .claude/agents/domain/*.
 
 ### 8. Generate Report
 
-Create a validation report with this structure:
+Create a validation report using emoji status indicators:
+
+**Status Legend:**
+- ✅ = Pass/OK
+- ❌ = Fail/Error
+- ⚠️ = Warning
+- 🔒 = Blocked (expected behavior)
+- ➖ = N/A
 
 ```
-# Infrastructure Validation Report
+# 🔍 Infrastructure Validation Report
 
-## Hook Status
+## 🪝 Hook Status
 
-| Hook | Type | Syntax | Safe Allow | Dangerous Block |
-|------|------|--------|------------|-----------------|
-| skill-activation-prompt.py | UserPromptSubmit | [OK/FAIL] | N/A | N/A |
-| context-loader.py | UserPromptSubmit | [OK/FAIL] | N/A | N/A |
-| pre-write-check.sh | PreToolUse | [OK/FAIL] | [OK/FAIL] | [OK/FAIL] |
-| dangerous-command-check.py | PreToolUse | [OK/FAIL] | [OK/FAIL] | [OK/FAIL] |
-| pretool-laziness-check.py | PreToolUse | [OK/FAIL] | [OK/FAIL] | N/A |
-| pretool-hallucination-check.py | PreToolUse | [OK/FAIL] | [OK/FAIL] | N/A |
-| file-edit-tracker.sh | PostToolUse | [OK/FAIL] | N/A | N/A |
-| context-detector.sh | PostToolUse | [OK/FAIL] | N/A | N/A |
+### Python Hooks
+| Hook | Syntax | Behavior |
+|------|--------|----------|
+| skill-activation-prompt.py | ✅/❌ | ✅/❌ |
+| context-loader.py | ✅/❌ | ✅/❌ |
+| dangerous-command-check.py | ✅/❌ | ✅ allow safe / 🔒 block dangerous |
+| pretool-laziness-check.py | ✅/❌ | ➖ |
+| pretool-hallucination-check.py | ✅/❌ | ➖ |
+| agent-announce.py | ✅/❌ | ➖ |
 
-## Config Status
+### Bash Hooks
+| Hook | Syntax | Behavior |
+|------|--------|----------|
+| pre-write-check.sh | ✅/❌ | ✅ allow safe / 🔒 block protected |
+| file-edit-tracker.sh | ✅/❌ | ➖ |
+| context-detector.sh | ✅/❌ | ➖ |
+| laziness-check.sh | ✅/❌ | ➖ |
+| honesty-check.sh | ✅/❌ | ➖ |
+| stop-verify.sh | ✅/❌ | ➖ |
 
-| File | Valid JSON | Notes |
-|------|------------|-------|
-| settings.json | [OK/FAIL] | |
-| skill-rules.json | [OK/FAIL] | |
+## ⚙️ Config Status
 
-## Summary
+| File | Valid | Notes |
+|------|-------|-------|
+| settings.json | ✅/❌ | |
+| skill-rules.json | ✅/❌ | |
+| .mcp.json | ✅/❌ | |
 
-- Hooks: [X] valid / [Y] total
-- Skills: [count] found
-- Agents: [count] found
-- Configs: [OK/FAIL]
+## 📊 Component Counts
 
-## Issues Found
-[List any issues]
+| Component | Count | Status |
+|-----------|-------|--------|
+| Python hooks | X | ✅ |
+| Bash hooks | X | ✅ |
+| Skills | X | ✅ |
+| Agents | X | ✅ |
 
-## Recommendations
-[List any recommendations]
+## 📋 Summary
+
+| Check | Result |
+|-------|--------|
+| Hook Syntax | ✅ X/Y passed |
+| Hook Behavior | ✅ All expected |
+| Configs | ✅ All valid JSON |
+| Components | ✅ All present |
+
+## ⚠️ Issues Found
+[List with ❌ prefix]
+
+## 💡 Recommendations
+[List with 📌 prefix]
 ```
 
 ## Usage
