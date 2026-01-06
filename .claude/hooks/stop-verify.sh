@@ -3,7 +3,10 @@
 # Reads JSON from stdin, outputs JSON to stdout if blocking needed
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
+source "$SCRIPT_DIR/hook-colors.sh" 2>/dev/null || true
+HOOK_NAME="stop-verify"
+
+hook_status "$HOOK_NAME" "RUNNING" "Final check"
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -38,6 +41,7 @@ if [ -n "$CLAUDE_MODIFIED_FILES" ]; then
 fi
 
 if [ -n "$ISSUES" ]; then
+    hook_status "$HOOK_NAME" "BLOCK" "Issues: ${ISSUES}"
     cat << ENDJSON
 {"decision": "block", "reason": "VERIFICATION NEEDED: ${ISSUES}. Please address these before completing."}
 ENDJSON
@@ -45,5 +49,6 @@ ENDJSON
 fi
 
 # No issues
+hook_status "$HOOK_NAME" "OK" "Verified"
 echo '{"continue": true}'
 exit 0
