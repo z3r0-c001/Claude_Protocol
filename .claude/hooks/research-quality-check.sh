@@ -2,8 +2,6 @@
 # PostToolUse hook: Check research quality (WebSearch/WebFetch)
 # Reads JSON from stdin with tool_response
 
-set -o pipefail
-
 SCRIPT_DIR="$(dirname "$0")"
 source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
 
@@ -31,10 +29,7 @@ if echo "$OUTPUT" | grep -qiE "however|but|contrary|conflicting|disputed"; then
 fi
 
 if [ -n "$ISSUES" ]; then
-    # Use jq for safe JSON construction
-    CONTEXT_MSG="RESEARCH NOTE: ${ISSUES}. Verify information accuracy."
-    jq -n --arg ctx "$CONTEXT_MSG" \
-        '{continue: true, hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: $ctx}}'
+    echo "{\"continue\": true, \"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"RESEARCH NOTE: ${ISSUES}. Verify information accuracy.\"}}"
 else
     echo '{"continue": true}'
 fi
