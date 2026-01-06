@@ -130,102 +130,74 @@ Ask these questions ONE AT A TIME. Wait for response after each.
 
 ### A2.5. Project Analysis & Refinement (CRITICAL)
 
-**IMMEDIATELY after receiving the description, ANALYZE it:**
+**IMMEDIATELY after receiving ANY description, perform dynamic analysis:**
 
-1. **Extract key elements:**
-   - Domain keywords (farm, medical, finance, etc.)
-   - Security indicators (sensitive, encrypted, private, secure)
-   - Functionality hints (forms, research, tracking, automation)
-   - Data requirements (storage, sync, export, backup)
-   - User mentions (admin, public, team, personal)
+#### Step 1: Parse the Description
 
-2. **Invoke brainstormer mindset - ASK clarifying questions:**
+Read the user's description and identify:
+- **What** they're building (application type, core function)
+- **Who** it's for (users, audience, stakeholders)
+- **Why** it exists (problem solved, value delivered)
+- **How** it should work (workflows, integrations, behaviors)
+- **Constraints** mentioned (security, performance, compliance, platform)
 
-Based on the description, ask 3-5 targeted questions ONE AT A TIME:
+#### Step 2: Identify Gaps & Ambiguities
 
-**For security-sensitive projects (detected keywords: sensitive, encrypted, secure, private, confidential):**
-> I notice this involves sensitive data. Let me clarify some security requirements:
+For EVERY description, ask yourself:
+- What assumptions am I making that could be wrong?
+- What information is missing that would change my approach?
+- What could the user mean by vague terms they used?
+- What technical decisions need user input?
+
+#### Step 3: Ask Clarifying Questions (Socratic Method)
+
+**Generate 2-4 questions SPECIFIC to what the user said.** Do not use templates.
+
+Format:
+> I want to make sure I understand your project correctly. A few questions:
 >
-> **Q1:** What type of data will be stored? (personal info, financial, health, proprietary)
+> **Q1:** [Question directly derived from their description]
+> **Q2:** [Question about something ambiguous or underspecified]
+> **Q3:** [Question about a technical decision that affects architecture]
 
-**WAIT** → Then ask:
-> **Q2:** Where should data be stored?
-> - `local` - Device only, never leaves the machine
-> - `cloud` - Synced online (specify provider preference)
-> - `hybrid` - Local with optional encrypted backup
+**Examples of good questions (adapt to actual description):**
+- "You mentioned 'forms' - are these existing paper/PDF forms you need to digitize, or new forms you'll design from scratch?"
+- "When you say 'research', do you mean gathering data from external sources, or analyzing data you already have?"
+- "You mentioned encryption - should the app work offline, or is cloud-based encryption acceptable?"
+- "'Sensitive data' can mean different things - is this regulated (HIPAA, GDPR) or just personally important to keep private?"
 
-**WAIT** → Then ask:
-> **Q3:** Who will access this application?
-> - `single-user` - Just you
-> - `team` - Multiple known users
-> - `public` - Anyone can register
+**WAIT FOR EACH ANSWER** before asking the next question.
 
-**WAIT** → Continue with domain questions
+#### Step 4: Synthesize & Suggest
 
-**For domain-specific projects, ask domain questions:**
+After gathering answers, provide:
 
-*Farm/Agriculture:*
-> **Q:** What types of forms? (government compliance, crop records, livestock tracking, equipment logs)
-
-*Forms/Documents:*
-> **Q:** What's the workflow? (data entry → review → submit? Or fetch → auto-fill → export?)
-
-*Research:*
-> **Q:** What kind of research? (web scraping, database queries, API integrations, document analysis)
-
-3. **Generate project-specific suggestions:**
-
-**SAY:**
-> Based on your description, I recommend these project-specific components:
+> **Based on what you've told me, here's my understanding:**
 >
-> **Suggested Custom Agents:**
-> | Agent | Purpose |
-> |-------|---------|
-> | [domain]-manager | Handle [domain] specific logic |
-> | form-processor | Parse and fill form templates |
-> | data-validator | Validate [domain] data before storage |
-> | [if encrypted] encryption-handler | Manage encryption/decryption |
+> **Core Purpose:** [one sentence summary]
+> **Key Workflows:** [bullet list of main user flows]
+> **Technical Considerations:** [security, storage, integrations]
 >
-> **Security Recommendations:** [if sensitive]
-> - All data encrypted at rest using AES-256
-> - No plaintext storage of sensitive fields
-> - Audit logging for all data access
-> - Consider: field-level encryption for PII
+> **I recommend these custom components for your project:**
 >
-> **Suggested Skills:**
-> - [domain]-patterns: Domain-specific conventions
-> - [if forms] form-templates: Reusable form structures
-> - [if research] research-workflow: Data gathering patterns
+> | Component | Type | Purpose |
+> |-----------|------|---------|
+> | [name] | agent/skill | [why it's needed for THIS project] |
+> | [name] | agent/skill | [why it's needed for THIS project] |
 >
-> Would you like me to:
-> - `accept` - Use these recommendations
-> - `modify` - Adjust the suggestions
-> - `skip` - Continue without custom components
+> Does this match your vision? What would you adjust?
 
-**WAIT FOR RESPONSE**
+**WAIT FOR CONFIRMATION**
 
-**If `accept` or `modify`:**
-- Store suggestions in memory for use in Section C
-- Flag for custom agent generation in C6
+#### Step 5: Iterate if Needed
 
-**If user asks questions or wants to discuss further:**
-- Continue Socratic dialogue
-- Refine requirements until user is satisfied
-- Summarize final decisions before proceeding
+If the user has corrections or additions:
+- Incorporate their feedback
+- Ask follow-up questions if new ambiguities arise
+- Update the summary
+- Confirm again before proceeding
 
-4. **Confirm understanding:**
-
-**SAY:**
-> **Project Summary:**
-> - **Core Function:** [restate in clear terms]
-> - **Security Level:** [high/medium/standard]
-> - **Data Handling:** [local/cloud/hybrid]
-> - **Key Features:** [bullet list]
-> - **Custom Components:** [agents/skills to generate]
->
-> Does this capture your vision? Reply `yes` or tell me what's missing.
-
-**WAIT FOR CONFIRMATION** → Then continue to A3
+**Only proceed to A3 when the user confirms understanding is correct.**
 
 ---
 
