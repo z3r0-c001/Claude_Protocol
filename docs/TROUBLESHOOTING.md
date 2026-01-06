@@ -18,7 +18,7 @@ Solutions for common issues with Claude Bootstrap Protocol.
 1. **Check Node.js version:**
 ```bash
 node --version
-# Must be v18.0.0 or higher
+# Must be v20.0.0 or higher
 ```
 
 2. **Clean and reinstall:**
