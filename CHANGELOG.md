@@ -1,9 +1,33 @@
 # Changelog
 
-**Current Version:** 1.1.8
+**Current Version:** 1.1.9
 **Date:** 2026-01-06
 
 > This file is overwritten with each release. For historical changes, see git history.
+
+---
+
+## v1.1.9 - Project Analysis Phase in Proto-Init
+
+Enhanced `/proto-init` command with intelligent project analysis and Socratic questioning.
+
+### Project Analysis & Refinement
+
+| File | Change |
+|------|--------|
+| `.claude/commands/proto-init.md` | Added A2.5 section: Project Analysis & Refinement |
+| `.claude/commands/proto-init.md` | Extracts domain keywords, security indicators, functionality hints |
+| `.claude/commands/proto-init.md` | Asks clarifying questions based on detected patterns |
+| `.claude/commands/proto-init.md` | Generates project-specific agent/skill suggestions |
+| `.claude/commands/proto-init.md` | Confirms understanding before proceeding to bootstrap |
+
+### Why This Matters
+
+When users provide project descriptions like "An application for my farm with sensitive encrypted data", the protocol now:
+1. Identifies domain (agriculture), security requirements, functionality scope
+2. Asks targeted clarifying questions (data types, encryption needs, compliance)
+3. Suggests custom agents (farm-manager, encryption-handler, compliance-auditor)
+4. Recommends project-specific skills before generating configuration
 
 ---
 
