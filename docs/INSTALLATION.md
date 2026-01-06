@@ -176,16 +176,16 @@ your-project/
 │   │   ├── proto-init.md
 │   │   ├── bootstrap.md
 │   │   ├── validate.md
-│   │   └── ... (24 total)
+│   │   └── ... (14 total)
 │   ├── hooks/
 │   │   ├── laziness-check.sh
 │   │   ├── dangerous-command-check.sh
-│   │   └── ... (20 total)
+│   │   └── ... (13 total)
 │   ├── skills/
 │   │   ├── skill-rules.json
 │   │   ├── quality-control/
 │   │   ├── workflow/
-│   │   └── ... (15 total)
+│   │   └── ... (6 total)
 │   ├── mcp/
 │   │   └── memory-server/
 │   │       ├── package.json
@@ -194,7 +194,10 @@ your-project/
 │   │       └── dist/           # Created after build
 │   └── memory/                  # Created at runtime
 └── scripts/
-    └── install-to-scope.sh
+    ├── validate-all.sh
+    ├── session-init.sh
+    ├── protocol-init.sh
+    └── audit.sh
 ```
 
 ## Troubleshooting
