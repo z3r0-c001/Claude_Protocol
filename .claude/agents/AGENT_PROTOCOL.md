@@ -198,6 +198,148 @@ Agents must run sequentially when:
 - `brainstormer` - Requirements refinement
 - `orchestrator` - Multi-agent coordination
 
+## Primary Agent Coordination
+
+The primary agent (Claude in the main conversation) coordinates sub-agents through a defined flow:
+
+### Plan→Approval→Execute Flow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    PRIMARY AGENT FLOW                           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. User Request                                                │
+│         │                                                       │
+│         ▼                                                       │
+│  2. Primary Agent analyzes task                                 │
+│         │                                                       │
+│         ├──[complex task]──► 3. Launch agent(plan)              │
+│         │                         │                             │
+│         │                         ▼                             │
+│         │                    4. Agent returns plan              │
+│         │                    (status: needs_approval)           │
+│         │                         │                             │
+│         │                         ▼                             │
+│         │                    5. Primary presents to user        │
+│         │                    "Plan: scan 47 files. Proceed?"    │
+│         │                         │                             │
+│         │                         ▼                             │
+│         │                    6. User approves                   │
+│         │                         │                             │
+│         │                         ▼                             │
+│         │                    7. Launch agent(execute)           │
+│         │                         │                             │
+│         │                         ▼                             │
+│         │                    8. Agent returns results           │
+│         │                         │                             │
+│         └──[simple task]─────────►│                             │
+│                                   ▼                             │
+│                              9. Present to user                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Primary Agent Responsibilities
+
+| Step | Action | How to Implement |
+|------|--------|------------------|
+| Detect plan-mode agent | Check `supports_plan_mode: true` in frontmatter | Read agent file or use registry |
+| Invoke plan mode | Pass `execution_mode: plan` in prompt | Include in Task tool prompt |
+| Interpret response | Parse agent's JSON response | Extract `status`, `present_to_user` |
+| Request approval | If `status: needs_approval` | Show user the `present_to_user` content |
+| Invoke execute mode | After approval | Pass `execution_mode: execute` in new Task |
+
+### Invoking Plan Mode
+
+When launching a plan-mode agent via Task tool:
+
+```
+Task(subagent_type="security-scanner", prompt="""
+execution_mode: plan
+
+Analyze the authentication code for security vulnerabilities.
+""")
+```
+
+### Interpreting Agent Response
+
+After agent completes, primary agent should:
+
+1. **Parse JSON response** from agent's output
+2. **Check status**:
+   - `complete`: Present findings, check `next_agents`
+   - `needs_approval`: Show `present_to_user`, wait for user
+   - `blocked`: Report blockers, ask user how to proceed
+   - `needs_input`: Ask user for missing information
+3. **Handle next_agents**: Launch suggested agents if appropriate
+
+### Auto-Proceed Rules
+
+Agents can auto-proceed without approval when:
+- Scope is small (< 10 files)
+- Complexity is low
+- No modifications will be made (read-only analysis)
+
+Otherwise, agent should return `status: needs_approval`.
+
+## EnterPlanMode vs Agent Plan Mode
+
+These are **different concepts** that serve different purposes:
+
+### EnterPlanMode (Claude Code Tool)
+
+| Property | Description |
+|----------|-------------|
+| **What** | Built-in tool for primary agent to enter planning mode |
+| **When** | Before implementing complex features requiring user sign-off |
+| **Who** | Primary Claude agent uses this |
+| **Purpose** | Get user approval before major code changes |
+| **Scope** | Entire conversation enters plan mode |
+
+### Agent Plan Mode (Protocol Feature)
+
+| Property | Description |
+|----------|-------------|
+| **What** | Two-phase execution for sub-agents |
+| **When** | When launching agents that support it |
+| **Who** | Sub-agents implement this |
+| **Purpose** | Lightweight scope assessment before full execution |
+| **Scope** | Only that specific agent invocation |
+
+### When to Use Which
+
+| Scenario | Use |
+|----------|-----|
+| User says "implement feature X" | EnterPlanMode (plan the implementation) |
+| Running security scan | Agent plan mode (assess scope, then scan) |
+| Complex multi-step task | Both (EnterPlanMode first, then agents with plan mode) |
+| Quick code review | Agent plan mode only |
+
+### Interaction Pattern
+
+```
+User: "Implement user authentication"
+        │
+        ▼
+Primary Agent uses EnterPlanMode
+        │
+        ▼
+Primary creates implementation plan
+        │
+        ▼
+User approves plan
+        │
+        ▼
+Primary exits plan mode, begins implementation
+        │
+        ├──► Launch brainstormer(plan) → approval → brainstormer(execute)
+        │
+        ├──► Launch architect(plan) → approval → architect(execute)
+        │
+        └──► Launch security-scanner(plan) → approval → security-scanner(execute)
+```
+
 ## Backward Compatibility
 
 Agents without `supports_plan_mode: true`:
