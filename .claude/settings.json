@@ -114,11 +114,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" skill-activation-prompt.py"
+            "command": "bash .claude/hooks/run-hook.sh skill-activation-prompt.py"
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" context-loader.py"
+            "command": "bash .claude/hooks/run-hook.sh context-loader.py"
           }
         ]
       }
@@ -129,16 +129,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" pre-write-check.sh"
+            "command": "bash .claude/hooks/run-hook.sh pre-write-check.sh"
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" pretool-laziness-check.py",
+            "command": "bash .claude/hooks/run-hook.sh pretool-laziness-check.py",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" pretool-hallucination-check.py",
+            "command": "bash .claude/hooks/run-hook.sh pretool-hallucination-check.py",
             "timeout": 15
           }
         ]
@@ -148,7 +148,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" dangerous-command-check.py"
+            "command": "bash .claude/hooks/run-hook.sh dangerous-command-check.py"
           }
         ]
       },
@@ -157,7 +157,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" agent-announce.py"
+            "command": "bash .claude/hooks/run-hook.sh agent-announce.py"
           }
         ]
       }
@@ -168,7 +168,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" doc-size-detector.py"
+            "command": "bash .claude/hooks/run-hook.sh doc-size-detector.py"
           }
         ]
       },
@@ -177,15 +177,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" file-edit-tracker.sh"
+            "command": "bash .claude/hooks/run-hook.sh file-edit-tracker.sh"
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" post-write-validate.sh"
+            "command": "bash .claude/hooks/run-hook.sh post-write-validate.sh"
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" context-detector.sh"
+            "command": "bash .claude/hooks/run-hook.sh context-detector.sh"
           }
         ]
       },
@@ -194,7 +194,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" research-quality-check.sh"
+            "command": "bash .claude/hooks/run-hook.sh research-quality-check.sh"
           }
         ]
       }
@@ -204,15 +204,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" laziness-check.sh"
+            "command": "bash .claude/hooks/run-hook.sh laziness-check.sh"
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" honesty-check.sh"
+            "command": "bash .claude/hooks/run-hook.sh honesty-check.sh"
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" stop-verify.sh"
+            "command": "bash .claude/hooks/run-hook.sh stop-verify.sh"
           }
         ]
       }
@@ -222,11 +222,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" research-validator.sh"
+            "command": "bash .claude/hooks/run-hook.sh research-validator.sh"
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" agent-handoff-validator.py"
+            "command": "bash .claude/hooks/run-hook.sh agent-handoff-validator.py"
           }
         ]
       }
