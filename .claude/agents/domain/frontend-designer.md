@@ -12,6 +12,7 @@ tools:
   - Task
 model: opus
 color: bright_cyan
+supports_plan_mode: true
 ---
 
 # Frontend Designer Agent
