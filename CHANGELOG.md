@@ -1,33 +1,38 @@
 # Changelog
 
-**Current Version:** 1.1.9
+**Current Version:** 1.1.10
 **Date:** 2026-01-06
 
 > This file is overwritten with each release. For historical changes, see git history.
 
 ---
 
-## v1.1.9 - Project Analysis Phase in Proto-Init
+## v1.1.10 - Dynamic Project Analysis
 
-Enhanced `/proto-init` command with intelligent project analysis and Socratic questioning.
+Rewrote A2.5 to use truly dynamic analysis instead of predefined question templates.
 
-### Project Analysis & Refinement
+### Changes
 
 | File | Change |
 |------|--------|
-| `.claude/commands/proto-init.md` | Added A2.5 section: Project Analysis & Refinement |
-| `.claude/commands/proto-init.md` | Extracts domain keywords, security indicators, functionality hints |
-| `.claude/commands/proto-init.md` | Asks clarifying questions based on detected patterns |
-| `.claude/commands/proto-init.md` | Generates project-specific agent/skill suggestions |
-| `.claude/commands/proto-init.md` | Confirms understanding before proceeding to bootstrap |
+| `.claude/commands/proto-init.md` | Replaced templated questions with dynamic 5-step analysis |
+| `.claude/commands/proto-init.md` | Step 1: Parse description for What/Who/Why/How/Constraints |
+| `.claude/commands/proto-init.md` | Step 2: Identify gaps and ambiguities in ANY description |
+| `.claude/commands/proto-init.md` | Step 3: Generate questions SPECIFIC to user's actual words |
+| `.claude/commands/proto-init.md` | Step 4: Synthesize understanding and suggest components |
+| `.claude/commands/proto-init.md` | Step 5: Iterate until user confirms understanding |
 
-### Why This Matters
+### Before vs After
 
-When users provide project descriptions like "An application for my farm with sensitive encrypted data", the protocol now:
-1. Identifies domain (agriculture), security requirements, functionality scope
-2. Asks targeted clarifying questions (data types, encryption needs, compliance)
-3. Suggests custom agents (farm-manager, encryption-handler, compliance-auditor)
-4. Recommends project-specific skills before generating configuration
+**Before (v1.1.9):** Predefined question sets for specific domains (security, farm, forms, research)
+
+**After (v1.1.10):** Dynamic analysis that generates unique questions based on whatever the user describes
+
+---
+
+## v1.1.9 - Project Analysis Phase in Proto-Init
+
+Added A2.5 section for project analysis (superseded by v1.1.10).
 
 ---
 
