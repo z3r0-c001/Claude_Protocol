@@ -8,6 +8,7 @@ tools:
   - Task
 model: opus
 color: bright_white
+supports_plan_mode: true
 ---
 
 # Orchestrator Agent
