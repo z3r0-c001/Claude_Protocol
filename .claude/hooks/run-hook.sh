@@ -16,8 +16,17 @@ if [ -z "$HOOK_NAME" ]; then
     exit 0
 fi
 
-# Define search paths
-PROJECT_HOOK="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/$HOOK_NAME"
+# Determine the hooks directory from this script's location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Define search paths - prefer script's directory first, then CLAUDE_PROJECT_DIR, then cwd
+if [ -f "$SCRIPT_DIR/$HOOK_NAME" ]; then
+    PROJECT_HOOK="$SCRIPT_DIR/$HOOK_NAME"
+elif [ -n "$CLAUDE_PROJECT_DIR" ] && [ -f "$CLAUDE_PROJECT_DIR/.claude/hooks/$HOOK_NAME" ]; then
+    PROJECT_HOOK="$CLAUDE_PROJECT_DIR/.claude/hooks/$HOOK_NAME"
+else
+    PROJECT_HOOK="./.claude/hooks/$HOOK_NAME"
+fi
 GLOBAL_HOOK="$HOME/.claude/hooks/$HOOK_NAME"
 
 # Project hooks take precedence over global (same-name replacement)
