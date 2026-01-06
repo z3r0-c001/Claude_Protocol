@@ -11,6 +11,13 @@ import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 
+# Import hook colors utility
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from hook_colors import hook_status
+except ImportError:
+    def hook_status(*args, **kwargs): pass
+
 # How often to check for updates (in hours)
 UPDATE_CHECK_INTERVAL_HOURS = 24
 
@@ -140,6 +147,8 @@ def check_protocol_updates(claude_dir: Path) -> str | None:
     return None
 
 def main():
+    hook_status("context-loader", "RUNNING", "Loading context")
+
     # Read and discard stdin
     try:
         sys.stdin.read()
@@ -179,6 +188,7 @@ def main():
 
     # Output context if any
     if context_parts:
+        hook_status("context-loader", "OK", f"{len(context_parts)} items loaded")
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "UserPromptSubmit",
@@ -186,6 +196,8 @@ def main():
             }
         }
         print(json.dumps(output))
+    else:
+        hook_status("context-loader", "OK", "No pending context")
 
     sys.exit(0)
 
