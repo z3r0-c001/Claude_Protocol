@@ -1,9 +1,62 @@
 # Changelog
 
-**Current Version:** 1.1.6
+**Current Version:** 1.1.8
 **Date:** 2026-01-06
 
 > This file is overwritten with each release. For historical changes, see git history.
+
+---
+
+## v1.1.8 - Agent Protocol Enhancements
+
+Enhanced agent protocol with plan mode support, improved documentation, and anti-hallucination safeguards.
+
+### Plan Mode Support (10 agents)
+
+Added `supports_plan_mode: true` to all agents that document plan/execute modes:
+
+| File | Change |
+|------|--------|
+| `.claude/agents/core/architect.md` | Added supports_plan_mode: true |
+| `.claude/agents/core/performance-analyzer.md` | Added supports_plan_mode: true |
+| `.claude/agents/domain/document-processor.md` | Added supports_plan_mode: true |
+| `.claude/agents/domain/frontend-designer.md` | Added supports_plan_mode: true |
+| `.claude/agents/domain/protocol-analyzer.md` | Added supports_plan_mode: true |
+| `.claude/agents/domain/protocol-updater.md` | Added supports_plan_mode: true |
+| `.claude/agents/domain/ui-researcher.md` | Added supports_plan_mode: true |
+| `.claude/agents/quality/security-scanner.md` | Added supports_plan_mode: true |
+| `.claude/agents/workflow/brainstormer.md` | Added supports_plan_mode: true |
+| `.claude/agents/workflow/orchestrator.md` | Added supports_plan_mode: true |
+
+### Protocol Documentation
+
+| File | Change |
+|------|--------|
+| `.claude/agents/AGENT_PROTOCOL.md` | Added Plan→Approval→Execute flow documentation |
+| `.claude/agents/AGENT_PROTOCOL.md` | Added EnterPlanMode vs Agent Plan Mode clarification |
+| `.claude/agents/AGENT_PROTOCOL.md` | Added Primary Agent Coordination section |
+
+### Anti-Hallucination Safeguards
+
+| File | Change |
+|------|--------|
+| `.claude/agents/quality/security-scanner.md` | Added mandatory file verification before reporting findings |
+| `.claude/agents/quality/security-scanner.md` | Added verified field and context_lines requirements |
+| `.claude/agents/quality/security-scanner.md` | Added CRITICAL CONSTRAINTS section with quality checklist |
+
+### Random Agent Coloring
+
+| File | Change |
+|------|--------|
+| `.claude/hooks/agent-announce.py` | Added RANDOM_COLOR_POOL with 14 vibrant color schemes |
+| `.claude/hooks/agent-announce.py` | Added get_random_theme_for_agent() using MD5 hash |
+| `.claude/hooks/agent-announce.py` | Unknown agents now get deterministic random colors |
+
+---
+
+## v1.1.7 - Hook Colored Output
+
+Added colored visual feedback to all PreToolUse and PostToolUse hooks.
 
 ---
 
@@ -11,68 +64,8 @@
 
 Added new skill for verifying best practice claims against authoritative sources with scientific rigor.
 
-### New Skill: research-verifier
-
-| File | Description |
-|------|-------------|
-| `.claude/skills/research-verifier/SKILL.md` | Complete skill implementation |
-
-### Core Mandates
-
-1. **Official Sources First**
-   - ALWAYS check vendor/official docs BEFORE any other source
-   - Community posts, blogs, Stack Overflow are LAST RESORT
-   - Must label community sources as "not officially verified"
-
-2. **Version Alignment**
-   - Match documentation to user's specific version
-   - STOP and prompt user if version mismatch or docs unavailable
-   - Never proceed without user direction when docs missing
-
-3. **Scientific Comparative Analysis**
-   - Anecdotes are NOT evidence
-   - Benchmarks require: methodology, environment, sample size, date
-   - Note commercial bias in vendor comparisons
-   - Mark unverifiable claims as UNVERIFIED
-
-### Source Hierarchy (Mandatory Order)
-
-```
-1. Official Documentation (vendor/maintainer)
-2. Official GitHub/Source Repo (maintainer comments)
-3. RFCs / Specifications
-4. Peer-reviewed research / Published benchmarks
-5. Community sources (LAST - always labeled)
-```
-
-### Trigger Keywords
-
-`best practice`, `should I`, `correct way`, `recommended`, `standard`, `pattern`, `convention`, `proper way`, `official`
-
-### Documentation Updates
-
-| File | Change |
-|------|--------|
-| CLAUDE.md | Added research-verifier to auto-activated skills table |
-| CLAUDE.md | Version 1.1.5 → 1.1.6 |
-| protocol-manifest.json | Version 1.1.5 → 1.1.6 |
-
 ---
 
 ## v1.1.5 - Documentation Accuracy Audit
 
 Fixed discrepancies between documented claims and actual codebase implementation.
-
-### Critical Fixes
-
-| Issue | Fix |
-|-------|-----|
-| "80+ specialized agents" | Changed to "21 specialized agents" |
-| `/verify` command | Removed - doesn't exist |
-| `/coverage` command | Changed to `/test --coverage` |
-
----
-
-## v1.1.4 - Existing CLAUDE.md Preservation
-
-Added B0 section to proto-init for analyzing and preserving existing CLAUDE.md files.
