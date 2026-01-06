@@ -161,12 +161,14 @@ A component is customized if:
 Before any update:
 ```
 .claude/backups/
-└── {timestamp}/
+└── {project-name}/       # Parent directory name (e.g., "my-app")
     ├── manifest.json     # Backup of local manifest
     ├── agents/           # Affected agent files
     ├── hooks/            # Affected hook files
     └── ...
 ```
+
+**Naming:** Uses parent directory name (`basename $(pwd)`) so each project maintains one backup that gets overwritten on each update, avoiding timestamp bloat across multiple projects.
 
 ## Error Handling
 
