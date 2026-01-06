@@ -16,7 +16,16 @@ Install:
 import json
 import sys
 import re
+import os
 from typing import Optional
+
+# Import hook colors utility
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from hook_colors import hook_status, set_current_hook
+    set_current_hook("pretool-laziness-check")
+except ImportError:
+    def hook_status(*args, **kwargs): pass
 
 # =============================================================================
 # DETECTION PATTERNS
@@ -200,6 +209,8 @@ def main():
         output_json("continue")
         sys.exit(0)
 
+    hook_status("pretool-laziness-check", "CHECKING", os.path.basename(file_path))
+
     # Extract content
     content = extract_content(tool_input, tool_name)
     if not content:
@@ -213,11 +224,13 @@ def main():
     critical_violations = [v for v in violations if v["severity"] == "critical"]
 
     if critical_violations:
+        hook_status("pretool-laziness-check", "BLOCK", f"{len(critical_violations)} issues")
         # Block with formatted message
         output_json("block", block_message=format_violations(violations))
         sys.exit(0)
 
     # All good
+    hook_status("pretool-laziness-check", "OK", "No lazy code")
     output_json("continue")
     sys.exit(0)
 
