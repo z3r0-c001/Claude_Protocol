@@ -15,7 +15,7 @@ from pathlib import Path
 UPDATE_CHECK_INTERVAL_HOURS = 24
 
 def get_project_dir():
-    return Path(os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd()))
+    return Path(os.getcwd())
 
 def load_json_file(filepath):
     try:
@@ -53,85 +53,18 @@ def fetch_remote_manifest(url: str, timeout: int = 5) -> dict | None:
         pass
     return None
 
-def get_local_manifest(project_dir: Path) -> tuple[dict | None, str]:
-    """
-    Get local manifest data. Returns (manifest_data, version).
-    Tries protocol-manifest.local.json first, then protocol-manifest.json.
-    """
-    claude_dir = project_dir / ".claude"
-
-    # Try local manifest first (tracks installation state)
-    local_manifest_file = claude_dir / "protocol-manifest.local.json"
-    local_manifest = load_json_file(local_manifest_file)
-    if local_manifest:
-        # Local manifest format
-        version = local_manifest.get("installed_version",
-                  local_manifest.get("protocol", {}).get("version", "unknown"))
-        return local_manifest, version
-
-    # Fall back to main manifest
-    main_manifest_file = project_dir / "protocol-manifest.json"
-    main_manifest = load_json_file(main_manifest_file)
-    if main_manifest:
-        version = main_manifest.get("protocol", {}).get("version", "unknown")
-        return main_manifest, version
-
-    return None, "unknown"
-
-def get_repo_url(manifest: dict) -> str | None:
-    """Extract repository URL from manifest (handles both formats)."""
-    # New format: repository.raw_base or repository.url
-    repo = manifest.get("repository", {})
-    if repo.get("raw_base"):
-        return repo["raw_base"]
-    if repo.get("url"):
-        url = repo["url"]
-        # Convert GitHub URL to raw content URL
-        return url.replace("github.com", "raw.githubusercontent.com")
-
-    # Old format: source.url
-    source = manifest.get("source", {})
-    if source.get("url"):
-        url = source["url"]
-        return url.replace("github.com", "raw.githubusercontent.com")
-
-    return None
-
-def count_component_updates(local_manifest: dict, remote_manifest: dict) -> int:
-    """Count number of components with version differences."""
-    updates = 0
-
-    remote_components = remote_manifest.get("components", {})
-    local_components = local_manifest.get("components", {})
-
-    for category, components in remote_components.items():
-        if isinstance(components, dict):
-            local_category = local_components.get(category, {})
-            for comp_name, comp_data in components.items():
-                if isinstance(comp_data, dict):
-                    remote_version = comp_data.get("version", "0")
-
-                    # Handle nested structure
-                    if isinstance(local_category, dict):
-                        local_comp = local_category.get(comp_name, {})
-                        local_version = local_comp.get("version", "0") if isinstance(local_comp, dict) else "0"
-                    else:
-                        local_version = "0"
-
-                    if remote_version != local_version:
-                        updates += 1
-
-    return updates
-
-def check_protocol_updates(project_dir: Path) -> str | None:
+def check_protocol_updates(claude_dir: Path) -> str | None:
     """Check for protocol updates, return notification if available."""
-    claude_dir = project_dir / ".claude"
     cache_file = claude_dir / "memory" / "protocol-version-cache.json"
+    local_manifest_file = claude_dir / "protocol-manifest.local.json"
+    remote_manifest_file = claude_dir.parent / "protocol-manifest.json"
 
-    # Get local manifest and version
-    local_manifest, local_version = get_local_manifest(project_dir)
-    if not local_manifest or local_version == "unknown":
+    # Load local manifest to get current version
+    local_manifest = load_json_file(local_manifest_file)
+    if not local_manifest:
         return None
+
+    local_version = local_manifest.get("installed_version", "unknown")
 
     # Check cache
     cache = load_json_file(cache_file)
@@ -157,17 +90,25 @@ def check_protocol_updates(project_dir: Path) -> str | None:
     updates_available = 0
 
     if should_fetch:
-        # Get repository URL from manifest
-        raw_base = get_repo_url(local_manifest)
-        if raw_base:
-            manifest_url = f"{raw_base}/main/protocol-manifest.json"
+        # Try to get repository URL from local manifest
+        source_url = local_manifest.get("source", {}).get("url", "")
+        if source_url:
+            # Convert GitHub URL to raw content URL
+            # https://github.com/user/repo -> https://raw.githubusercontent.com/user/repo/main
+            raw_url = source_url.replace("github.com", "raw.githubusercontent.com")
+            manifest_url = f"{raw_url}/main/protocol-manifest.json"
 
             remote_manifest = fetch_remote_manifest(manifest_url)
             if remote_manifest:
                 remote_version = remote_manifest.get("protocol", {}).get("version")
 
-                # Count available updates
-                updates_available = count_component_updates(local_manifest, remote_manifest)
+                # Count available updates by comparing components
+                local_components = local_manifest.get("components", {})
+                for category, components in remote_manifest.get("components", {}).items():
+                    for comp_name, comp_data in components.items():
+                        local_comp = local_components.get(f"{category}/{comp_name}", {})
+                        if local_comp.get("version") != comp_data.get("version"):
+                            updates_available += 1
 
                 # Update cache
                 cache = {
@@ -211,7 +152,7 @@ def main():
 
     # Check for protocol updates (non-blocking, cached)
     try:
-        update_notification = check_protocol_updates(project_dir)
+        update_notification = check_protocol_updates(claude_dir)
         if update_notification:
             context_parts.append(update_notification)
     except Exception:
