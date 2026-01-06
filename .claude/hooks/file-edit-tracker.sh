@@ -3,7 +3,8 @@
 # Reads JSON from stdin with tool_input.file_path
 
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
+source "$SCRIPT_DIR/hook-colors.sh" 2>/dev/null || true
+HOOK_NAME="file-edit-tracker"
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -15,6 +16,8 @@ if [ -z "$FILE_PATH" ]; then
     echo '{"continue": true}'
     exit 0
 fi
+
+hook_status "$HOOK_NAME" "RUNNING" "$(basename "$FILE_PATH")"
 
 # Track file
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
@@ -37,5 +40,6 @@ else
 fi
 
 # Output JSON for Claude Code
+hook_status "$HOOK_NAME" "OK" "Tracked"
 echo '{"continue": true}'
 exit 0
