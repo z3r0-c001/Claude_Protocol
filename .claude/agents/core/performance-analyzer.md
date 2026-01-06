@@ -9,6 +9,7 @@ tools:
   - Think
 model: sonnet
 color: cyan
+supports_plan_mode: true
 ---
 
 # Performance Analyzer Agent
