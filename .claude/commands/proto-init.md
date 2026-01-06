@@ -103,32 +103,6 @@ Ask these questions ONE AT A TIME. Wait for response after each.
 
 **WAIT** → Continue
 
-### A2b. Description Audit
-**EVALUATE** the user's description for:
-- Clarity: Does it explain what the project does?
-- Specificity: Does it mention the core functionality?
-- Brevity: Is it one clear sentence?
-- Value proposition: Does it explain why someone would use it?
-
-**IF description could be improved, SAY:**
-> Let me suggest a refined version:
->
-> **Original:** "[user's description]"
-> **Suggested:** "[your improved version]"
->
-> Changes made:
-> - [specific improvement 1]
-> - [specific improvement 2]
->
-> Would you like to use the suggested version, keep yours, or provide a new one?
-
-**WAIT FOR APPROVAL** → Use approved version, then continue
-
-**IF description is already clear and effective:**
-> Great description! Clear and actionable. Moving on...
-
-→ Continue
-
 ### A3. Project Type
 **ASK:**
 > What type of project is this?
@@ -142,24 +116,12 @@ Ask these questions ONE AT A TIME. Wait for response after each.
 
 **WAIT** → Continue
 
-### A4a. Primary Language(s)
+### A4. Tech Stack
 **ASK:**
-> What primary programming language(s) will this project use?
-> (e.g., Python, TypeScript, Go, Rust, Java)
-
-**WAIT** → Continue
-
-### A4b. Frameworks
-**ASK:**
-> What frameworks or libraries are central to this project?
-> (e.g., React, FastAPI, Django, Express, Axum)
-
-**WAIT** → Continue
-
-### A4c. Database
-**ASK:**
-> What database or data storage will you use? (if any)
-> (e.g., PostgreSQL, MongoDB, SQLite, Redis, None)
+> What tech stack are you planning to use?
+> - Primary language(s):
+> - Frameworks:
+> - Database (if any):
 
 **WAIT** → Continue
 
@@ -190,6 +152,95 @@ Ask these questions ONE AT A TIME. Wait for response after each.
 ---
 
 ## SECTION B: EXISTING PROJECT
+
+### B0. Analyze Existing CLAUDE.md (CRITICAL - DO FIRST)
+
+**CHECK for existing CLAUDE.md:**
+```bash
+test -f CLAUDE.md && echo "EXISTS" || echo "NOT_FOUND"
+```
+
+**If CLAUDE.md EXISTS:**
+
+1. **Read the entire file:**
+   - Use Read tool to get full contents
+   - Do NOT skip or summarize - read everything
+
+2. **Extract and categorize all content:**
+   - **Project Identity**: Name, description, purpose
+   - **Tech Stack**: Languages, frameworks, databases
+   - **Commands**: Build, test, lint, deploy commands
+   - **Patterns**: Code conventions, naming rules, architecture patterns
+   - **Behavioral Rules**: Custom mandates, restrictions, preferences
+   - **Directory Structure**: Project layout, important paths
+   - **Custom Sections**: Any unique content not matching above
+
+3. **Save to memory for merging:**
+   ```
+   mcp__memory__memory_write category="project-learnings" key="existing-claude-md" value="[Full extracted content]"
+   ```
+
+4. **Present findings to user:**
+
+**SAY:**
+> **Found existing CLAUDE.md** ([X] lines)
+>
+> I've analyzed your current configuration:
+>
+> | Section | Content Found |
+> |---------|---------------|
+> | Project Identity | [name, description] |
+> | Tech Stack | [languages, frameworks] |
+> | Commands | [build, test, lint] |
+> | Patterns | [conventions found] |
+> | Custom Rules | [behavioral mandates] |
+> | Custom Sections | [unique content] |
+>
+> **How would you like to proceed?**
+> - `merge` - Keep ALL your content, add protocol features around it (recommended)
+> - `review` - Show me each section, I'll decide what to keep
+> - `replace` - Start fresh with protocol template (your content will be lost)
+
+**WAIT FOR RESPONSE**
+
+**If `merge`:**
+- Flag all existing content as PRESERVE
+- Protocol will wrap around existing content, not replace it
+- SAY: "All your existing content will be preserved. Protocol features will be added."
+
+**If `review`:**
+For EACH extracted section, ASK:
+> **[Section Name]:**
+> ```
+> [Show content]
+> ```
+> Keep this? `yes` / `no` / `edit`
+
+**WAIT** after each section
+
+- If `yes` → Mark as PRESERVE
+- If `no` → Mark as DISCARD
+- If `edit` → Let user provide updated version
+
+**If `replace`:**
+**ASK:**
+> Are you sure? This will discard:
+> - [List key items being lost]
+>
+> Type `CONFIRM` to proceed or `back` to choose another option.
+
+**WAIT FOR RESPONSE**
+- If not "CONFIRM" → Go back to options
+
+**Store decisions for use in C3 (Generate CLAUDE.md)**
+
+**If CLAUDE.md NOT found:**
+**SAY:**
+> No existing CLAUDE.md found. Will generate fresh configuration.
+
+**THEN continue to B1**
+
+---
 
 ### B1. Run Discovery
 **SAY:**
@@ -398,12 +449,36 @@ mkdir -p .claude/mcp/memory-server
 
 ### C3. Generate CLAUDE.md
 
+**If existing CLAUDE.md was preserved (merge/review mode):**
+
+1. **Start with preserved content as base**
+2. **Add protocol sections that don't conflict:**
+   - Protocol header with version
+   - Quality enforcement rules (if not already present)
+   - Hook documentation (new section)
+   - Agent documentation (new section)
+   - Command reference (new section)
+3. **Merge overlapping sections intelligently:**
+   - Commands: Add protocol commands, keep user's custom commands
+   - Patterns: Keep user's patterns, add protocol patterns
+   - Behavioral rules: User rules take precedence, protocol rules fill gaps
+4. **Preserve all custom sections verbatim**
+
+**SAY:**
+> Generated CLAUDE.md preserving your content:
+> - Kept: [list preserved sections]
+> - Added: [list new protocol sections]
+> - Merged: [list merged sections]
+
+**If fresh generation (new project or replace mode):**
+
 Create customized `CLAUDE.md` with:
 1. Project name and description
 2. Detected/specified tech stack
 3. Build/test/lint commands
 4. Key patterns and conventions
 5. Behavioral mandates (from protocol)
+6. Full protocol documentation
 
 ### C4. Copy Protocol Files
 
