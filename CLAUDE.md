@@ -10,16 +10,6 @@ Quality-enforced protocol with automated hooks, specialized agents, and persiste
 | Philosophy | Research-first, quality-enforced |
 | Validation | Zero-error tolerance |
 
-## Repository Structure
-
-| Directory | Purpose | Git Status |
-|-----------|---------|------------|
-| `/` (root) | Working development directory | DO NOT PUSH |
-| `CP/` | Clean distribution for GitHub | PUSH THIS ONLY |
-| `test/` | Testing directory | NEVER TOUCH |
-
-**Workflow:** Edit in root, sync to `CP/`, push only `CP/` contents.
-
 ## Critical Behaviors
 
 ### Research Before Acting
