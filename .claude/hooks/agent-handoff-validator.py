@@ -18,7 +18,15 @@ Output:
 import json
 import sys
 import re
+import os
 from typing import Optional, Tuple
+
+# Import hook colors utility
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from hook_colors import hook_status
+except ImportError:
+    def hook_status(*args, **kwargs): pass
 
 # Required fields in agent response
 REQUIRED_FIELDS = ["agent", "execution_mode", "status", "present_to_user"]
@@ -135,6 +143,8 @@ def format_handoff_context(response_data: dict) -> str:
 
 
 def main():
+    hook_status("agent-handoff-validator", "RUNNING", "Validating handoff")
+
     try:
         input_data = json.load(sys.stdin)
     except (json.JSONDecodeError, EOFError):
@@ -191,6 +201,7 @@ def main():
     if not is_valid:
         # Response doesn't match protocol - warn but don't block
         # Blocking would break legacy agents
+        hook_status("agent-handoff-validator", "WARN", f"{len(issues)} issues")
         context = f"AGENT PROTOCOL WARNING: Response missing required fields: {'; '.join(issues)}"
         result = {
             "continue": True,
@@ -203,6 +214,8 @@ def main():
         sys.exit(0)
 
     # Valid response - format for handoff
+    agent_name = response_data.get("agent", "Unknown")
+    hook_status("agent-handoff-validator", "OK", f"Valid: {agent_name}")
     handoff_context = format_handoff_context(response_data)
 
     result = {
