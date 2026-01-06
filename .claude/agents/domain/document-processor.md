@@ -9,6 +9,7 @@ tools:
   - Bash
 model: sonnet
 color: blue
+supports_plan_mode: true
 ---
 
 # Document Processor Agent
