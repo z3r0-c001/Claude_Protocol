@@ -3,7 +3,10 @@
 # Reads JSON from stdin, outputs JSON to stdout for blocking
 
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
+source "$SCRIPT_DIR/hook-colors.sh" 2>/dev/null || true
+HOOK_NAME="honesty-check"
+
+hook_status "$HOOK_NAME" "RUNNING" "Checking honesty"
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -61,6 +64,7 @@ if echo "$LAST_RESPONSE" | grep -qiE "this will (always|never)" || \
 fi
 
 if [ -n "$OVERCONFIDENT" ]; then
+    hook_status "$HOOK_NAME" "BLOCK" "Overconfident: ${OVERCONFIDENT}"
     cat << ENDJSON
 {"decision": "block", "reason": "OVERCONFIDENT LANGUAGE DETECTED: ${OVERCONFIDENT}. Rephrase with appropriate uncertainty (e.g., 'should', 'likely', 'in most cases')."}
 ENDJSON
@@ -68,5 +72,6 @@ ENDJSON
 fi
 
 # No issues
+hook_status "$HOOK_NAME" "OK" "Honesty verified"
 echo '{"continue": true}'
 exit 0
