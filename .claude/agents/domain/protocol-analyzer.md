@@ -10,6 +10,7 @@ tools:
   - mcp__memory__memory_search
 model: sonnet
 color: green
+supports_plan_mode: true
 ---
 
 # Protocol Analyzer Agent
