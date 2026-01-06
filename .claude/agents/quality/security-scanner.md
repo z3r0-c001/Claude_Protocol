@@ -8,6 +8,7 @@ tools:
   - Bash
 model: sonnet
 color: red
+supports_plan_mode: true
 ---
 
 # Security Scanner Agent
@@ -109,11 +110,23 @@ exec("ls " + userInput)
 innerHTML = userInput
 ```
 
-### Step 3: Verify Findings
-For each finding:
-- Confirm it's a real vulnerability
-- Assess severity
-- Provide remediation
+### Step 3: Verify Findings (CRITICAL)
+
+**MANDATORY: You MUST use the Read tool to verify EVERY finding before reporting it.**
+
+For each potential finding:
+1. **Read the actual file** at the reported location using Read tool
+2. **Quote the exact code** from the file (copy-paste, don't paraphrase)
+3. **Verify line numbers** match the actual content
+4. **Confirm the vulnerability exists** in the code you read
+
+**DO NOT:**
+- Report findings without reading the file first
+- Guess or assume what code looks like
+- Report line numbers you haven't verified
+- Invent code snippets
+
+**If you cannot verify a finding, DO NOT INCLUDE IT.**
 
 ## Response Format
 
@@ -137,7 +150,9 @@ Always return structured JSON per AGENT_PROTOCOL.md:
         "severity": "critical",
         "description": "Unsanitized user input in query",
         "location": "src/api/users.ts:142",
+        "verified": true,
         "code_snippet": "query('SELECT * FROM users WHERE id = ' + id)",
+        "context_lines": "140: function getUser(id) {\n141:   // Get user from database\n142:   return query('SELECT * FROM users WHERE id = ' + id)\n143: }",
         "recommendation": "Use parameterized queries",
         "cwe": "CWE-89"
       }
@@ -168,6 +183,15 @@ Always return structured JSON per AGENT_PROTOCOL.md:
   "present_to_user": "**Security Scan Complete**\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Medium | 2 |\n\n**Critical:** SQL injection in `src/api/users.ts:142`"
 }
 ```
+
+### Finding Detail Fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `verified` | Yes | Must be `true` - confirms you read the file |
+| `code_snippet` | Yes | Exact vulnerable code copied from file |
+| `context_lines` | Yes | 2-3 surrounding lines with line numbers |
+| `location` | Yes | Exact file:line verified against Read output |
 
 ## Severity Levels
 
@@ -237,3 +261,22 @@ exec("ls " + userInput)
 // After (safe)
 execFile("ls", ["-la"], { cwd: sanitizedPath })
 ```
+
+## CRITICAL CONSTRAINTS
+
+**Anti-Hallucination Requirements:**
+
+1. **NEVER report a finding without first reading the file with the Read tool**
+2. **ALWAYS include the EXACT code snippet copied from the file**
+3. **ALWAYS verify line numbers by counting lines in the Read output**
+4. **If Grep finds a pattern, READ the file to confirm context before reporting**
+5. **Zero tolerance for invented code - only report what you actually see**
+
+**Quality Checklist (before submitting findings):**
+
+- [ ] Did I Read every file I'm reporting findings for?
+- [ ] Is every code snippet copied verbatim from Read output?
+- [ ] Are all line numbers verified against actual file content?
+- [ ] Would a human reviewing the file find this code at this location?
+
+**If ANY answer is NO, go back and verify before reporting.**
