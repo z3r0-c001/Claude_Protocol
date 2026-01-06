@@ -13,6 +13,13 @@ import os
 import hashlib
 from pathlib import Path
 
+# Import hook colors utility
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from hook_colors import hook_status
+except ImportError:
+    def hook_status(*args, **kwargs): pass
+
 THRESHOLDS = {
     "small": 500,
     "medium": 2000,
@@ -88,6 +95,8 @@ def output_json(data: dict) -> None:
 
 
 def main():
+    hook_status("doc-size-detector", "RUNNING", "Checking document")
+
     try:
         input_data = json.load(sys.stdin)
     except json.JSONDecodeError:
@@ -152,6 +161,10 @@ def main():
 
     # Output result if we have context to add
     if context_parts:
+        if lines >= THRESHOLDS["medium"]:
+            hook_status("doc-size-detector", "WARN", f"{lines} lines - large doc")
+        else:
+            hook_status("doc-size-detector", "OK", f"{lines} lines")
         output = {
             "continue": True,
             "hookSpecificOutput": {
@@ -160,6 +173,8 @@ def main():
             }
         }
         output_json(output)
+    else:
+        hook_status("doc-size-detector", "OK", "Small file")
 
     sys.exit(0)
 
