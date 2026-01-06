@@ -9,6 +9,7 @@ tools:
   - Task
 model: opus
 color: white
+supports_plan_mode: true
 ---
 
 # Brainstormer Agent
