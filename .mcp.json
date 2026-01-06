@@ -5,7 +5,18 @@
       "args": [".claude/mcp/memory-server/dist/index.js"],
       "env": {
         "MEMORY_PATH": ".claude/memory"
-      }
+      },
+      "description": "Persistent memory server for storing learnings, decisions, corrections, and patterns across sessions"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-filesystem", "."],
+      "description": "File system access with safety guards"
     }
+  },
+  "mcpConfig": {
+    "autoConnect": true,
+    "persistMemory": true,
+    "memoryPath": ".claude/memory"
   }
 }
