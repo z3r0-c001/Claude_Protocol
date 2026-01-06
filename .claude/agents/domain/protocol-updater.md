@@ -14,6 +14,7 @@ tools:
   - mcp__memory__memory_search
 model: sonnet
 color: bright_green
+supports_plan_mode: true
 ---
 
 # Protocol Updater Agent
