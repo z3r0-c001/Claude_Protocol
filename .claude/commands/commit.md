@@ -144,16 +144,11 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## Before Pushing
 
-**MANDATORY: Run `/git` before ANY push operation.**
-
-The /git skill performs pre-push verification:
-- Location check (must be in CP directory)
-- Commit message audit (blocks generic messages)
-- Version bump verification
-- CHANGELOG.md update check
-- Tag creation reminder
-
-**Never push without running /git first.**
+Consider running `/git` for pre-push verification:
+- Commit message quality check
+- Change review for secrets/unwanted files
+- Version verification (if releasing)
+- Test execution
 
 ---
 
