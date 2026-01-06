@@ -22,12 +22,16 @@ Check for protocol updates from the upstream repository and apply them with inte
 
 ### Step 1: Check GitHub Connection
 
-Verify the upstream repository is reachable and fetch the remote manifest.
+Read repository URL from manifest and verify connectivity.
 
 ```bash
+# Get URL from manifest
+RAW_BASE=$(jq -r '.repository.raw_base // empty' protocol-manifest.json 2>/dev/null || \
+           jq -r '.source.url // empty' .claude/protocol-manifest.local.json 2>/dev/null | \
+           sed 's|github.com|raw.githubusercontent.com|; s|$|/main|')
+
 # Test connectivity
-curl -sL -o /dev/null -w "%{http_code}" \
-  "https://raw.githubusercontent.com/{user}/{repo}/main/protocol-manifest.json"
+curl -sL -o /dev/null -w "%{http_code}" "${RAW_BASE}/protocol-manifest.json"
 ```
 
 ### Step 2: Compare Versions
@@ -171,12 +175,14 @@ Apply this update? (y/n)
 Backups are stored in:
 ```
 .claude/backups/
-└── 2025-12-31T10-00-00/
+└── {project-name}/           # Uses parent directory name (basename of pwd)
     ├── manifest.local.json
     ├── agents/
     ├── hooks/
     └── ...
 ```
+
+Each project maintains one backup that gets overwritten on update, avoiding bloat.
 
 ## Error Handling
 
