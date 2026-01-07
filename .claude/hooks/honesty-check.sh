@@ -3,7 +3,10 @@
 # Reads JSON from stdin, outputs JSON to stdout for blocking
 
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
+source "$SCRIPT_DIR/hook-colors.sh" 2>/dev/null || true
+HOOK_NAME="honesty-check"
+
+hook_status "$HOOK_NAME" "RUNNING" "Checking honesty"
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -11,12 +14,14 @@ INPUT=$(cat)
 # Prevent infinite loops
 STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
 if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
 
 # Get transcript path
 TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty')
 if [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
 
@@ -30,6 +35,7 @@ LAST_RESPONSE=$(tac "$TRANSCRIPT_PATH" 2>/dev/null | while read -r line; do
 done)
 
 if [ -z "$LAST_RESPONSE" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
 
@@ -58,6 +64,7 @@ if echo "$LAST_RESPONSE" | grep -qiE "this will (always|never)" || \
 fi
 
 if [ -n "$OVERCONFIDENT" ]; then
+    hook_status "$HOOK_NAME" "BLOCK" "Overconfident: ${OVERCONFIDENT}"
     cat << ENDJSON
 {"decision": "block", "reason": "OVERCONFIDENT LANGUAGE DETECTED: ${OVERCONFIDENT}. Rephrase with appropriate uncertainty (e.g., 'should', 'likely', 'in most cases')."}
 ENDJSON
@@ -65,4 +72,6 @@ ENDJSON
 fi
 
 # No issues
+hook_status "$HOOK_NAME" "OK" "Honesty verified"
+echo '{"continue": true}'
 exit 0
