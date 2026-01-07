@@ -1,9 +1,17 @@
 ---
 name: codebase-analyzer
 description: "MUST BE USED when initializing protocol for a new project. Analyzes codebase structure, detects languages/frameworks, identifies patterns, key files, and project conventions. Outputs structured analysis for protocol generation."
-tools: Read, Grep, Glob, Bash
-model: sonnet
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+model: claude-sonnet-4-5-20250929
+model_tier: standard
+color: green
+min_tier: standard
 ---
+
 
 # Codebase Analyzer Agent
 
