@@ -1,9 +1,15 @@
 # Changelog
 
-**Current Version:** 1.2.0
+**Current Version:** 1.2.9
 **Date:** 2026-01-07
 
 > This file is overwritten with each release. For historical changes, see git history.
+
+---
+
+## v1.2.9 - Version Consolidation
+
+Version bump to consolidate all 1.2.x improvements and documentation updates.
 
 ---
 
