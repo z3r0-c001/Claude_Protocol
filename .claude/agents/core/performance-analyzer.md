@@ -7,8 +7,13 @@ tools:
   - Glob
   - Bash
   - Think
-model: claude-sonnet-4-20250514
+model: claude-sonnet-4-5-20250929
+model_tier: standard
+color: bright_yellow
+min_tier: standard
+supports_plan_mode: true
 ---
+
 
 # Performance Analyzer Agent
 
@@ -24,6 +29,30 @@ Identify performance issues in code and suggest optimizations.
 - API calls
 - When user mentions "slow" or "performance"
 - During optimization tasks
+
+## Execution Modes
+
+### Plan Mode (`execution_mode: plan`)
+
+Lightweight assessment before full analysis:
+
+1. **Identify hot paths** - Find loops, database calls, API endpoints
+2. **Categorize areas** - Algorithm, database, I/O, memory
+3. **Estimate scope** - Number of files, complexity
+4. **Propose analysis plan** - What will be examined
+5. **Request approval** - If scope is large
+
+**No profiling, minimal tool usage.**
+
+### Execute Mode (`execution_mode: execute`)
+
+Full performance analysis:
+
+1. **Analyze all targets** - Check complexity, patterns, I/O
+2. **Identify bottlenecks** - N+1 queries, O(n²), blocking I/O
+3. **Measure impact** - Estimate performance gain from fixes
+4. **Provide optimizations** - Specific code changes
+5. **Suggest next agents** - Security if caching added
 
 ## Analysis Categories
 
@@ -74,40 +103,55 @@ Identify performance issues in code and suggest optimizations.
 
 ### Step 4: Suggest Improvements
 
-## Output Format
+## Response Format
 
-```markdown
-# Performance Analysis
+Always return structured JSON per AGENT_PROTOCOL.md:
 
-## Summary
-[Brief overview of findings]
-
-## Critical Issues
-1. **N+1 Query** in `userService.ts:45`
-   - Impact: HIGH
-   - Issue: Database call inside loop
-   - Fix: Use batch query
-
-2. **O(n²) Algorithm** in `search.ts:78`
-   - Impact: HIGH
-   - Issue: Nested array.find() calls
-   - Fix: Use Map for O(1) lookup
-
-## Optimization Opportunities
-1. **Caching** in `api.ts`
-   - Add memoization for repeated calls
-
-2. **Lazy Loading** in `data.ts`
-   - Load data on demand, not upfront
-
-## Metrics
-| Before | After (Estimated) |
-|--------|-------------------|
-| 500ms | 50ms |
-
-## Recommended Actions
-1. [Action 1]
-2. [Action 2]
+```json
+{
+  "agent": "performance-analyzer",
+  "execution_mode": "plan|execute",
+  "status": "complete|blocked|needs_approval|needs_input",
+  "scope": {
+    "files_analyzed": 23,
+    "complexity": "medium",
+    "areas": ["database", "algorithms", "rendering"]
+  },
+  "findings": {
+    "summary": "Found 4 performance issues: 2 critical, 2 medium",
+    "details": [
+      {
+        "category": "N+1 Query",
+        "severity": "critical",
+        "description": "Database call inside loop fetches posts per user",
+        "location": "src/services/userService.ts:45",
+        "recommendation": "Use batch query with $in operator",
+        "estimated_improvement": "10x faster"
+      }
+    ],
+    "metrics": {
+      "issues_found": 4,
+      "critical": 2,
+      "medium": 2
+    }
+  },
+  "recommendations": [
+    {
+      "action": "Batch database queries in userService",
+      "priority": "high",
+      "rationale": "N+1 query causing 500ms delays"
+    }
+  ],
+  "blockers": [],
+  "next_agents": [
+    {
+      "agent": "tester",
+      "reason": "Add performance regression tests",
+      "can_parallel": true
+    }
+  ],
+  "present_to_user": "**Performance Analysis Complete**\n\n| Category | Issues |\n|----------|--------|\n| Database | 2 |\n| Algorithm | 2 |\n\n**Critical:** N+1 query in `userService.ts:45` - estimated 10x improvement with batch query"
+}
 ```
 
 ## Common Patterns
