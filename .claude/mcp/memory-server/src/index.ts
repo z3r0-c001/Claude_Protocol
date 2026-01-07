@@ -21,6 +21,10 @@ import { memoryList, formatListResult } from "./tools/list.js";
 import { memoryDelete, formatDeleteResult } from "./tools/delete.js";
 import { memoryPrune, formatPruneResult } from "./tools/prune.js";
 import type { MemoryCategory } from "./types/memory.js";
+import { WRITABLE_CATEGORIES, READ_ONLY_CATEGORIES } from "./types/memory.js";
+
+// All categories for read/list operations
+const ALL_CATEGORIES = [...WRITABLE_CATEGORIES, ...READ_ONLY_CATEGORIES];
 
 // Tool definitions
 const tools: Tool[] = [
@@ -32,7 +36,7 @@ const tools: Tool[] = [
       properties: {
         category: {
           type: "string",
-          enum: ["user-preferences", "project-learnings", "decisions", "corrections", "patterns", "protocol-state"],
+          enum: ALL_CATEGORIES,
           description: "Memory category to read. Omit to read all categories."
         },
         key: {
@@ -54,8 +58,8 @@ const tools: Tool[] = [
       properties: {
         category: {
           type: "string",
-          enum: ["user-preferences", "project-learnings", "decisions", "corrections", "patterns"],
-          description: "Memory category. Use 'decisions' for major architectural choices (requires confirm: true)."
+          enum: WRITABLE_CATEGORIES,
+          description: "Memory category. Use 'decisions' for major architectural choices (requires confirm: true). Note: 'protocol-state' is read-only."
         },
         key: {
           type: "string",
@@ -99,7 +103,7 @@ const tools: Tool[] = [
           type: "array",
           items: {
             type: "string",
-            enum: ["user-preferences", "project-learnings", "decisions", "corrections", "patterns"]
+            enum: ALL_CATEGORIES
           },
           description: "Categories to search. Omit to search all."
         },
@@ -123,7 +127,7 @@ const tools: Tool[] = [
       properties: {
         category: {
           type: "string",
-          enum: ["user-preferences", "project-learnings", "decisions", "corrections", "patterns", "protocol-state"],
+          enum: ALL_CATEGORIES,
           description: "Category to list. Omit to list all."
         },
         include_timestamps: {
@@ -135,14 +139,14 @@ const tools: Tool[] = [
   },
   {
     name: "memory_delete",
-    description: "Delete a specific entry from memory. Requires confirmation to prevent accidental deletion.",
+    description: "Delete a specific entry from memory. Requires confirmation to prevent accidental deletion. Cannot delete from protocol-state (read-only).",
     inputSchema: {
       type: "object",
       properties: {
         category: {
           type: "string",
-          enum: ["user-preferences", "project-learnings", "decisions", "corrections", "patterns"],
-          description: "Category containing the entry"
+          enum: WRITABLE_CATEGORIES,
+          description: "Category containing the entry (protocol-state is read-only)"
         },
         key: {
           type: "string",
@@ -187,7 +191,7 @@ const tools: Tool[] = [
 const server = new Server(
   {
     name: "claude-memory-server",
-    version: "1.0.0"
+    version: "1.1.0"
   },
   {
     capabilities: {
@@ -301,7 +305,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Claude Memory Server running on stdio");
+  console.error("Claude Memory Server v1.1.0 running on stdio");
 }
 
 main().catch((error) => {
