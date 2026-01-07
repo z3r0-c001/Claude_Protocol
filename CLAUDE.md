@@ -47,7 +47,7 @@ Input: "Write unit tests for the auth module"
 
 | Property | Value |
 |----------|-------|
-| Version | 1.2.0 |
+| Version | 1.2.9 |
 | Philosophy | Research-first, quality-enforced |
 | Validation | Zero-error tolerance |
 
