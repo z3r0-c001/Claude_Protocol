@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2025-01-07",
+  "update_source": "https://raw.githubusercontent.com/anthropics/anthropic-cookbook/main/misc/model-versions.json",
+  "current_models": {
+    "opus": {
+      "model_id": "claude-opus-4-5-20251101",
+      "released": "2025-11-01",
+      "status": "current",
+      "capabilities": [
+        "best_reasoning",
+        "complex_analysis",
+        "extended_thinking"
+      ],
+      "context_window": 200000
+    },
+    "sonnet": {
+      "model_id": "claude-sonnet-4-5-20250929",
+      "released": "2025-09-29",
+      "status": "current",
+      "capabilities": [
+        "balanced",
+        "fast",
+        "code_generation"
+      ],
+      "context_window": 200000
+    },
+    "haiku": {
+      "model_id": "claude-haiku-4-5-20251001",
+      "released": "2025-10-01",
+      "status": "current",
+      "capabilities": [
+        "fastest",
+        "simple_tasks",
+        "high_volume"
+      ],
+      "context_window": 200000
+    }
+  },
+  "deprecated_models": [
+    {
+      "model_id": "claude-3-opus-20240229",
+      "deprecated_date": "2025-06-01",
+      "replacement": "claude-opus-4-5-20251101"
+    },
+    {
+      "model_id": "claude-3-sonnet-20240229",
+      "deprecated_date": "2025-06-01",
+      "replacement": "claude-sonnet-4-5-20250929"
+    },
+    {
+      "model_id": "claude-3-5-sonnet-20241022",
+      "deprecated_date": "2025-09-01",
+      "replacement": "claude-sonnet-4-5-20250929"
+    }
+  ],
+  "tier_mapping": {
+    "high": "opus",
+    "standard": "sonnet",
+    "fast": "haiku"
+  },
+  "notes": "This file is checked on Claude Code startup. Run /update-proto to fetch latest model versions."
+}
