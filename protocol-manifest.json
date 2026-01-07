@@ -1,6 +1,6 @@
 {
   "protocol": {
-    "version": "1.2.0",
+    "version": "1.2.9",
     "release_date": "2026-01-07",
     "min_claude_code_version": "1.0.0",
     "description": "Claude Code infrastructure protocol with quality enforcement, memory persistence, and automated agent orchestration"
