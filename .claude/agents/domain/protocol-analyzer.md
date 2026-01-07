@@ -8,7 +8,7 @@ tools:
   - Bash
   - mcp__memory__memory_read
   - mcp__memory__memory_search
-model: sonnet
+model: claude-sonnet-4-5-20250929
 color: green
 supports_plan_mode: true
 ---

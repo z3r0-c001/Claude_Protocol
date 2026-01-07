@@ -6,7 +6,7 @@ tools:
   - Write
   - Bash
   - Glob
-model: sonnet
+model: claude-sonnet-4-5-20250929
 color: bright_green
 ---
 

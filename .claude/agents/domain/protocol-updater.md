@@ -12,7 +12,7 @@ tools:
   - mcp__memory__memory_read
   - mcp__memory__memory_write
   - mcp__memory__memory_search
-model: sonnet
+model: claude-sonnet-4-5-20250929
 color: bright_green
 supports_plan_mode: true
 ---
