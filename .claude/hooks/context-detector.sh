@@ -3,7 +3,8 @@
 # Reads JSON from stdin, outputs context via hookSpecificOutput
 
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
+source "$SCRIPT_DIR/hook-colors.sh" 2>/dev/null || true
+HOOK_NAME="context-detector"
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -12,8 +13,11 @@ INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 if [ -z "$FILE_PATH" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
+
+hook_status "$HOOK_NAME" "CHECKING" "$(basename "$FILE_PATH")"
 
 SUGGESTIONS=""
 
@@ -37,9 +41,11 @@ done
 SUGGESTIONS="${SUGGESTIONS%, }"
 
 if [ -n "$SUGGESTIONS" ]; then
-    cat << ENDJSON
-{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"AGENT SUGGESTION for $FILE_PATH: Consider running $SUGGESTIONS"}}
-ENDJSON
+    hook_status "$HOOK_NAME" "OK" "Suggest: $SUGGESTIONS"
+    echo "{\"continue\": true, \"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"AGENT SUGGESTION for $FILE_PATH: Consider running $SUGGESTIONS\"}}"
+else
+    hook_status "$HOOK_NAME" "OK" "No suggestions"
+    echo '{"continue": true}'
 fi
 
 exit 0
