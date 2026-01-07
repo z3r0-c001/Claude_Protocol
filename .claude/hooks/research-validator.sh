@@ -3,7 +3,10 @@
 # Reads JSON from stdin
 
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
+source "$SCRIPT_DIR/hook-colors.sh" 2>/dev/null || true
+HOOK_NAME="research-validator"
+
+hook_status "$HOOK_NAME" "RUNNING" "Validating research"
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -11,12 +14,14 @@ INPUT=$(cat)
 # Prevent infinite loops
 STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
 if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
 
 # Get transcript to analyze subagent output
 TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty')
 if [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
 
@@ -30,6 +35,7 @@ LAST_OUTPUT=$(tac "$TRANSCRIPT_PATH" 2>/dev/null | while read -r line; do
 done)
 
 if [ -z "$LAST_OUTPUT" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
 
@@ -47,10 +53,14 @@ if echo "$LAST_OUTPUT" | grep -qiE "definitely|certainly|guaranteed|always|never
 fi
 
 if [ -n "$ISSUES" ]; then
+    hook_status "$HOOK_NAME" "BLOCK" "Issues: ${ISSUES}"
     cat << ENDJSON
 {"decision": "block", "reason": "RESEARCH QUALITY ISSUE: ${ISSUES}. Please cite sources and acknowledge uncertainty."}
 ENDJSON
     exit 0
 fi
 
+# No issues
+hook_status "$HOOK_NAME" "OK" "Research validated"
+echo '{"continue": true}'
 exit 0
