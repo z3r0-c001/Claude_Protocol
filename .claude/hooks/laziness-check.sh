@@ -3,13 +3,11 @@
 # Validates Claude's response for lazy patterns before completion
 # Reads JSON from stdin, outputs JSON to stdout
 
-# Source shared logger
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-if [ -f "${SCRIPT_DIR}/hook-logger.sh" ]; then
-    source "${SCRIPT_DIR}/hook-logger.sh"
-else
-    hook_log() { :; }
-fi
+source "$SCRIPT_DIR/hook-colors.sh" 2>/dev/null || true
+HOOK_NAME="laziness-check"
+
+hook_status "$HOOK_NAME" "RUNNING" "Checking response"
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -17,12 +15,14 @@ INPUT=$(cat)
 # Prevent infinite loops - if we're already in a stop hook, allow through
 STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
 if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
 
 # Get transcript path from input
 TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty')
 if [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
 
@@ -36,6 +36,7 @@ LAST_RESPONSE=$(tac "$TRANSCRIPT_PATH" 2>/dev/null | while read -r line; do
 done)
 
 if [ -z "$LAST_RESPONSE" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
 
@@ -59,6 +60,7 @@ fi
 
 # Skip laziness check if work was done, offering choices, or asking questions
 if [ "$WORK_DONE" = "true" ] || [ "$USER_CHOICE" = "true" ] || [ "$ASKING_QUESTION" = "true" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
 
@@ -81,6 +83,7 @@ if echo "$LAST_RESPONSE" | grep -qiE '\b(for brevity|beyond the scope|i.ll leave
 fi
 
 if [ -n "$LAZY_FOUND" ]; then
+    hook_status "$HOOK_NAME" "BLOCK" "Lazy patterns: ${LAZY_FOUND}"
     # Block with reason - forces Claude to continue
     cat << ENDJSON
 {"decision": "block", "reason": "LAZY RESPONSE DETECTED: ${LAZY_FOUND}. You must DO the work, not tell the user what to do. Rewrite your response to take action."}
@@ -88,5 +91,7 @@ ENDJSON
     exit 0
 fi
 
-# No issues - exit 0 with no output means continue
+# No issues - continue
+hook_status "$HOOK_NAME" "OK" "No lazy patterns"
+echo '{"continue": true}'
 exit 0
