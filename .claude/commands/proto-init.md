@@ -18,10 +18,83 @@ You are conducting an interactive intake session to set up Claude Bootstrap Prot
 
 ## START HERE
 
+---
+
+## STEP 0: INSTALLATION SCOPE
+
+**First, check for existing protocol:**
+
+Check if `.claude/settings.json` exists in project OR `~/.claude/hooks/` has protocol files.
+
+**If protocol NOT found, ASK:**
+> This appears to be your first time using Claude Protocol.
+>
+> Where would you like to install the protocol tooling?
+>
+> - `global` - Install to `~/.claude/` (available in ALL projects)
+> - `project` - Install to `./.claude/` (only THIS project, git-trackable)
+> - `hybrid` - Core quality hooks global, project customizations local
+>
+> **Best for:**
+> - `global` → Personal use, consistent experience everywhere
+> - `project` → Team projects, shared config via git
+> - `hybrid` → Power users, maximum flexibility
+
+**WAIT FOR RESPONSE**
+
+**Based on choice:**
+
+- If `global`:
+  - Set `INSTALL_TARGET="$HOME/.claude"`
+  - Run install script: `scripts/install-to-scope.sh global`
+  - SAY: "Installing to ~/.claude/ - protocol will be active in all projects"
+
+- If `project`:
+  - Set `INSTALL_TARGET="./.claude"`
+  - Continue with normal setup below
+  - SAY: "Installing to ./.claude/ - protocol specific to this project"
+
+- If `hybrid`:
+  - Install core hooks to `~/.claude/hooks/`
+  - Install customizations to `./.claude/`
+  - SAY: "Core quality hooks installed globally, project customizations local"
+
+**If protocol ALREADY found:**
+> Protocol detected at [location]. Proceeding with configuration...
+
+**THEN continue to STEP 1**
+
+---
+
 First, create the tracking directory:
 ```bash
 mkdir -p .claude/memory
 ```
+
+---
+
+## STEP 0.5: MANIFEST VALIDATION
+
+**Check protocol-manifest.json for placeholder URLs:**
+
+```bash
+# Check if manifest has placeholder URL
+if grep -q "user/Claude_Protocol" protocol-manifest.json 2>/dev/null; then
+    echo "⚠️  Placeholder URL detected in protocol-manifest.json"
+fi
+```
+
+**If placeholder detected, AUTO-FIX:**
+```bash
+# Fix placeholder with actual repo URL
+sed -i 's|user/Claude_Protocol|z3r0-c001/Claude_Protocol|g' protocol-manifest.json
+```
+
+**Notify user:**
+> Fixed protocol-manifest.json: Updated placeholder URL to actual repository.
+> Remote updates will now work correctly via /proto-update.
+
+**THEN continue to STEP 1**
 
 ---
 
@@ -54,6 +127,79 @@ Ask these questions ONE AT A TIME. Wait for response after each.
 > Describe this project in one sentence. What problem does it solve?
 
 **WAIT** → Continue
+
+### A2.5. Project Analysis & Refinement (CRITICAL)
+
+**IMMEDIATELY after receiving ANY description, perform dynamic analysis:**
+
+#### Step 1: Parse the Description
+
+Read the user's description and identify:
+- **What** they're building (application type, core function)
+- **Who** it's for (users, audience, stakeholders)
+- **Why** it exists (problem solved, value delivered)
+- **How** it should work (workflows, integrations, behaviors)
+- **Constraints** mentioned (security, performance, compliance, platform)
+
+#### Step 2: Identify Gaps & Ambiguities
+
+For EVERY description, ask yourself:
+- What assumptions am I making that could be wrong?
+- What information is missing that would change my approach?
+- What could the user mean by vague terms they used?
+- What technical decisions need user input?
+
+#### Step 3: Ask Clarifying Questions (Socratic Method)
+
+**Generate 2-4 questions SPECIFIC to what the user said.** Do not use templates.
+
+Format:
+> I want to make sure I understand your project correctly. A few questions:
+>
+> **Q1:** [Question directly derived from their description]
+> **Q2:** [Question about something ambiguous or underspecified]
+> **Q3:** [Question about a technical decision that affects architecture]
+
+**Examples of good questions (adapt to actual description):**
+- "You mentioned 'forms' - are these existing paper/PDF forms you need to digitize, or new forms you'll design from scratch?"
+- "When you say 'research', do you mean gathering data from external sources, or analyzing data you already have?"
+- "You mentioned encryption - should the app work offline, or is cloud-based encryption acceptable?"
+- "'Sensitive data' can mean different things - is this regulated (HIPAA, GDPR) or just personally important to keep private?"
+
+**WAIT FOR EACH ANSWER** before asking the next question.
+
+#### Step 4: Synthesize & Suggest
+
+After gathering answers, provide:
+
+> **Based on what you've told me, here's my understanding:**
+>
+> **Core Purpose:** [one sentence summary]
+> **Key Workflows:** [bullet list of main user flows]
+> **Technical Considerations:** [security, storage, integrations]
+>
+> **I recommend these custom components for your project:**
+>
+> | Component | Type | Purpose |
+> |-----------|------|---------|
+> | [name] | agent/skill | [why it's needed for THIS project] |
+> | [name] | agent/skill | [why it's needed for THIS project] |
+>
+> Does this match your vision? What would you adjust?
+
+**WAIT FOR CONFIRMATION**
+
+#### Step 5: Iterate if Needed
+
+If the user has corrections or additions:
+- Incorporate their feedback
+- Ask follow-up questions if new ambiguities arise
+- Update the summary
+- Confirm again before proceeding
+
+**Only proceed to A3 when the user confirms understanding is correct.**
+
+---
 
 ### A3. Project Type
 **ASK:**
@@ -104,6 +250,95 @@ Ask these questions ONE AT A TIME. Wait for response after each.
 ---
 
 ## SECTION B: EXISTING PROJECT
+
+### B0. Analyze Existing CLAUDE.md (CRITICAL - DO FIRST)
+
+**CHECK for existing CLAUDE.md:**
+```bash
+test -f CLAUDE.md && echo "EXISTS" || echo "NOT_FOUND"
+```
+
+**If CLAUDE.md EXISTS:**
+
+1. **Read the entire file:**
+   - Use Read tool to get full contents
+   - Do NOT skip or summarize - read everything
+
+2. **Extract and categorize all content:**
+   - **Project Identity**: Name, description, purpose
+   - **Tech Stack**: Languages, frameworks, databases
+   - **Commands**: Build, test, lint, deploy commands
+   - **Patterns**: Code conventions, naming rules, architecture patterns
+   - **Behavioral Rules**: Custom mandates, restrictions, preferences
+   - **Directory Structure**: Project layout, important paths
+   - **Custom Sections**: Any unique content not matching above
+
+3. **Save to memory for merging:**
+   ```
+   mcp__memory__memory_write category="project-learnings" key="existing-claude-md" value="[Full extracted content]"
+   ```
+
+4. **Present findings to user:**
+
+**SAY:**
+> **Found existing CLAUDE.md** ([X] lines)
+>
+> I've analyzed your current configuration:
+>
+> | Section | Content Found |
+> |---------|---------------|
+> | Project Identity | [name, description] |
+> | Tech Stack | [languages, frameworks] |
+> | Commands | [build, test, lint] |
+> | Patterns | [conventions found] |
+> | Custom Rules | [behavioral mandates] |
+> | Custom Sections | [unique content] |
+>
+> **How would you like to proceed?**
+> - `merge` - Keep ALL your content, add protocol features around it (recommended)
+> - `review` - Show me each section, I'll decide what to keep
+> - `replace` - Start fresh with protocol template (your content will be lost)
+
+**WAIT FOR RESPONSE**
+
+**If `merge`:**
+- Flag all existing content as PRESERVE
+- Protocol will wrap around existing content, not replace it
+- SAY: "All your existing content will be preserved. Protocol features will be added."
+
+**If `review`:**
+For EACH extracted section, ASK:
+> **[Section Name]:**
+> ```
+> [Show content]
+> ```
+> Keep this? `yes` / `no` / `edit`
+
+**WAIT** after each section
+
+- If `yes` → Mark as PRESERVE
+- If `no` → Mark as DISCARD
+- If `edit` → Let user provide updated version
+
+**If `replace`:**
+**ASK:**
+> Are you sure? This will discard:
+> - [List key items being lost]
+>
+> Type `CONFIRM` to proceed or `back` to choose another option.
+
+**WAIT FOR RESPONSE**
+- If not "CONFIRM" → Go back to options
+
+**Store decisions for use in C3 (Generate CLAUDE.md)**
+
+**If CLAUDE.md NOT found:**
+**SAY:**
+> No existing CLAUDE.md found. Will generate fresh configuration.
+
+**THEN continue to B1**
+
+---
 
 ### B1. Run Discovery
 **SAY:**
@@ -312,12 +547,36 @@ mkdir -p .claude/mcp/memory-server
 
 ### C3. Generate CLAUDE.md
 
+**If existing CLAUDE.md was preserved (merge/review mode):**
+
+1. **Start with preserved content as base**
+2. **Add protocol sections that don't conflict:**
+   - Protocol header with version
+   - Quality enforcement rules (if not already present)
+   - Hook documentation (new section)
+   - Agent documentation (new section)
+   - Command reference (new section)
+3. **Merge overlapping sections intelligently:**
+   - Commands: Add protocol commands, keep user's custom commands
+   - Patterns: Keep user's patterns, add protocol patterns
+   - Behavioral rules: User rules take precedence, protocol rules fill gaps
+4. **Preserve all custom sections verbatim**
+
+**SAY:**
+> Generated CLAUDE.md preserving your content:
+> - Kept: [list preserved sections]
+> - Added: [list new protocol sections]
+> - Merged: [list merged sections]
+
+**If fresh generation (new project or replace mode):**
+
 Create customized `CLAUDE.md` with:
 1. Project name and description
 2. Detected/specified tech stack
 3. Build/test/lint commands
 4. Key patterns and conventions
 5. Behavioral mandates (from protocol)
+6. Full protocol documentation
 
 ### C4. Copy Protocol Files
 
