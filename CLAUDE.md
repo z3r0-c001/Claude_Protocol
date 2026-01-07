@@ -1,138 +1,191 @@
-# Claude Protocol (Unified)
+# Claude Protocol
 
-The definitive Claude Code infrastructure protocol combining quality enforcement, honesty guardrails, and autonomous operation.
+Quality-enforced protocol with automated hooks, specialized agents, and persistent memory.
+
+## ⚡ MANDATORY: Session Startup
+
+**BEFORE responding to the user's first message, run:**
+```bash
+python3 .claude/scripts/health-check.py
+```
+
+This is NOT optional. Report any warnings to the user, then proceed.
+
+---
+
+## 🤖 Agent Delegation
+
+This project uses specialized agents. **USE THEM via the Task tool:**
+
+| When To Delegate | Agent | Invocation |
+|------------------|-------|------------|
+| Multi-step tasks | `orchestrator` | Task tool with agent name |
+| Architecture decisions | `architect` | Task tool |
+| Writing tests | `tester` | Task tool |
+| Code review | `reviewer` | Task tool |
+| Security concerns | `security-scanner` | Task tool |
+| Documentation | `documenter` | Task tool |
+
+**Example Task invocation:**
+```
+Tool: Task
+Agent: tester
+Input: "Write unit tests for the auth module"
+```
+
+**When to delegate:**
+- Task requires specialized expertise
+- Task involves multiple steps
+- User explicitly asks for agent
+- Commands like `/validate`, `/pr`, `/test`, `/orchestrate`
+
+**Agents are in:** `.claude/agents/` (31 agents across core, quality, domain, workflow)
+
+---
 
 ## Project Status
 
 | Property | Value |
 |----------|-------|
-| Version | 1.0.0 |
-| Mode | Unified Protocol |
-| Philosophy | Research-first + Quality-enforced |
+| Version | 1.2.0 |
+| Philosophy | Research-first, quality-enforced |
 | Validation | Zero-error tolerance |
 
 ## Critical Behaviors
 
-### 1. Research Before Acting
+### Research Before Acting
 - NEVER claim capability without verification
-- NEVER say "yes I can do that" unless you've verified the approach works
-- When uncertain, say: "I don't know. Let me research this first."
+- When uncertain: "I don't know. Let me research this first."
 
-### 2. Stop When Things Fail
-- If an approach fails, STOP
-- Do not try random variations hoping one works
-- Research the actual cause before attempting again
-- Say: "That didn't work. Let me research why."
+### Stop When Things Fail
+- If an approach fails, STOP and research the cause
+- Do not try random variations
 
-### 3. Default to Action
+### Default to Action
 - Implement changes rather than suggesting them
-- Do the work, don't describe the work
-- Never use placeholders: `// ...`, `# TODO`, `pass`, `throw new NotImplementedError()`
+- Never use placeholders: `// ...`, `# TODO`, `pass`
 
-### 4. Quality Enforcement
-- All code must pass 100% of checks (zero errors tolerated)
-- Completeness: No placeholders, TODOs, stubs
-- Correctness: All imports/packages verified to exist
-- Syntax: All files pass syntax validation
-- Lint: All files pass linting rules
+### Quality Enforcement
+- Zero errors tolerated
+- No placeholders, TODOs, or stubs
+- All imports/packages verified to exist
 
-### 5. Thinking Triggers
-- `think` - Standard reasoning
-- `think hard` - More deliberate analysis
-- `think harder` - Deep problem solving
-- `ultrathink` - Maximum reasoning for architecture/design
+### Thinking Triggers
+| Trigger | Use Case |
+|---------|----------|
+| `think` | Standard reasoning |
+| `think hard` | Deliberate analysis |
+| `think harder` | Deep problem solving |
+| `ultrathink` | Architecture/design decisions |
 
 ## Quick Reference
 
 | Task | Command |
 |------|---------|
-| Initialize protocol | `/init` |
+| Initialize protocol | `/proto-init` |
 | Generate tooling | `/bootstrap` |
+| Protocol status | `/proto-status` |
+| Check for updates | `/proto-update` |
 | Validate all | `/validate` |
-| Security scan | `/security` |
-| Performance analysis | `/perf` |
-| Test coverage | `/coverage` |
+| Run tests | `/test` |
 
-## Autonomous Behaviors
+## Hooks
 
-### Memory Operations (via MCP)
-- **Auto-save** (silent): corrections, project-learnings, patterns, user-preferences
-- **Ask permission**: decisions (major architectural choices)
-- Use MCP tools: `mcp__memory__memory_write`, `mcp__memory__memory_read`, `mcp__memory__memory_search`
+### UserPromptSubmit
+| Script | Purpose |
+|--------|---------|
+| context-loader.py | Load context at session start |
+| skill-activation-prompt.py | Auto-activate skills based on prompt |
 
-### On Hook Output
-When hooks return structured JSON with issues:
+### PreToolUse
+| Matcher | Script | Purpose |
+|---------|--------|---------|
+| Write | pre-write-check.sh | Block protected directories |
+| Write | pretool-laziness-check.py | Pre-validate for placeholders |
+| Write | pretool-hallucination-check.py | Pre-validate packages/APIs |
+| Bash | dangerous-command-check.py | Block dangerous commands |
+| Task | agent-plan-enforcer.py | Enforce plan mode for capable agents |
+| Task | agent-announce.py | Display colored agent banners |
 
-| Severity | Action |
-|----------|--------|
-| `auto_fix` | Fix immediately, inform user: "Fixed {issue}" |
-| `suggest` | Offer to fix: "I noticed {issue}. Would you like me to {action}?" |
-| `ask` | Always ask permission before any action |
-| `block` | Explain why action was blocked, offer alternatives |
+### PostToolUse
+| Matcher | Script | Purpose |
+|---------|--------|---------|
+| Read | doc-size-detector.py | Detect large files, suggest chunking |
+| Write | file-edit-tracker.sh | Track file edits |
+| Write | post-write-validate.sh | Validate written files |
+| Write | context-detector.sh | Suggest relevant agents |
+| WebFetch/WebSearch | research-quality-check.sh | Validate research quality |
 
-### Agent Invocations
-Agents auto-invoke based on file context with **verbose announcements**:
+### Stop
+| Script | Purpose |
+|--------|---------|
+| laziness-check.sh | Block incomplete code |
+| honesty-check.sh | Check for overclaiming |
+| stop-verify.sh | Final quality gate |
 
-| Context | Agent | Announcement |
-|---------|-------|--------------|
-| Security-sensitive files | security-scanner | "Running security scan on {file}..." |
-| Dependency files | dependency-auditor | "Auditing dependencies..." |
-| Test files | test-coverage-enforcer | "Checking test coverage..." |
-| Architecture components | architect | "Analyzing architectural implications..." |
-
-## Hooks Configuration
-
-| Hook Event | Scripts | Purpose |
-|------------|---------|---------|
-| UserPromptSubmit | skill-activation-prompt.py, query-analyzer.sh | Skill activation, query analysis |
-| PreToolUse (Write) | pre-write-check.sh, completeness-check.sh | Block protected dirs, check completeness |
-| PreToolUse (Bash) | dangerous-command-check.sh | Block dangerous commands |
-| PostToolUse (Write) | file-edit-tracker.sh, post-write-validate.sh, context-detector.sh | Track edits, validate, suggest agents |
-| PostToolUse (Task) | subagent-output-check.sh | Validate subagent output |
-| PostToolUse (Web) | research-quality-check.sh | Validate research quality |
-| Stop | laziness-check.sh, honesty-check.sh, stop-verify.sh | Quality gates |
-| SubagentStop | research-validator.sh | Validate research from subagents |
+### SubagentStop
+| Script | Purpose |
+|--------|---------|
+| agent-response-handler.py | Handle approval flows and next_agents |
+| research-validator.sh | Validate research from subagents |
+| agent-handoff-validator.py | Validate agent output quality |
 
 ## Agents
 
 ### Quality Agents
 | Agent | Purpose | Trigger |
 |-------|---------|---------|
-| laziness-destroyer | Block incomplete/placeholder code | Stop hook |
+| laziness-destroyer | Block placeholder code | Stop hook |
 | hallucination-checker | Verify packages/APIs exist | Stop hook |
 | honesty-evaluator | Check for overclaiming | Stop hook |
+| fact-checker | Verify factual claims | Manual |
+| reviewer | Code review | `/pr` |
+| tester | Test generation | `/feature`, `/fix` |
+| security-scanner | Security vulnerability detection | Auto on auth files |
+| test-coverage-enforcer | Ensure test coverage | `/test --coverage` |
 
 ### Core Agents
 | Agent | Purpose | Trigger |
 |-------|---------|---------|
 | architect | System design and architecture | `/refactor`, manual |
-| reviewer | Code review | `/pr`, manual |
-| tester | Test generation | `/feature`, `/fix` |
+| research-analyzer | Synthesize research findings | SubagentStop hook |
+| performance-analyzer | Performance issue detection | Auto on hot paths |
 
 ### Domain Agents
 | Agent | Purpose | Trigger |
 |-------|---------|---------|
-| security-scanner | Security vulnerability detection | `/security`, auto |
-| performance-analyzer | Performance issue detection | `/perf`, auto |
-| codebase-analyzer | Project analysis | `/init` |
+| codebase-analyzer | Project structure analysis | `/proto-init` |
 | protocol-generator | Generate protocol artifacts | `/bootstrap` |
+| protocol-updater | Fetch and apply updates | `/proto-update` |
+| protocol-analyzer | Smart optimization suggestions | `/proto-update --analyze` |
+| frontend-designer | UI/UX design and components | Auto on frontend files |
+| ui-researcher | Research UI patterns | Via frontend-designer |
+| dependency-auditor | Check dependency health | Auto on package files |
+| document-processor | Process large documentation | `/doc-ingest` |
 
-### Specialized Agents
+### Workflow Agents
 | Agent | Purpose | Trigger |
 |-------|---------|---------|
-| fact-checker | Verify factual claims | `/verify` |
-| research-analyzer | Synthesize research | `/verify` |
-| test-coverage-enforcer | Ensure test coverage | `/coverage` |
-| dependency-auditor | Check dependency health | Auto on package files |
-| build-error-resolver | Fix build errors | On build failure |
+| brainstormer | Socratic design refinement | "I want to build..." |
+| orchestrator | Coordinate multi-agent workflows | `/orchestrate` |
+
+### Agent Visual Banners
+When agents run, colored banners display their status:
+- Red: Security/quality agents
+- Blue: Architecture/core agents
+- Green: Domain/analysis agents
+- Yellow: Review/planning agents
+- Cyan: Exploration agents
 
 ## Commands
 
 ### Initialization
 | Command | Description |
 |---------|-------------|
-| `/init` | Initialize protocol, discover project |
-| `/bootstrap` | Generate CLAUDE.md and project tooling |
+| `/proto-init` | Initialize protocol for project |
+| `/bootstrap` | Generate CLAUDE.md and tooling |
+| `/proto-status` | Show protocol state and health |
+| `/proto-help` | List protocol commands |
 
 ### Development
 | Command | Description |
@@ -142,63 +195,79 @@ Agents auto-invoke based on file context with **verbose announcements**:
 | `/refactor <target>` | Refactor with agent pipeline |
 | `/test [pattern]` | Run project tests |
 | `/lint [--fix]` | Run linters |
+| `/search <query>` | Search codebase |
 
 ### Quality
 | Command | Description |
 |---------|-------------|
 | `/validate` | Run full validation suite |
-| `/verify` | Research verification (fact-check + honesty) |
-| `/audit` | Quality audit (laziness + hallucination) |
-| `/security` | Security scan (5 categories) |
-| `/perf` | Performance analysis |
-| `/coverage` | Test coverage analysis |
+| `/orchestrate` | Coordinate multi-agent workflows |
 
 ### Git & Docs
 | Command | Description |
 |---------|-------------|
-| `/commit <msg>` | Safe commit after sanitization |
+| `/commit <msg>` | Commit with validation |
+| `/git` | Pre-push checklist |
 | `/pr [title]` | Create pull request |
 | `/docs` | Generate documentation |
-| `/dev-docs` | Create/update development context |
 
-### Memory
+### Session Management
 | Command | Description |
 |---------|-------------|
-| `/remember <category> <what>` | Save to persistent memory |
-| `/recall <topic>` | Search memory |
+| `/leftoff [summary]` | Save session state |
+| `/resume [id]` | Resume saved session |
+| `/remember <cat> <text>` | Save to memory |
+| `/recall <query>` | Search memory |
+
+### Documentation Processing
+| Command | Description |
+|---------|-------------|
+| `/doc-ingest <path>` | Process large docs into searchable chunks |
+| `/doc-search <query>` | Search processed documents |
+| `/doc-list` | List processed documentation |
+
+### Protocol Management
+| Command | Description |
+|---------|-------------|
+| `/proto-update` | Check for and apply updates |
+| `/proto-update --check` | Dry run - show available updates |
+| `/proto-update --analyze` | Full analysis with suggestions |
+| `/manage-tools` | Manage protocol tooling |
 
 ## Memory System
 
-Memory persists across sessions via MCP server.
+Memory persists across sessions via MCP server (optional).
 
-### MCP Memory Tools
-| Tool | Purpose | Permission |
-|------|---------|------------|
-| `mcp__memory__memory_read` | Read entries | Silent |
-| `mcp__memory__memory_write` | Save entries | Auto for learnings, ask for decisions |
-| `mcp__memory__memory_search` | Fuzzy search | Silent |
-| `mcp__memory__memory_list` | List entries | Silent |
-| `mcp__memory__memory_delete` | Remove entries | Ask |
-| `mcp__memory__memory_prune` | Clean old entries | Ask |
+### MCP Tools
+| Tool | Purpose |
+|------|---------|
+| `mcp__memory__memory_read` | Read entries |
+| `mcp__memory__memory_write` | Save entries |
+| `mcp__memory__memory_search` | Fuzzy search |
+| `mcp__memory__memory_list` | List entries |
+| `mcp__memory__memory_delete` | Remove entries |
 
 ### Memory Categories
 | Category | Auto-save | Purpose |
 |----------|-----------|---------|
-| `user-preferences` | Yes | Skill level, verbosity, goals |
-| `project-learnings` | Yes | Technical discoveries |
-| `corrections` | Yes | Mistakes to avoid |
-| `patterns` | Yes | Detected code patterns |
-| `decisions` | Ask | Architecture and design decisions |
+| user-preferences | Yes | Skill level, verbosity, goals |
+| project-learnings | Yes | Technical discoveries |
+| corrections | Yes | Mistakes to avoid |
+| patterns | Yes | Detected code patterns |
+| decisions | Ask | Architecture decisions |
 
 ## Skills
 
 ### Auto-Activated Skills
-Skills suggest themselves based on prompts via `skill-rules.json`:
-
-| Trigger Keywords | Skill | Type |
-|------------------|-------|------|
-| `implement`, `create`, `build`, `refactor` | dev-guidelines | Domain |
-| `best practice`, `should I`, `correct way` | research-verifier | Workflow |
+| Trigger Keywords | Skill |
+|------------------|-------|
+| `implement`, `create`, `build`, `refactor` | dev-guidelines |
+| `UI`, `component`, `button`, `form`, `layout` | frontend-design |
+| `design system`, `tokens`, `theme` | design-system |
+| `I want to build`, `help me plan`, `brainstorm` | brainstormer |
+| `security`, `vulnerability`, `authentication` | security-scanner |
+| `performance`, `optimize`, `slow` | performance-analyzer |
+| `best practice`, `should I`, `correct way`, `recommended` | research-verifier |
 
 ### Core Skills
 | Skill | Purpose |
@@ -210,10 +279,16 @@ Skills suggest themselves based on prompts via `skill-rules.json`:
 | honesty-guardrail | Always-active honesty protocol |
 | dev-guidelines | Development patterns |
 
+### Frontend Skills
+| Skill | Purpose |
+|-------|---------|
+| frontend-design | Complete frontend workflow |
+| design-system | Design tokens and consistency |
+| doc-processor | Large document processing |
+
 ## Quality Gates
 
-All code must pass before completion:
-
+All code must pass:
 1. **Completeness** - No placeholders, TODOs, stubs
 2. **Correctness** - All imports/packages verified
 3. **Syntax** - All files pass syntax validation
@@ -226,43 +301,51 @@ All code must pass before completion:
 
 ```
 project-root/
-├── CLAUDE.md                      # This file
-├── .mcp.json                      # MCP server config
+├── CLAUDE.md                    # This file
+├── .mcp.json                    # MCP server config (optional)
 ├── .claude/
-│   ├── settings.json              # Hooks and permissions
+│   ├── settings.json            # Hooks and permissions
 │   ├── agents/
-│   │   ├── core/                  # architect, reviewer, tester
-│   │   ├── quality/               # laziness-destroyer, hallucination-checker
-│   │   ├── domain/                # security-scanner, performance-analyzer
-│   │   └── workflow/              # fact-checker, research-analyzer
+│   │   ├── core/                # architect, performance-analyzer, research-analyzer
+│   │   ├── quality/             # laziness-destroyer, hallucination-checker, etc.
+│   │   ├── domain/              # codebase-analyzer, frontend-designer, etc.
+│   │   └── workflow/            # brainstormer, orchestrator
+│   ├── commands/                # Slash commands (25)
+│   ├── hooks/                   # Hook scripts (20)
 │   ├── skills/
-│   │   ├── skill-rules.json       # Auto-activation config
-│   │   ├── project-bootstrap/
-│   │   ├── quality-control/
-│   │   ├── workflow/
-│   │   ├── memorizer/
-│   │   ├── honesty-guardrail/
-│   │   └── dev-guidelines/
-│   ├── commands/                  # Slash commands
-│   ├── hooks/                     # Hook scripts
-│   ├── scripts/                   # Utility scripts
-│   ├── memory/                    # Runtime state
+│   │   ├── skill-rules.json     # Auto-activation config
+│   │   ├── frontend-design/
+│   │   ├── design-system/
+│   │   └── doc-processor/
+│   ├── scripts/                 # Utility scripts
 │   └── mcp/
-│       └── memory-server/         # MCP memory server
-└── .claude-plugin/
-    └── plugin.json
+│       └── memory-server/       # MCP memory server (optional)
+└── docs/                        # Documentation
 ```
+
+## Commit Message Standards
+
+Every commit must have specific summary and per-file details:
+
+**Good:**
+```
+Add agent visual banners with distinct colors
+
+- agent-announce.py: PreToolUse hook for Task tool, displays colored banners
+- CLAUDE.md: Updated hooks documentation with new agent-announce
+```
+
+**Bad:** "Updated files", "Fixed bugs", "WIP"
 
 ## Installation
 
 ```bash
-# Copy protocol to target project
-cp -r .claude /path/to/project/
-cp -r .claude-plugin /path/to/project/
-cp .mcp.json /path/to/project/
-cp CLAUDE.md /path/to/project/
+# Clone and install
+git clone https://github.com/z3r0-c001/Claude_Protocol.git
+./install.sh
 
-# Initialize
-cd /path/to/project && claude
-# Then run: /init
+# Initialize in your project
+cd /path/to/your/project
+claude
+# Run: /proto-init
 ```
