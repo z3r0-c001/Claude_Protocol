@@ -7,7 +7,10 @@ tools:
   - Glob
   - Think
 model: claude-opus-4-5-20251101
+model_tier: high
+color: bright_green
 ---
+
 
 # Research Analyzer Agent
 
