@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Read",
@@ -114,32 +115,45 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/skill-activation-prompt.py\""
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" skill-activation-prompt.py",
+            "timeout": 5
           },
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/context-loader.py\""
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" context-loader.py",
+            "timeout": 10
           }
         ]
       }
     ],
     "PreToolUse": [
       {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/scripts/health-check.py\" --json --no-ack",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-write-check.sh\""
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" pre-write-check.sh",
+            "timeout": 5
           },
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretool-laziness-check.py\"",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" pretool-laziness-check.py",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretool-hallucination-check.py\"",
-            "timeout": 15
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" pretool-hallucination-check.py",
+            "timeout": 30
           }
         ]
       },
@@ -148,26 +162,55 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/dangerous-command-check.py\""
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" dangerous-command-check.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" agent-plan-enforcer.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" agent-announce.py",
+            "timeout": 5
           }
         ]
       }
     ],
     "PostToolUse": [
       {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" doc-size-detector.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/file-edit-tracker.sh\" 2>/dev/null || true"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" file-edit-tracker.sh",
+            "timeout": 5
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-write-validate.sh\" 2>/dev/null || true"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" post-write-validate.sh",
+            "timeout": 15
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/context-detector.sh\" 2>/dev/null || true"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" context-detector.sh",
+            "timeout": 5
           }
         ]
       },
@@ -176,7 +219,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/research-quality-check.sh\" 2>/dev/null || true"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" research-quality-check.sh",
+            "timeout": 10
           }
         ]
       }
@@ -186,15 +230,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/laziness-check.sh\""
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" laziness-check.sh",
+            "timeout": 15
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/honesty-check.sh\" 2>/dev/null || true"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" honesty-check.sh",
+            "timeout": 10
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-verify.sh\" 2>/dev/null || true"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" stop-verify.sh",
+            "timeout": 15
           }
         ]
       }
@@ -204,10 +251,22 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/research-validator.sh\" 2>/dev/null || true"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" agent-response-handler.py",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" research-validator.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" agent-handoff-validator.py",
+            "timeout": 15
           }
         ]
       }
     ]
-  }
+  },
+  "hooksDisabled": false
 }
