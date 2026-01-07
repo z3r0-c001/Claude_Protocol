@@ -7,7 +7,10 @@ tools:
   - WebSearch
   - WebFetch
 model: claude-opus-4-5-20251101
+model_tier: high
+color: magenta
 ---
+
 
 # Hallucination Checker Agent
 
