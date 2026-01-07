@@ -9,6 +9,13 @@ import sys
 import os
 from pathlib import Path
 
+# Import hook colors utility
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from hook_colors import hook_status
+except ImportError:
+    def hook_status(*args, **kwargs): pass
+
 def get_project_dir():
     return os.environ.get('CLAUDE_PROJECT_DIR', os.getcwd())
 
@@ -38,6 +45,8 @@ def check_prompt_triggers(prompt, rules):
     return matched
 
 def main():
+    hook_status("skill-activation-prompt", "RUNNING", "Analyzing prompt")
+
     # Read input from stdin
     try:
         input_data = json.load(sys.stdin)
@@ -47,6 +56,7 @@ def main():
 
     prompt = input_data.get("prompt", "")
     if not prompt:
+        hook_status("skill-activation-prompt", "OK", "No prompt")
         sys.exit(0)
 
     # Check for skill triggers
@@ -55,15 +65,18 @@ def main():
 
     if matched_skills:
         skills_list = ", ".join([m["skill"] for m in matched_skills])
+        hook_status("skill-activation-prompt", "OK", f"Suggest: {skills_list}")
         context = f"SKILL SUGGESTION: Consider loading: {skills_list}"
         output = {
             "hookSpecificOutput": {
-                "hookEventName": "UserPromptSubmit", 
+                "hookEventName": "UserPromptSubmit",
                 "additionalContext": context
             }
         }
         print(json.dumps(output))
-    
+    else:
+        hook_status("skill-activation-prompt", "OK", "No skill matches")
+
     sys.exit(0)
 
 if __name__ == "__main__":
