@@ -1,44 +1,42 @@
-# ===========================================
-# Claude Protocol - Files to exclude from git
-# ===========================================
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
 
-# Runtime files (generated during sessions)
-.claude/flags/
+# Runtime data
 .claude/logs/
 .claude/memory/
+.claude/flags/
+.claude/backups/
 
-# MCP server build artifacts and runtime data
-.claude/mcp/memory-server/node_modules/
-.claude/mcp/memory-server/dist/
-.claude/mcp/memory-server/package-lock.json
+# MCP data
 .claude/mcp/memory-server/data/
 
-# Python cache
-.claude/hooks/__pycache__/
-**/__pycache__/
-*.pyc
-*.pyo
-
-# Local settings (user-specific)
-.claude/settings.local.json
-
-# Watcher (not part of distribution)
-.claude/watcher/
-
-# Test directories
-test/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Editor files
-*.swp
-*.swo
-*~
+# IDE
 .vscode/
 .idea/
 
-# Backup files
+# OS
+.DS_Store
+Thumbs.db
+
+# Local config
+.claude/protocol-manifest.local.json
+
+# Node (for MCP server)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temp files
+*.tmp
 *.bak
-*.backup
+*.swp
+*~
