@@ -6,7 +6,7 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
-model: opus
+model: claude-opus-4-5-20251101
 color: magenta
 ---
 

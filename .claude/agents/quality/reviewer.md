@@ -6,7 +6,7 @@ tools:
   - Grep
   - Glob
   - Bash
-model: sonnet
+model: claude-sonnet-4-5-20250929
 color: yellow
 ---
 
