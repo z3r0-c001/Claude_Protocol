@@ -18,11 +18,19 @@ Install:
 import json
 import sys
 import re
+import os
 import urllib.request
 import urllib.error
 from typing import Optional
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+# Import hook colors utility
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from hook_colors import hook_status
+except ImportError:
+    def hook_status(*args, **kwargs): pass
 
 # Cache to avoid repeated lookups in same session
 _package_cache: dict[str, bool] = {}
@@ -211,6 +219,9 @@ def detect_language(file_path: str, content: str) -> Optional[str]:
 
 def output_json(decision: str, reason: str = "", block_message: str = ""):
     """Output properly formatted JSON for Claude Code hooks."""
+    if decision == "continue":
+        print('{"continue": true}')
+        return
     result = {"decision": decision}
     if reason:
         result["reason"] = reason
@@ -244,6 +255,8 @@ def main():
     if not language:
         output_json("continue")
         sys.exit(0)
+
+    hook_status("pretool-hallucination-check", "CHECKING", f"{language} imports")
 
     # Extract and verify packages (parallel for speed)
     hallucinations = []
@@ -283,6 +296,7 @@ def main():
             hallucinations.append(f"npm package '{pkg}' not found on registry")
 
     if hallucinations:
+        hook_status("pretool-hallucination-check", "BLOCK", f"{len(hallucinations)} fake packages")
         msg = "HALLUCINATION CHECK FAILED - These packages don't exist:\n\n"
         for h in hallucinations:
             msg += f"  • {h}\n"
@@ -290,6 +304,7 @@ def main():
         output_json("block", block_message=msg)
         sys.exit(0)
 
+    hook_status("pretool-hallucination-check", "OK", "All packages verified")
     output_json("continue")
     sys.exit(0)
 
@@ -299,5 +314,5 @@ if __name__ == "__main__":
         main()
     except Exception:
         # Absolute fallback - always output valid JSON
-        print('{"decision": "continue"}')
+        print('{"continue": true}')
         sys.exit(0)
