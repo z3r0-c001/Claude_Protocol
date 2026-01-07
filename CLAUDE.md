@@ -6,7 +6,7 @@ Quality-enforced protocol with automated hooks, specialized agents, and persiste
 
 | Property | Value |
 |----------|-------|
-| Version | 1.1.11 |
+| Version | 1.2.0 |
 | Philosophy | Research-first, quality-enforced |
 | Validation | Zero-error tolerance |
 
@@ -63,6 +63,7 @@ Quality-enforced protocol with automated hooks, specialized agents, and persiste
 | Write | pretool-laziness-check.py | Pre-validate for placeholders |
 | Write | pretool-hallucination-check.py | Pre-validate packages/APIs |
 | Bash | dangerous-command-check.py | Block dangerous commands |
+| Task | agent-plan-enforcer.py | Enforce plan mode for capable agents |
 | Task | agent-announce.py | Display colored agent banners |
 
 ### PostToolUse
@@ -84,6 +85,7 @@ Quality-enforced protocol with automated hooks, specialized agents, and persiste
 ### SubagentStop
 | Script | Purpose |
 |--------|---------|
+| agent-response-handler.py | Handle approval flows and next_agents |
 | research-validator.sh | Validate research from subagents |
 | agent-handoff-validator.py | Validate agent output quality |
 
