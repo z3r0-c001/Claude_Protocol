@@ -1,0 +1,15 @@
+{
+  "known_issues": [
+    {
+      "id": "SEC-001",
+      "title": "MCP SDK ReDoS Vulnerability",
+      "severity": "high",
+      "type": "upstream_dependency",
+      "package": "@modelcontextprotocol/sdk",
+      "advisory": "GHSA-8r9q-7v3j-jr4g",
+      "status": "awaiting_upstream_fix",
+      "date_identified": "2025-01-07",
+      "notes": "Upstream issue in Anthropic's MCP SDK. No fix available."
+    }
+  ]
+}
