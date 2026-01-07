@@ -2,6 +2,8 @@
 
 Solutions for common issues with Claude Bootstrap Protocol.
 
+> **Note:** This guide covers known issues, but the protocol is actively developed and new edge cases may arise. If you encounter an issue not covered here, please check the GitHub issues or report a new one.
+
 ## Installation Issues
 
 ### MCP Server Won't Build
@@ -47,16 +49,10 @@ cat package.json | python3 -m json.tool
 
 **Solutions:**
 
-1. **Re-run the installer (easiest):**
-```bash
-./install.sh
-# This sets all permissions automatically
-```
-
-2. **Or set permissions manually:**
+1. **Set executable permissions:**
 ```bash
 chmod +x .claude/hooks/*.sh
-chmod +x .claude/hooks/*.py
+chmod +x scripts/*.sh
 ```
 
 2. **Check shebang line:**
