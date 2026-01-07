@@ -6,7 +6,7 @@ tools:
   - Grep
   - Glob
   - Task
-model: opus
+model: claude-opus-4-5-20251101
 color: bright_white
 supports_plan_mode: true
 ---
