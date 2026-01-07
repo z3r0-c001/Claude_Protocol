@@ -2,13 +2,18 @@
 
 Get up and running with Claude Bootstrap Protocol in 5 minutes.
 
+> **Note:** This protocol is designed specifically for **Claude Code** and leverages Claude's unique capabilities. While the concepts may inspire similar systems, this implementation is tailored to Claude's architecture.
+
+> **Caveat Emptor:** No AI system is infallible. Despite extensive quality checks and guardrails, Claude may still make mistakes. Always review critical code, security-sensitive operations, and architectural decisions. The protocol provides guardrails, not guarantees.
+
 ## Prerequisites
 
 - Python 3.8+ installed (for hooks)
+- jq installed (for hooks) - `apt install jq` or `brew install jq`
 - Claude Code installed
 - Node.js 18+ (only if using MCP memory server)
 
-## Step 1: Install
+## Step 1: Clone and Install
 
 ```bash
 # Clone the repository
@@ -17,9 +22,17 @@ cd Claude_Protocol
 
 # Run the installer
 ./install.sh
+
+# Follow the prompts:
+#   1) Install to current directory
+#   2) Install to parent directory
+#   3) Specify a different directory
 ```
 
-The installer prompts for your target directory and handles everything automatically.
+The installer automatically:
+- Copies all protocol files (.claude/, CLAUDE.md, docs/, etc.)
+- Sets executable permissions on hooks
+- Verifies dependencies (Python 3, jq, Node.js)
 
 ## Step 2: Initialize
 
@@ -56,11 +69,13 @@ Answer the interactive questions:
 | `/feature <desc>` | Implement a feature |
 | `/fix <issue>` | Fix a bug |
 | `/test` | Run tests |
+| `/lint [--fix]` | Run linters |
 | `/commit <msg>` | Commit changes |
-| `/remember <cat> <text>` | Save to memory |
-| `/recall <topic>` | Search memory |
-| `/leftoff` | Save session for later |
+| `/pr [title]` | Create pull request |
+| `/leftoff [summary]` | Save session for later |
 | `/resume` | Resume saved session |
+| `/remember <cat> <text>` | Save to memory (requires MCP) |
+| `/recall <topic>` | Search memory (requires MCP) |
 
 ### Example Session
 
