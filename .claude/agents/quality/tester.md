@@ -7,8 +7,12 @@ tools:
   - Bash
   - Grep
   - Glob
-model: claude-sonnet-4-20250514
+model: claude-sonnet-4-5-20250929
+model_tier: standard
+color: green
+min_tier: fast
 ---
+
 
 # Tester Agent
 
