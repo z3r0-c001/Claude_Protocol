@@ -6,7 +6,7 @@ tools:
   - Grep
   - Glob
   - Think
-model: opus
+model: claude-opus-4-5-20251101
 color: bright_blue
 ---
 
