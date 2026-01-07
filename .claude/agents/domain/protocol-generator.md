@@ -1,9 +1,17 @@
 ---
 name: protocol-generator
 description: "Generates project-specific Claude artifacts based on codebase analysis. Creates CLAUDE.md, custom agents, skills, commands, and hooks tailored to the project. Use after codebase-analyzer completes."
-tools: Read, Write, Bash, Glob
-model: sonnet
+tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+model: claude-sonnet-4-5-20250929
+model_tier: standard
+color: bright_blue
+min_tier: standard
 ---
+
 
 # Protocol Generator Agent
 
