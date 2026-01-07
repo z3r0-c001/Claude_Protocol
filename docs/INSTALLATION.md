@@ -2,9 +2,14 @@
 
 Complete installation guide for Claude Bootstrap Protocol.
 
+> **Note:** This protocol is designed specifically for **Claude Code** and leverages Claude's unique capabilities. While the concepts may inspire similar systems, this implementation is tailored to Claude's architecture.
+
+> **Important:** Hooks and validation scripts may contain bugs or edge cases not covered. If you encounter unexpected behavior, please check the hook implementations and report issues.
+
 ## Prerequisites
 
 - **Python**: Version 3.8 or higher (for hooks)
+- **jq**: JSON processor (for hooks)
 - **Claude Code**: Latest version installed
 - **Node.js**: Version 18.0.0 or higher (only if using MCP memory server)
 
@@ -12,6 +17,7 @@ Complete installation guide for Claude Bootstrap Protocol.
 
 ```bash
 python3 --version  # Should be 3.8+
+jq --version       # Should be 1.6+
 claude --version   # Verify Claude Code is installed
 
 # Only needed if using MCP memory server:
@@ -19,44 +25,63 @@ node --version     # Should be v18.0.0+
 npm --version      # Should be 9.0.0+
 ```
 
-## Installation Methods
-
-### Method 1: Install Script (Recommended)
-
-The easiest way to install:
+### Install jq (if missing)
 
 ```bash
-# Clone the protocol
+# Ubuntu/Debian
+sudo apt install jq
+
+# macOS
+brew install jq
+
+# Windows (via Chocolatey)
+choco install jq
+```
+
+## Installation Methods
+
+### Method 1: Using install.sh (Recommended)
+
+The installer script handles all file copying and permissions:
+
+```bash
+# Clone the repository
 git clone https://github.com/z3r0-c001/Claude_Protocol.git
 cd Claude_Protocol
 
 # Run the installer
 ./install.sh
+
+# Follow the prompts:
+#   1) Install to current directory
+#   2) Install to parent directory
+#   3) Specify a different directory (e.g., /path/to/your/project)
 ```
 
-The installer will:
-- Prompt for target directory (current directory or custom path)
-- Copy all required files (`.claude/`, `CLAUDE.md`, `.mcp.json`)
-- Set executable permissions on all hooks automatically
-- Verify installation
-- Check dependencies (python3, jq, node, claude)
+The installer automatically:
+- Copies .claude/, CLAUDE.md, .mcp.json, docs/, scripts/
+- Sets executable permissions on all hooks and scripts
+- Verifies Python 3, jq, Node.js dependencies
+- Checks for existing installations
 
 ### Method 2: Manual Installation
 
-If you prefer manual installation:
+If you prefer manual control:
 
 ```bash
-# Clone or download the protocol
+# Clone the repository
 git clone https://github.com/z3r0-c001/Claude_Protocol.git
 
 # Copy to your project
 cp -r Claude_Protocol/.claude /path/to/your/project/
 cp Claude_Protocol/CLAUDE.md /path/to/your/project/
 cp Claude_Protocol/.mcp.json /path/to/your/project/
+cp -r Claude_Protocol/docs /path/to/your/project/
 
-# Set hook permissions
-chmod +x /path/to/your/project/.claude/hooks/*.sh
-chmod +x /path/to/your/project/.claude/hooks/*.py
+# Set permissions
+cd /path/to/your/project
+chmod +x .claude/hooks/*.sh
+chmod +x .claude/hooks/*.py
 ```
 
 ## Verify Installation
@@ -149,14 +174,13 @@ your-project/
 │   │       └── test-coverage-enforcer.md
 │   ├── commands/
 │   │   ├── proto-init.md
-│   │   ├── leftoff.md          # Session save
-│   │   ├── resume.md           # Session restore
-│   │   └── ... (18 total)
+│   │   ├── bootstrap.md
+│   │   ├── validate.md
+│   │   └── ... (14 total)
 │   ├── hooks/
-│   │   ├── pretool-laziness-check.py    # BLOCKING: stops lazy code
-│   │   ├── pretool-hallucination-check.py # BLOCKING: verifies packages
-│   │   ├── dangerous-command-check.py   # BLOCKING: stops dangerous cmds
-│   │   └── ... (24 total)
+│   │   ├── laziness-check.sh
+│   │   ├── dangerous-command-check.sh
+│   │   └── ... (13 total)
 │   ├── skills/
 │   │   ├── skill-rules.json
 │   │   ├── quality-control/
