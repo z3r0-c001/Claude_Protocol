@@ -2,6 +2,10 @@
 
 Complete reference for all Claude Bootstrap Protocol hooks.
 
+> **Important:** Hooks are shell scripts and Python scripts that may contain bugs or edge cases not covered. If you encounter unexpected behavior (blocking valid operations, not catching issues), please check the hook implementations and report issues. You can modify hooks to suit your needs.
+
+> **Note:** Hooks run automatically and can block operations. Test changes in a safe environment before relying on them for critical work.
+
 ## Overview
 
 Hooks are scripts that run at specific points in Claude's operation:
@@ -74,13 +78,12 @@ Runs before a tool executes. Can block dangerous operations.
 | Script | Purpose |
 |--------|---------|
 | `pre-write-check.sh` | Block writes to protected paths |
-| `pretool-laziness-check.py` | Block TODOs, placeholders, stubs, delegation phrases |
-| `pretool-hallucination-check.py` | Verify packages exist on PyPI/npm before writing |
+| `completeness-check.sh` | Block placeholder code before write |
 
 **Hooks for Bash:**
 | Script | Purpose |
 |--------|---------|
-| `dangerous-command-check.py` | Block dangerous commands (Python, more robust)
+| `dangerous-command-check.sh` | Block dangerous commands |
 
 **Protected Paths (pre-write-check.sh):**
 - `.git/` - Git internals
@@ -102,17 +105,7 @@ Runs before a tool executes. Can block dangerous operations.
   "hooks": [
     {
       "type": "command",
-      "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-write-check.sh\""
-    },
-    {
-      "type": "command",
-      "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretool-laziness-check.py\"",
-      "timeout": 10
-    },
-    {
-      "type": "command",
-      "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretool-hallucination-check.py\"",
-      "timeout": 15
+      "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-write-check.sh\" \"$TOOL_INPUT\""
     }
   ]
 }
@@ -218,77 +211,7 @@ Runs when a subagent completes.
 
 ## Hook Scripts
 
-### pretool-laziness-check.py (PreToolUse)
-
-**BLOCKING HOOK** - Prevents lazy code from being written. Exit code 2 blocks the tool.
-
-**Input:** JSON via stdin with `tool_input` containing content to write.
-
-**Detection Patterns:**
-```
-Placeholders:  // ...  # ...  /* ... */
-TODOs:         // TODO  # TODO  // FIXME
-Stubs:         pass  raise NotImplementedError  throw new Error('Not implemented')
-Delegation:    "You could..."  "You'll need to..."  "User should..."
-```
-
-**Output (when blocking):**
-```json
-{
-  "error": "Lazy code patterns detected",
-  "patterns_found": ["todo_fixme", "delegation_phrases"],
-  "details": [
-    {"pattern": "TODO", "line": 15, "context": "// TODO: implement this"}
-  ]
-}
-```
-
----
-
-### pretool-hallucination-check.py (PreToolUse)
-
-**BLOCKING HOOK** - Verifies Python/JS packages exist before writing imports.
-
-**Checks:**
-- Python packages against PyPI API
-- JavaScript packages against npm registry
-- Caches results for performance
-
-**Output (when blocking):**
-```json
-{
-  "error": "Potentially hallucinated packages detected",
-  "packages": [
-    {"name": "fake-package", "type": "python", "exists": false}
-  ]
-}
-```
-
----
-
-### dangerous-command-check.py (PreToolUse)
-
-**BLOCKING HOOK** - Prevents dangerous shell commands.
-
-**Blocked Patterns:**
-- `rm -rf /` or `rm -rf ~`
-- `sudo rm -rf`
-- `chmod 777`
-- `curl|wget ... | sh|bash`
-- Fork bombs, dd to devices
-
-**Output (when blocking):**
-```json
-{
-  "error": "Dangerous command blocked",
-  "command": "rm -rf /",
-  "reason": "Recursive deletion of root filesystem"
-}
-```
-
----
-
-### laziness-check.sh (Stop)
+### laziness-check.sh
 
 Detects placeholder code, TODOs, and incomplete implementations.
 
