@@ -111,15 +111,16 @@
   "hooks": {
     "UserPromptSubmit": [
       {
+        "matcher": {},
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh skill-activation-prompt.py",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" skill-activation-prompt.py",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh context-loader.py",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" context-loader.py",
             "timeout": 10
           }
         ]
@@ -127,46 +128,56 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Write|Edit|MultiEdit",
+        "matcher": {},
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh pre-write-check.sh",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/scripts/health-check.py\" --json --no-ack",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": {"tools": ["Write", "Edit", "MultiEdit"]},
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" pre-write-check.sh",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh pretool-laziness-check.py",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" pretool-laziness-check.py",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh pretool-hallucination-check.py",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" pretool-hallucination-check.py",
             "timeout": 30
           }
         ]
       },
       {
-        "matcher": "Bash",
+        "matcher": {"tools": ["Bash"]},
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh dangerous-command-check.py",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" dangerous-command-check.py",
             "timeout": 5
           }
         ]
       },
       {
-        "matcher": "Task",
+        "matcher": {"tools": ["Task"]},
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh agent-plan-enforcer.py",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" agent-plan-enforcer.py",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh agent-announce.py",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" agent-announce.py",
             "timeout": 5
           }
         ]
@@ -174,41 +185,41 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Read",
+        "matcher": {"tools": ["Read"]},
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh doc-size-detector.py",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" doc-size-detector.py",
             "timeout": 5
           }
         ]
       },
       {
-        "matcher": "Write|Edit|MultiEdit",
+        "matcher": {"tools": ["Write", "Edit", "MultiEdit"]},
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh file-edit-tracker.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" file-edit-tracker.sh",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh post-write-validate.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" post-write-validate.sh",
             "timeout": 15
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh context-detector.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" context-detector.sh",
             "timeout": 5
           }
         ]
       },
       {
-        "matcher": "WebSearch|WebFetch",
+        "matcher": {"tools": ["WebSearch", "WebFetch"]},
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh research-quality-check.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" research-quality-check.sh",
             "timeout": 10
           }
         ]
@@ -216,20 +227,21 @@
     ],
     "Stop": [
       {
+        "matcher": {},
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh laziness-check.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" laziness-check.sh",
             "timeout": 15
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh honesty-check.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" honesty-check.sh",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh stop-verify.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" stop-verify.sh",
             "timeout": 15
           }
         ]
@@ -237,20 +249,21 @@
     ],
     "SubagentStop": [
       {
+        "matcher": {},
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh agent-response-handler.py",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" agent-response-handler.py",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh research-validator.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" research-validator.sh",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/run-hook.sh agent-handoff-validator.py",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" agent-handoff-validator.py",
             "timeout": 15
           }
         ]

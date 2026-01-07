@@ -7,8 +7,10 @@ tools:
   - Glob
   - Bash
 model: claude-sonnet-4-5-20250929
-color: green
+model_tier: standard
+min_tier: standard
 ---
+
 
 # Codebase Analyzer Agent
 

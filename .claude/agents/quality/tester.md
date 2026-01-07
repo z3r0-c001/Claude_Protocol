@@ -8,8 +8,10 @@ tools:
   - Grep
   - Glob
 model: claude-sonnet-4-5-20250929
-color: green
+model_tier: standard
+min_tier: fast
 ---
+
 
 # Tester Agent
 

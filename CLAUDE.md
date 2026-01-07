@@ -2,6 +2,22 @@
 
 Quality-enforced protocol with automated hooks, specialized agents, and persistent memory.
 
+## ⚡ Session Startup
+
+**On first interaction each session, run the health check:**
+```bash
+python3 .claude/scripts/health-check.py
+```
+
+If warnings are displayed, acknowledge them before proceeding. This ensures:
+- Model versions are current
+- Protocol is up to date
+- All hooks are present
+
+If issues found, suggest running `/proto-update` to resolve.
+
+---
+
 ## Project Status
 
 | Property | Value |

@@ -15,7 +15,9 @@ tools:
   - Write
   - Grep
   - Task
-model: claude-opus-4-5-20251101
+model: claude-sonnet-4-5-20250929
+model_tier: standard
+min_tier: fast
 supports_plan_mode: true
 ---
 ```
@@ -27,8 +29,56 @@ supports_plan_mode: true
 | `name` | Yes | Kebab-case identifier (e.g., `security-scanner`) |
 | `description` | Yes | When to use, starts with action verb |
 | `tools` | Yes | Array of tools agent can use |
-| `model` | Yes | Claude model version |
+| `model` | Yes | Default Claude model version |
+| `model_tier` | Yes | Default tier: `fast`, `standard`, or `high` |
+| `min_tier` | No | Minimum capable tier (for orchestrator override) |
 | `supports_plan_mode` | No | Boolean, enables two-phase execution |
+
+## Model Tiers
+
+Agents declare their model requirements using a tier system:
+
+| Tier | Model | Use For |
+|------|-------|---------|
+| `fast` | claude-haiku-4-5-20251001 | Linting, formatting, simple checks, status |
+| `standard` | claude-sonnet-4-5-20250929 | Code review, implementation, documentation |
+| `high` | claude-opus-4-5-20251101 | Architecture, debugging, security, planning |
+
+### Tier Selection Guidelines
+
+**Use `fast` (Haiku) when:**
+- Task is deterministic (lint, format, type-check)
+- Simple pattern matching or lookup
+- Status checks, file listing
+- No complex reasoning required
+
+**Use `standard` (Sonnet) when:**
+- Code review or implementation
+- Writing tests or documentation
+- Simple refactoring
+- Most development tasks
+
+**Use `high` (Opus) when:**
+- System architecture or design
+- Complex debugging or root cause analysis
+- Security audits
+- Planning and orchestration
+- Accuracy-critical tasks (fact-checking)
+
+### Orchestrator Model Override
+
+The orchestrator can override an agent's default tier based on task complexity:
+
+```json
+{
+  "agent": "tester",
+  "task": "Run unit tests for utils",
+  "model_override": "fast",
+  "reason": "Simple unit tests, no complex assertions"
+}
+```
+
+Agents with `min_tier` set can be downgraded to that tier. Agents without `min_tier` always use their default.
 
 ## Execution Modes
 

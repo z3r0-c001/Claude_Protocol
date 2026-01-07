@@ -1,33 +1,32 @@
 #!/usr/bin/env python3
 """
 agent-response-handler.py - SubagentStop hook
-Handles agent responses according to AGENT_PROTOCOL.md
+Handles agent responses according to AGENT_PROTOCOL.md using official Claude Code API.
 
 When an agent returns with status: needs_approval, this hook:
-1. Extracts the plan from present_to_user
-2. Displays it clearly to the user
-3. Prompts for approval before continuing
+1. Blocks the completion with decision: "block"
+2. Provides reason that tells Claude to present plan and wait for approval
 
-When status is complete with next_agents, it:
-1. Shows suggested next agents
-2. Asks user if they want to proceed with suggestions
+Uses official Claude Code SubagentStop format:
+- decision: "block" prevents agent from stopping
+- reason: fed back to Claude explaining what to do next
 """
 
 import json
 import sys
 import os
 import re
-from typing import Optional, Tuple
+from typing import Optional
 
 _hooks_dir = os.path.dirname(os.path.abspath(__file__))
 if _hooks_dir not in sys.path:
     sys.path.insert(0, _hooks_dir)
 
-from colors import (
-    ANSI,
-    hook_status,
-    get_agent_theme,
-)
+try:
+    from colors import hook_status, get_agent_theme
+except ImportError:
+    def hook_status(*args, **kwargs): pass
+    def get_agent_theme(name): return ("", "", "AGENT")
 
 
 def extract_json_from_response(response: str) -> Optional[dict]:
@@ -42,76 +41,41 @@ def extract_json_from_response(response: str) -> Optional[dict]:
         except json.JSONDecodeError:
             continue
     
-    # Try raw JSON at end
-    brace_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
-    matches = re.findall(brace_pattern, response)
-    
-    for match in reversed(matches):
-        try:
-            parsed = json.loads(match)
-            if isinstance(parsed, dict) and "agent" in parsed:
-                return parsed
-        except json.JSONDecodeError:
-            continue
+    # Try raw JSON at end - look for complete objects
+    # Match nested JSON properly
+    try:
+        # Find last { that might start a JSON object
+        last_brace = response.rfind('{')
+        while last_brace >= 0:
+            try:
+                # Try to parse from this position
+                candidate = response[last_brace:]
+                # Find matching closing brace
+                depth = 0
+                end_pos = 0
+                for i, c in enumerate(candidate):
+                    if c == '{':
+                        depth += 1
+                    elif c == '}':
+                        depth -= 1
+                        if depth == 0:
+                            end_pos = i + 1
+                            break
+                
+                if end_pos > 0:
+                    json_str = candidate[:end_pos]
+                    parsed = json.loads(json_str)
+                    if isinstance(parsed, dict) and "agent" in parsed:
+                        return parsed
+            except json.JSONDecodeError:
+                pass
+            
+            # Try earlier brace
+            last_brace = response.rfind('{', 0, last_brace)
+    except Exception:
+        pass
     
     return None
-
-
-def format_plan_approval(agent_name: str, response_data: dict) -> str:
-    """Format plan for user approval."""
-    fg, bg, category = get_agent_theme(agent_name)
-    
-    present = response_data.get("present_to_user", "No details provided.")
-    scope = response_data.get("scope", {})
-    
-    output = f"""
-{fg}{bg}{ANSI.BOLD}+{'='*58}+{ANSI.RESET}
-{fg}{bg}{ANSI.BOLD}|{' '*20}PLAN APPROVAL{' '*25}|{ANSI.RESET}
-{fg}{bg}{ANSI.BOLD}|{' '*18}Agent: {agent_name:<31}|{ANSI.RESET}
-{fg}{bg}{ANSI.BOLD}+{'='*58}+{ANSI.RESET}
-
-{present}
-"""
-    
-    if scope:
-        output += f"""
-{ANSI.BOLD}Scope:{ANSI.RESET}
-"""
-        for key, value in scope.items():
-            output += f"  {key}: {value}\n"
-    
-    output += f"""
-{ANSI.BOLD}Options:{ANSI.RESET}
-  [Y] Approve and execute
-  [N] Cancel
-  [M] Modify scope (explain changes)
-"""
-    return output
-
-
-def format_next_agents(agent_name: str, next_agents: list) -> str:
-    """Format next agent suggestions for user."""
-    output = f"""
-{ANSI.BOLD}Agent '{agent_name}' suggests running:{ANSI.RESET}
-"""
-    for i, agent in enumerate(next_agents, 1):
-        name = agent.get("agent", "unknown")
-        reason = agent.get("reason", "")
-        parallel = agent.get("can_parallel", False)
-        
-        fg, bg, category = get_agent_theme(name)
-        output += f"  {i}. {fg}{bg} {name} {ANSI.RESET}"
-        if parallel:
-            output += " (can run parallel)"
-        output += f"\n     {reason}\n"
-    
-    output += f"""
-{ANSI.BOLD}Options:{ANSI.RESET}
-  [A] Run all suggested agents
-  [1-{len(next_agents)}] Run specific agent
-  [S] Skip suggestions
-"""
-    return output
 
 
 def main():
@@ -167,32 +131,29 @@ def main():
     status = response_data.get("status", "")
     execution_mode = response_data.get("execution_mode", "")
     next_agents = response_data.get("next_agents", [])
+    present_to_user = response_data.get("present_to_user", "")
 
-    # Handle needs_approval status
+    # Handle needs_approval status - BLOCK and tell Claude what to do
     if status == "needs_approval":
         hook_status("agent-response-handler", "WARN", f"{agent_name} needs approval")
         
-        approval_prompt = format_plan_approval(agent_name, response_data)
-        
+        # Use official SubagentStop format
+        # decision: "block" prevents completion, reason goes to Claude
         result = {
-            "decision": "ask",
-            "message": approval_prompt,
-            "agentResponse": response_data
-        }
-        print(json.dumps(result))
-        return
-
-    # Handle complete with next_agents
-    if status == "complete" and next_agents:
-        hook_status("agent-response-handler", "OK", f"{agent_name} complete, {len(next_agents)} suggested")
-        
-        suggestion_prompt = format_next_agents(agent_name, next_agents)
-        
-        result = {
-            "continue": True,
-            "hookSpecificOutput": {
-                "additionalContext": suggestion_prompt
-            }
+            "decision": "block",
+            "reason": (
+                f"AGENT REQUIRES APPROVAL\n\n"
+                f"Agent '{agent_name}' returned status: needs_approval\n"
+                f"Execution mode: {execution_mode}\n\n"
+                f"You MUST present the following to the user and wait for explicit approval:\n\n"
+                f"---\n{present_to_user}\n---\n\n"
+                f"After user approves:\n"
+                f"- Invoke the agent again with execution_mode: execute\n"
+                f"- Include any modifications the user requested\n\n"
+                f"If user denies:\n"
+                f"- Report that the operation was cancelled\n"
+                f"- Ask if they want to modify the scope"
+            )
         }
         print(json.dumps(result))
         return
@@ -202,13 +163,60 @@ def main():
         blockers = response_data.get("blockers", [])
         hook_status("agent-response-handler", "BLOCK", f"{agent_name} blocked")
         
-        blocker_text = "\n".join([f"  - {b.get('description', str(b))}" for b in blockers])
+        blocker_text = "\n".join([f"- {b.get('description', str(b))}" for b in blockers])
         
+        result = {
+            "decision": "block",
+            "reason": (
+                f"AGENT BLOCKED\n\n"
+                f"Agent '{agent_name}' cannot proceed due to blockers:\n"
+                f"{blocker_text}\n\n"
+                f"Address these blockers before continuing."
+            )
+        }
+        print(json.dumps(result))
+        return
+
+    # Handle complete with next_agents suggestions
+    if status == "complete" and next_agents:
+        hook_status("agent-response-handler", "OK", f"{agent_name} complete, {len(next_agents)} suggested")
+        
+        suggestions = []
+        for agent in next_agents:
+            name = agent.get("agent", "unknown")
+            reason = agent.get("reason", "")
+            parallel = agent.get("can_parallel", False)
+            suggestions.append(f"- {name}: {reason}" + (" (can run parallel)" if parallel else ""))
+        
+        suggestion_text = "\n".join(suggestions)
+        
+        # Continue but inject suggestion context
         result = {
             "continue": True,
             "hookSpecificOutput": {
-                "additionalContext": f"\n{ANSI.BG_RED}{ANSI.BRIGHT_WHITE} AGENT BLOCKED {ANSI.RESET}\n{blocker_text}\n"
+                "additionalContext": (
+                    f"\n\nAGENT SUGGESTIONS\n"
+                    f"Agent '{agent_name}' suggests running:\n"
+                    f"{suggestion_text}\n\n"
+                    f"Consider invoking these agents if appropriate for the task."
+                )
             }
+        }
+        print(json.dumps(result))
+        return
+
+    # Handle needs_input status
+    if status == "needs_input":
+        hook_status("agent-response-handler", "WARN", f"{agent_name} needs input")
+        
+        result = {
+            "decision": "block",
+            "reason": (
+                f"AGENT NEEDS INPUT\n\n"
+                f"Agent '{agent_name}' requires additional information.\n\n"
+                f"Present to user:\n{present_to_user}\n\n"
+                f"After getting user input, invoke the agent again with the additional context."
+            )
         }
         print(json.dumps(result))
         return
@@ -221,5 +229,6 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
+    except Exception as e:
+        print(f"Hook error: {e}", file=sys.stderr)
         print('{"continue": true}')

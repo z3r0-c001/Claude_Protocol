@@ -7,8 +7,10 @@ tools:
   - Bash
   - Glob
 model: claude-sonnet-4-5-20250929
-color: bright_green
+model_tier: standard
+min_tier: standard
 ---
+
 
 # Protocol Generator Agent
 

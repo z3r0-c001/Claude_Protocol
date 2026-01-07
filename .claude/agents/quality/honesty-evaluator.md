@@ -4,8 +4,10 @@ description: "Audits intellectual honesty of responses. Ensures appropriate unce
 tools:
   - Read
 model: claude-sonnet-4-5-20250929
-color: bright_magenta
+model_tier: standard
+min_tier: standard
 ---
+
 
 # Honesty Evaluator Agent
 

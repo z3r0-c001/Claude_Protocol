@@ -8,9 +8,10 @@ tools:
   - Glob
   - Think
 model: claude-opus-4-5-20251101
-color: blue
+model_tier: high
 supports_plan_mode: true
 ---
+
 
 # Architect Agent
 

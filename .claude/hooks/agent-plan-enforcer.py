@@ -1,22 +1,16 @@
 #!/usr/bin/env python3
 """
 agent-plan-enforcer.py - PreToolUse hook for Task tool
-Enforces plan mode for agents that support it.
+Enforces plan mode for agents that support it using official Claude Code hook API.
 
-When an agent with supports_plan_mode: true is invoked WITHOUT
-execution_mode specified, this hook:
-1. Warns that plan mode should be used
-2. Suggests the corrected prompt
-3. Asks user whether to proceed anyway or use plan mode
-
-This is "guided enforcement" - not blocking, but ensuring the user
-is aware and makes a conscious choice.
+Uses:
+- permissionDecision: "ask" to prompt user
+- updatedInput to inject execution_mode when approved
 """
 
 import json
 import sys
 import os
-import re
 from pathlib import Path
 
 # Add hooks directory to path
@@ -24,11 +18,10 @@ _hooks_dir = os.path.dirname(os.path.abspath(__file__))
 if _hooks_dir not in sys.path:
     sys.path.insert(0, _hooks_dir)
 
-from colors import (
-    ANSI,
-    hook_status,
-    format_agent_banner,
-)
+try:
+    from colors import hook_status
+except ImportError:
+    def hook_status(*args, **kwargs): pass
 
 # Cache for agent metadata
 _agent_cache = {}
@@ -124,38 +117,21 @@ def main():
     if supports_plan_mode and current_mode is None:
         hook_status("agent-plan-enforcer", "WARN", f"{agent_name} supports plan mode")
         
-        # Build guidance message
-        guidance = f"""
-{ANSI.BOLD}{ANSI.BG_YELLOW}{ANSI.BLACK} PLAN MODE RECOMMENDED {ANSI.RESET}
-
-Agent '{agent_name}' supports plan mode but none was specified.
-
-{ANSI.BOLD}Recommended:{ANSI.RESET} Add 'execution_mode: plan' to get scope assessment first.
-
-{ANSI.BOLD}Example prompt:{ANSI.RESET}
-  execution_mode: plan
-  
-  {prompt[:100]}{'...' if len(prompt) > 100 else ''}
-
-{ANSI.BOLD}Plan mode benefits:{ANSI.RESET}
-  - See scope before execution (files, complexity)
-  - Approve or adjust before work begins
-  - Better control over agent behavior
-
-{ANSI.BOLD}Options:{ANSI.RESET}
-  [P] Use plan mode (recommended)
-  [E] Execute directly without plan
-  [C] Cancel
-"""
-        
-        # Return with user prompt
+        # Use OFFICIAL Claude Code hook format
+        # permissionDecision: "ask" prompts the user in the UI
         result = {
-            "decision": "ask",
-            "message": guidance,
-            "options": {
-                "P": "Rerun with execution_mode: plan",
-                "E": "Execute without plan mode",
-                "C": "Cancel"
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "ask",
+                "permissionDecisionReason": (
+                    f"Agent '{agent_name}' supports plan mode but none was specified.\n\n"
+                    f"RECOMMENDED: Run in plan mode first to assess scope before execution.\n\n"
+                    f"Plan mode benefits:\n"
+                    f"- See scope before work begins (files, complexity)\n"
+                    f"- Approve or adjust before execution\n"
+                    f"- Better control over agent behavior\n\n"
+                    f"Allow to proceed without plan mode, or deny to add plan mode."
+                )
             }
         }
         print(json.dumps(result))
@@ -165,7 +141,7 @@ Agent '{agent_name}' supports plan mode but none was specified.
     if current_mode:
         hook_status("agent-plan-enforcer", "OK", f"{agent_name} ({current_mode.upper()} mode)")
     else:
-        hook_status("agent-plan-enforcer", "OK", f"{agent_name} (no plan mode)")
+        hook_status("agent-plan-enforcer", "OK", f"{agent_name} (no plan support)")
 
     print('{"continue": true}')
 
@@ -173,5 +149,7 @@ Agent '{agent_name}' supports plan mode but none was specified.
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
+    except Exception as e:
+        # Log error but don't block
+        print(f"Hook error: {e}", file=sys.stderr)
         print('{"continue": true}')

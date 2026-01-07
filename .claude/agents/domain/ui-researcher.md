@@ -9,9 +9,11 @@ tools:
   - WebFetch
   - Task
 model: claude-sonnet-4-5-20250929
-color: cyan
+model_tier: standard
+min_tier: standard
 supports_plan_mode: true
 ---
+
 
 # UI Researcher Agent
 

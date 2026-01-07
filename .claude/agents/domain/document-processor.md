@@ -8,9 +8,11 @@ tools:
   - Glob
   - Bash
 model: claude-sonnet-4-5-20250929
-color: blue
+model_tier: standard
+min_tier: fast
 supports_plan_mode: true
 ---
+
 
 # Document Processor Agent
 

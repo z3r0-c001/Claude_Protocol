@@ -114,7 +114,7 @@ Affected files: All 22 agent definition files in `.claude/agents/`
 4. **High**: `protocol-state` category inconsistency in tool enums
 5. **High**: Hardcoded invalid model strings (`opus`, `sonnet`)
 6. **Medium**: Inconsistent skill file naming (SKILL.md vs skill.md)
-7. **Low**: No test coverage for MCP server
+7. **Low**: Minimal test coverage for MCP server (added basic unit tests, not integration)
 
 ---
 
@@ -126,10 +126,8 @@ Fixed hooks not working on fresh git clone installations.
 
 | File | Change |
 |------|--------|
-| `.claude/hooks/run-hook.sh` | Use SCRIPT_DIR to find hooks relative to script location |
-| `.claude/hooks/run-hook.sh` | No longer requires $CLAUDE_PROJECT_DIR to be set |
-| `.claude/settings.json` | Changed from `$CLAUDE_PROJECT_DIR/.claude/hooks/` to `.claude/hooks/` |
-| `.claude/settings.json` | Relative paths work from project root (Claude Code's working directory) |
+| `.claude/hooks/run-hook.sh` | Enhanced to use SCRIPT_DIR for hook discovery |
+| `.claude/settings.json` | Updated paths to use `$CLAUDE_PROJECT_DIR` for robustness |
 
 ---
 
@@ -166,3 +164,140 @@ Added new skill for verifying best practice claims against authoritative sources
 ## v1.1.5 - Documentation Accuracy Audit
 
 Fixed discrepancies between documented claims and actual codebase implementation.
+
+### Agent Workflow Fixes
+
+**Hook API Corrections:**
+
+The following hooks have been updated to use the official Claude Code hook API format:
+
+| Hook | Before | After |
+|------|--------|-------|
+| agent-plan-enforcer.py | Custom `decision: "ask"` | Official `permissionDecision: "ask"` |
+| agent-response-handler.py | Custom format | Official `decision: "block"` with reason |
+
+**Official PreToolUse format:**
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "ask",
+    "permissionDecisionReason": "User-facing explanation"
+  }
+}
+```
+
+**Official SubagentStop format:**
+```json
+{
+  "decision": "block",
+  "reason": "This text is fed back to Claude"
+}
+```
+
+See `docs/AGENT_WORKFLOW_ANALYSIS.md` for complete analysis of gaps and solutions.
+
+### New Agents Added
+
+Ten new agents to address identified blind spots:
+
+| Agent | Category | Purpose |
+|-------|----------|---------|
+| debugger | core | Systematic debugging and root cause analysis |
+| documenter | core | Generate README, API docs, ADRs, docstrings |
+| refactorer | core | Safe code refactoring with pattern application |
+| api-designer | domain | REST/GraphQL API design and documentation |
+| data-modeler | domain | Database schema, migrations, query optimization |
+| devops-engineer | domain | CI/CD, Docker, deployment configuration |
+| accessibility-auditor | quality | WCAG compliance, keyboard navigation, screen readers |
+| error-handler | quality | Error types, structured logging, observability |
+| tech-debt-tracker | workflow | Catalog, prioritize, and report technical debt |
+| git-strategist | workflow | Merge conflicts, branch strategy, history cleanup |
+
+All new agents support plan mode for user approval workflows.
+
+### Model Version Management System
+
+Added centralized model version tracking with startup audit:
+
+**Files Added:**
+- `.claude/config/models.json` - Central model registry
+- `.claude/hooks/model-audit.py` - Startup hook for version checking
+- `.claude/scripts/update-models.py` - Model update utility
+
+**Features:**
+- Automatic model version audit on Claude Code startup
+- Detects deprecated/outdated model strings in agents
+- Single config file to update when new models release
+- Integration with `/update-proto` command
+- Manual model setting: `--set-model opus=claude-opus-4-6-20260101`
+
+**Workflow:**
+1. Claude Code starts → model-audit.py runs
+2. If outdated models found → warning displayed
+3. User runs `/update-proto --models` or `--update`
+4. All agent files updated automatically
+
+### Unified Health Check System
+
+Added startup health check that requires acknowledgment:
+
+**Files:**
+- `.claude/scripts/health-check.py` - Unified startup checker
+- `.claude/scripts/proto-update.py` - Fixed early return bug
+- `CLAUDE.md` - Startup instruction added
+
+**Startup Flow:**
+```
+Claude Code starts
+       ↓
+Reads CLAUDE.md
+       ↓
+Runs health-check.py
+       ↓
+Checks: models, protocol version, hook integrity
+       ↓
+If issues → Display warning, require acknowledgment
+       ↓
+Continue to user request
+```
+
+**Acknowledgment Required:**
+- Warnings block until user types "yes"
+- Prevents accidentally running with outdated config
+- Once per session (1 hour cache)
+
+### Intelligent Model Routing (v1.2.0)
+
+Added tiered model selection for cost/performance optimization:
+
+**New Files:**
+- `.claude/config/model-routing.json` - Task complexity mapping and routing rules
+
+**Agent Updates:**
+- All 31 agents now have `model_tier` field (fast/standard/high)
+- 7 agents can be downgraded with `min_tier: fast`
+- Updated `AGENT_PROTOCOL.md` with tier guidelines
+
+**Tier Distribution:**
+- `high` (Opus): 7 agents - orchestrator, architect, debugger, brainstormer, fact-checker, hallucination-checker, research-analyzer
+- `standard` (Sonnet): 24 agents - most development tasks
+- `fast` (Haiku): 0 default, 7 downgrade-capable
+
+**Orchestrator Enhancement:**
+- Added intelligent model selection section
+- Complexity assessment guidelines
+- Cost optimization strategies
+- Model override in task invocation
+
+**Downgrade-Capable Agents:**
+These agents can run on Haiku for simple tasks:
+- tester, reviewer, laziness-destroyer
+- documenter, document-processor
+- git-strategist, tech-debt-tracker
+
+**Cost Savings Example:**
+```
+Before (all Sonnet): 5x × 7 agents = 35x baseline
+After (mixed):       1x×3 + 5x×3 + 25x×1 = 43x (complex) or 18x (simple)
+```

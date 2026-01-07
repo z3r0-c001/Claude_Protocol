@@ -7,9 +7,10 @@ tools:
   - Glob
   - Task
 model: claude-opus-4-5-20251101
-color: bright_white
+model_tier: high
 supports_plan_mode: true
 ---
+
 
 # Orchestrator Agent
 
@@ -77,6 +78,135 @@ Run the planned workflow:
 | `**/*.test.*`, `**/tests/**` | test-coverage-enforcer |
 | `package.json`, `requirements.txt` | dependency-auditor |
 | `**/*.tsx`, `**/components/**` | frontend-designer |
+
+## Intelligent Model Selection
+
+The orchestrator determines the optimal model tier for each sub-agent based on task complexity.
+
+### Model Tiers
+
+| Tier | Model | Cost | Speed | Use Case |
+|------|-------|------|-------|----------|
+| `fast` | Haiku | 1x | Fastest | Lint, format, simple checks |
+| `standard` | Sonnet | 5x | Fast | Most development tasks |
+| `high` | Opus | 25x | Slower | Architecture, security, planning |
+
+### Complexity Assessment
+
+When planning, assess each sub-task's complexity:
+
+**Low Complexity → `fast` (Haiku)**
+- File listing, grep searches
+- Linting, formatting checks
+- Simple validation
+- Status checks
+- Changelog entries
+
+**Medium Complexity → `standard` (Sonnet)**
+- Code review
+- Implementation tasks
+- Documentation writing
+- Unit test creation
+- Simple refactoring
+
+**High Complexity → `high` (Opus)**
+- Architecture decisions
+- Security audits
+- Complex debugging
+- Root cause analysis
+- Planning and coordination
+
+### Complexity Signals
+
+Analyze the task for these keywords:
+
+**High complexity indicators:**
+- "architecture", "design", "security", "vulnerability"
+- "complex", "critical", "production"
+- "debug", "root cause", "investigate"
+- "breaking change", "migration"
+
+**Low complexity indicators:**
+- "lint", "format", "typo", "rename"
+- "simple", "quick", "check", "status", "list"
+
+### Agent Constraints
+
+Some agents have fixed tier requirements:
+
+| Agent | Constraint | Reason |
+|-------|------------|--------|
+| orchestrator | Always `high` | Planning requires best reasoning |
+| architect | Always `high` | System design is complex |
+| fact-checker | Always `high` | Accuracy critical |
+| hallucination-checker | Always `high` | Accuracy critical |
+| security-scanner | Min `standard` | Security requires care |
+
+### Model Override in Task Invocation
+
+When invoking a sub-agent, include model guidance:
+
+```
+Task: tester
+Input: {
+  "task": "Run unit tests for utils module",
+  "model_tier": "fast",
+  "reason": "Simple unit tests, deterministic output"
+}
+```
+
+### Planned Execution with Models
+
+Include model tier in workflow plans:
+
+```json
+{
+  "workflow": {
+    "steps": [
+      {
+        "step": 1,
+        "agent": "laziness-destroyer",
+        "model_tier": "fast",
+        "reason": "Pattern matching only"
+      },
+      {
+        "step": 2,
+        "agent": "reviewer",
+        "model_tier": "standard",
+        "reason": "Code review needs reasoning"
+      },
+      {
+        "step": 3,
+        "agent": "security-scanner",
+        "model_tier": "high",
+        "reason": "Critical security analysis"
+      }
+    ],
+    "cost_estimate": "15x baseline",
+    "time_estimate": "45 seconds"
+  }
+}
+```
+
+### Cost Optimization
+
+When parallelizing, consider model costs:
+
+```
+Sequential (time-optimized):
+  haiku → sonnet → opus
+  Cost: 31x, Time: 3 calls
+
+Parallel (cost-optimized, high complexity):
+  All opus
+  Cost: 75x, Time: 1 call (parallel)
+
+Parallel (cost-optimized, mixed complexity):
+  haiku ─┐
+  sonnet ├─ synthesize
+  opus  ─┘
+  Cost: 31x, Time: 1 call (parallel)
+```
 
 ## Execution Strategies
 

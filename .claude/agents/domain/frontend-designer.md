@@ -10,10 +10,12 @@ tools:
   - WebSearch
   - WebFetch
   - Task
-model: claude-opus-4-5-20251101
-color: bright_cyan
+model: claude-sonnet-4-5-20250929
+model_tier: standard
+min_tier: standard
 supports_plan_mode: true
 ---
+
 
 # Frontend Designer Agent
 

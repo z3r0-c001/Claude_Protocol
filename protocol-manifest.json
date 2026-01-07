@@ -12,138 +12,11 @@
   },
   "components": {
     "agents": {
-      "AGENT_PROTOCOL": {
-        "version": "1.0.0",
-        "checksum": "sha256:e790b48b0341e587b77acc87f4fb12422082d15e2493f94c5bdbd36835ec9535",
-        "file": ".claude/agents/AGENT_PROTOCOL.md",
-        "description": "Master agent protocol defining standards for all specialized agents."
-      },
-      "workflow/brainstormer": {
-        "version": "1.0.0",
-        "checksum": "sha256:ef2c0a795b7eeb71e06aa8f80b9c66aef1b7ef33eb75de96cfb560b03d2cb056",
-        "file": ".claude/agents/workflow/brainstormer.md",
-        "description": "Use PROACTIVELY before implementing features to refine design through Socratic questioning. Ensures requirements are clear and approach is validated before coding."
-      },
-      "workflow/orchestrator": {
-        "version": "1.0.0",
-        "checksum": "sha256:1ed93620ead2bc55b5bffcb43d53062e8b53b0a6e528610ee8731ed206282a45",
-        "file": ".claude/agents/workflow/orchestrator.md",
-        "description": "Coordinates multi-agent workflows. Determines execution order, manages parallel execution, and synthesizes results. Auto-invoked on /validate, /pr, /security or manually via /orchestrate."
-      },
-      "domain/frontend-designer": {
-        "version": "1.0.0",
-        "checksum": "sha256:8f1e8b89e72e7fcf5ed21f8a50751c6b051eb8febf40979c7cd648dfbc4463de",
-        "file": ".claude/agents/domain/frontend-designer.md",
-        "description": "Use PROACTIVELY when designing UI/UX, creating components, or making frontend architecture decisions. Ensures consistent, accessible, and maintainable frontend code."
-      },
-      "domain/protocol-generator": {
-        "version": "1.0.0",
-        "checksum": "sha256:a1cd372f54e97af54205bb73ecb4e61507020ea6f150251b6f405848f213770e",
-        "file": ".claude/agents/domain/protocol-generator.md",
-        "description": "Generates project-specific Claude artifacts based on codebase analysis. Creates CLAUDE.md, custom agents, skills, commands, and hooks tailored to the project. Use after codebase-analyzer completes."
-      },
-      "domain/document-processor": {
-        "version": "1.0.0",
-        "checksum": "sha256:c51ffb3e6e96e83ba4c9538dba7de3c6b895c67ed9cb44992c92e50fb3a80143",
-        "file": ".claude/agents/domain/document-processor.md",
-        "description": "Process large documentation files into searchable summaries and chunks. Invoke when reading large docs or when /doc-ingest is called."
-      },
-      "domain/protocol-analyzer": {
-        "version": "1.0.0",
-        "checksum": "sha256:4985819f6ac4955a36ae5e4bdb5d749d33284f325a842fbf6f322206cda817fe",
-        "file": ".claude/agents/domain/protocol-analyzer.md",
-        "description": "Analyze protocol installation for optimization opportunities, unused components, outdated patterns, and smart suggestions beyond version updates."
-      },
-      "domain/ui-researcher": {
-        "version": "1.0.0",
-        "checksum": "sha256:7701c39140ecb269ccb58250a4b55ffbe053ff82b48919d19a18188ed318e4a4",
-        "file": ".claude/agents/domain/ui-researcher.md",
-        "description": "Use PROACTIVELY when researching UI/UX patterns, design frameworks, component libraries, or frontend best practices. Provides evidence-based design recommendations."
-      },
-      "domain/codebase-analyzer": {
-        "version": "1.0.0",
-        "checksum": "sha256:755bee82b4e9af5f06470cd7b7dc7507d2dbb8894f6db3877a1a6f74a970fa38",
-        "file": ".claude/agents/domain/codebase-analyzer.md",
-        "description": "MUST BE USED when initializing protocol for a new project. Analyzes codebase structure, detects languages/frameworks, identifies patterns, key files, and project conventions. Outputs structured analysis for protocol generation."
-      },
-      "domain/dependency-auditor": {
-        "version": "1.0.0",
-        "checksum": "sha256:7d5a4d57a41c1daed630ea4e4d4ec05587995efb4bb62d8b2fa0afc720c7af7d",
-        "file": ".claude/agents/domain/dependency-auditor.md",
-        "description": "Check dependency health: outdated packages, vulnerabilities, unused dependencies. Auto-triggered on package.json, requirements.txt, Cargo.toml, go.mod changes."
-      },
-      "domain/protocol-updater": {
-        "version": "1.0.0",
-        "checksum": "sha256:5c7aa60b1bfc34f4376cc16ce2b570b305863c9ef22aa57e1ab4245faee0c572",
-        "file": ".claude/agents/domain/protocol-updater.md",
-        "description": "Fetch and apply protocol updates from GitHub with interactive approval. Shows diffs, explains changes, handles user customizations."
-      },
-      "core/research-analyzer": {
-        "version": "1.0.0",
-        "checksum": "sha256:9d1bcbbc58755eb175821c669565584c8cf6c67838f43ef0379cfa2f446b17f3",
-        "file": ".claude/agents/core/research-analyzer.md",
-        "description": "Use to analyze and synthesize research findings. Invoke PROACTIVELY after gathering information to identify patterns, contradictions, and gaps."
-      },
-      "core/architect": {
-        "version": "1.0.0",
-        "checksum": "sha256:d42daa7a65e9b494c47e9706c40542cf7f7a186fe94907931aaafd93bcf9cf51",
-        "file": ".claude/agents/core/architect.md",
-        "description": "Use PROACTIVELY when designing system architecture, planning features, or making technical decisions. Combines strategic planning with architecture review."
-      },
-      "core/performance-analyzer": {
-        "version": "1.0.0",
-        "checksum": "sha256:5fa2e2c06ffdabf96a98af5846b2b35be38ff3de198f6ba28abbc834d7f7a617",
-        "file": ".claude/agents/core/performance-analyzer.md",
-        "description": "Use PROACTIVELY when code involves loops, data processing, API calls, database queries, or when user mentions slow, performance, optimize, speed. Identifies performance issues and suggests optimizations."
-      },
-      "quality/tester": {
-        "version": "1.0.0",
-        "checksum": "sha256:0089242337604951b7c4f6d32a184fee91bdd465aeaf2f7022380151d6dfaa50",
-        "file": ".claude/agents/quality/tester.md",
-        "description": "Use PROACTIVELY when writing tests, verifying implementations, or ensuring code quality. Invoke with /test or after writing code."
-      },
-      "quality/reviewer": {
-        "version": "1.0.0",
-        "checksum": "sha256:00a38130650ec307e90dc08c5e440c8d2aa50824046ce134177b4c8ce8d8e239",
-        "file": ".claude/agents/quality/reviewer.md",
-        "description": "Use PROACTIVELY for code review, PR review, or quality assessment. Invoke with /review or when reviewing changes."
-      },
-      "quality/security-scanner": {
-        "version": "1.0.0",
-        "checksum": "sha256:1303a5955e79d824972437d90435d10c2bedeb4f78a2c267d7cd0ff00665e30d",
-        "file": ".claude/agents/quality/security-scanner.md",
-        "description": "Use PROACTIVELY on any code that handles: auth, user input, database, files, network, secrets. MUST BE USED before committing security-sensitive code."
-      },
-      "quality/honesty-evaluator": {
-        "version": "1.0.0",
-        "checksum": "sha256:cec8925f6084a99a6c0b5d9b5b944a9c95956b379fc0b2b2d5baad5241cfd593",
-        "file": ".claude/agents/quality/honesty-evaluator.md",
-        "description": "Audits intellectual honesty of responses. Ensures appropriate uncertainty representation, checks epistemic honesty, source honesty, and task completion honesty. Invoked by Stop hooks."
-      },
-      "quality/test-coverage-enforcer": {
-        "version": "1.0.0",
-        "checksum": "sha256:c55afd7e3c6708ec0d822bbcd1dc84add0656d82d18f619d1da8a403d6659c42",
-        "file": ".claude/agents/quality/test-coverage-enforcer.md",
-        "description": "MUST BE USED after writing code to ensure adequate test coverage. Use PROACTIVELY when code is written without tests. Blocks incomplete test coverage."
-      },
-      "quality/hallucination-checker": {
-        "version": "1.0.0",
-        "checksum": "sha256:08b286eab587bcf4e723826c0d8f17abb15cc5237faaa30949d8f4261b9819da",
-        "file": ".claude/agents/quality/hallucination-checker.md",
-        "description": "MUST BE USED to verify all claims, packages, APIs, and technical details are REAL. Use PROACTIVELY after any code generation or technical response."
-      },
-      "quality/laziness-destroyer": {
-        "version": "1.0.0",
-        "checksum": "sha256:44f3fe6fe1a5bd81fa37770ef4d74f80289373c9622a767841ddb37d11e0ea10",
-        "file": ".claude/agents/quality/laziness-destroyer.md",
-        "description": "MUST BE USED on every Stop hook. Catches lazy, incomplete, or placeholder code. Use PROACTIVELY before any response is finalized."
-      },
-      "quality/fact-checker": {
-        "version": "1.0.0",
-        "checksum": "sha256:8cc419c6365ea80c44a1dc0f6368fe773bc3776884cabb1a85087a726e66976d",
-        "file": ".claude/agents/quality/fact-checker.md",
-        "description": "Use PROACTIVELY to verify factual claims. MUST BE USED when making assertions about APIs, libraries, dates, statistics, or any verifiable information."
-      }
+      "total": 31,
+      "core": 6,
+      "domain": 11,
+      "quality": 10,
+      "workflow": 4
     },
     "skills": {
       "dev-guidelines": {
@@ -544,5 +417,17 @@
       "hook_naming": "kebab-case with extension (.sh or .py)",
       "command_naming": "kebab-case"
     }
-  }
+  },
+  "new_agents": [
+    "debugger",
+    "documenter",
+    "refactorer",
+    "api-designer",
+    "data-modeler",
+    "devops-engineer",
+    "accessibility-auditor",
+    "error-handler",
+    "tech-debt-tracker",
+    "git-strategist"
+  ]
 }

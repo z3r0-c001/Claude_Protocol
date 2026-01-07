@@ -6,8 +6,10 @@ tools:
   - Grep
   - Glob
 model: claude-sonnet-4-5-20250929
-color: bright_red
+model_tier: standard
+min_tier: fast
 ---
+
 
 # Laziness Destroyer Agent
 

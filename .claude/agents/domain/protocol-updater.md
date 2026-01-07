@@ -13,9 +13,11 @@ tools:
   - mcp__memory__memory_write
   - mcp__memory__memory_search
 model: claude-sonnet-4-5-20250929
-color: bright_green
+model_tier: standard
+min_tier: standard
 supports_plan_mode: true
 ---
+
 
 # Protocol Updater Agent
 

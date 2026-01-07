@@ -8,9 +8,10 @@ tools:
   - WebSearch
   - Task
 model: claude-opus-4-5-20251101
-color: white
+model_tier: high
 supports_plan_mode: true
 ---
+
 
 # Brainstormer Agent
 

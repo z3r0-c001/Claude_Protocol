@@ -7,9 +7,11 @@ tools:
   - Glob
   - Bash
 model: claude-sonnet-4-5-20250929
-color: red
+model_tier: standard
+min_tier: standard
 supports_plan_mode: true
 ---
+
 
 # Security Scanner Agent
 

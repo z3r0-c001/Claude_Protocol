@@ -8,8 +8,10 @@ tools:
   - Grep
   - Glob
 model: claude-sonnet-4-5-20250929
-color: bright_yellow
+model_tier: standard
+min_tier: standard
 ---
+
 
 # Test Coverage Enforcer Agent
 

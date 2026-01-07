@@ -441,3 +441,17 @@ Claude automatically uses memory tools when:
 - Auto-save learnings without prompting
 - Ask permission only for major decisions
 - Search memory before asking questions
+
+## Known Issues
+
+### @modelcontextprotocol/sdk Vulnerability (GHSA-8r9q-7v3j-jr4g)
+
+**Severity:** High (ReDoS - Regular Expression Denial of Service)  
+**Status:** Upstream issue in Anthropic's MCP SDK  
+**Resolution:** Awaiting fix from Anthropic  
+
+This vulnerability exists in the `@modelcontextprotocol/sdk` package itself. Since this is a core dependency of any MCP server, there's no workaround available until Anthropic releases a patched version.
+
+**Mitigation:** The memory server runs locally and processes trusted input from Claude, limiting exposure. Monitor for SDK updates.
+
+**Tracking:** https://github.com/advisories/GHSA-8r9q-7v3j-jr4g

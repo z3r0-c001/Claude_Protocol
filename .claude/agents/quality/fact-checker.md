@@ -8,8 +8,9 @@ tools:
   - Grep
   - Bash
 model: claude-opus-4-5-20251101
-color: bright_cyan
+model_tier: high
 ---
+
 
 # Fact Checker Agent
 
