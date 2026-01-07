@@ -132,14 +132,43 @@ if [ "$SCRIPT_DIR" = "$TARGET_DIR" ]; then
 fi
 
 # Check if .claude already exists in target
-if [ -d "$TARGET_DIR/.claude" ]; then
-    echo -e "${YELLOW}Warning: $TARGET_DIR/.claude already exists.${NC}"
-    read -p "Overwrite? [y/N]: " overwrite
-    if [[ ! "$overwrite" =~ ^[Yy]$ ]]; then
-        echo -e "${RED}Exiting.${NC}"
-        exit 1
-    fi
-    rm -rf "$TARGET_DIR/.claude"
+MERGE_MODE=false
+if [ -d "$TARGET_DIR/.claude" ] || [ -f "$TARGET_DIR/CLAUDE.md" ]; then
+    echo ""
+    echo -e "${YELLOW}Existing Claude configuration detected:${NC}"
+    [ -d "$TARGET_DIR/.claude" ] && echo -e "  - .claude/ directory"
+    [ -f "$TARGET_DIR/CLAUDE.md" ] && echo -e "  - CLAUDE.md"
+    [ -f "$TARGET_DIR/.mcp.json" ] && echo -e "  - .mcp.json"
+    echo ""
+    echo -e "${YELLOW}How would you like to proceed?${NC}"
+    echo ""
+    echo "  1) Merge - Keep existing customizations, add missing protocol components"
+    echo "  2) Overwrite - Replace everything with fresh protocol (backup created)"
+    echo "  3) Exit - Cancel installation"
+    echo ""
+    read -p "Choice [1/2/3]: " merge_choice
+
+    case "$merge_choice" in
+        1)
+            MERGE_MODE=true
+            echo -e "${BLUE}Merge mode: Preserving existing customizations${NC}"
+            ;;
+        2)
+            # Create backup before overwriting
+            BACKUP_DIR="$TARGET_DIR/.claude-backup-$(date +%Y%m%d-%H%M%S)"
+            echo -e "${BLUE}Creating backup at: $BACKUP_DIR${NC}"
+            mkdir -p "$BACKUP_DIR"
+            [ -d "$TARGET_DIR/.claude" ] && cp -r "$TARGET_DIR/.claude" "$BACKUP_DIR/"
+            [ -f "$TARGET_DIR/CLAUDE.md" ] && cp "$TARGET_DIR/CLAUDE.md" "$BACKUP_DIR/"
+            [ -f "$TARGET_DIR/.mcp.json" ] && cp "$TARGET_DIR/.mcp.json" "$BACKUP_DIR/"
+            rm -rf "$TARGET_DIR/.claude"
+            echo -e "${GREEN}Backup created. Proceeding with fresh install.${NC}"
+            ;;
+        3|*)
+            echo -e "${RED}Exiting.${NC}"
+            exit 1
+            ;;
+    esac
 fi
 
 echo ""
@@ -147,20 +176,84 @@ echo -e "${BLUE}Installing Claude Protocol to: $TARGET_DIR${NC}"
 echo ""
 
 # Copy files
-echo -e "${GREEN}[1/6]${NC} Copying .claude directory..."
-cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR/"
+if [ "$MERGE_MODE" = true ]; then
+    echo -e "${GREEN}[1/6]${NC} Merging .claude directory (preserving existing)..."
+    # Create .claude if it doesn't exist
+    mkdir -p "$TARGET_DIR/.claude"
 
-echo -e "${GREEN}[2/6]${NC} Copying configuration files..."
-cp "$SCRIPT_DIR/CLAUDE.md" "$TARGET_DIR/"
-cp "$SCRIPT_DIR/.mcp.json" "$TARGET_DIR/" 2>/dev/null || true
-cp "$SCRIPT_DIR/.gitignore" "$TARGET_DIR/" 2>/dev/null || true
+    # Copy subdirectories, only adding missing files
+    for subdir in agents commands hooks skills scripts mcp docs; do
+        if [ -d "$SCRIPT_DIR/.claude/$subdir" ]; then
+            mkdir -p "$TARGET_DIR/.claude/$subdir"
+            # Copy files that don't exist in target
+            find "$SCRIPT_DIR/.claude/$subdir" -type f | while read src_file; do
+                rel_path="${src_file#$SCRIPT_DIR/.claude/}"
+                dst_file="$TARGET_DIR/.claude/$rel_path"
+                if [ ! -f "$dst_file" ]; then
+                    mkdir -p "$(dirname "$dst_file")"
+                    cp "$src_file" "$dst_file"
+                    echo -e "    ${GREEN}+ Added: $rel_path${NC}"
+                fi
+            done
+        fi
+    done
+
+    # Copy settings.json only if it doesn't exist
+    if [ ! -f "$TARGET_DIR/.claude/settings.json" ]; then
+        cp "$SCRIPT_DIR/.claude/settings.json" "$TARGET_DIR/.claude/"
+        echo -e "    ${GREEN}+ Added: settings.json${NC}"
+    else
+        echo -e "    ${YELLOW}Kept existing: settings.json${NC}"
+    fi
+
+    echo -e "${GREEN}[2/6]${NC} Merging configuration files..."
+
+    # CLAUDE.md - analyze and merge
+    if [ -f "$TARGET_DIR/CLAUDE.md" ]; then
+        echo -e "    ${YELLOW}Existing CLAUDE.md detected - preserving${NC}"
+        echo -e "    ${BLUE}Run /proto-init to analyze and enhance it${NC}"
+    else
+        cp "$SCRIPT_DIR/CLAUDE.md" "$TARGET_DIR/"
+        echo -e "    ${GREEN}+ Added: CLAUDE.md${NC}"
+    fi
+
+    # .mcp.json - merge if exists
+    if [ -f "$TARGET_DIR/.mcp.json" ]; then
+        echo -e "    ${YELLOW}Existing .mcp.json detected - preserving${NC}"
+        echo -e "    ${BLUE}Protocol servers will be added on /proto-init${NC}"
+    else
+        cp "$SCRIPT_DIR/.mcp.json" "$TARGET_DIR/" 2>/dev/null || true
+        echo -e "    ${GREEN}+ Added: .mcp.json${NC}"
+    fi
+
+    # .gitignore - don't overwrite
+    if [ ! -f "$TARGET_DIR/.gitignore" ]; then
+        cp "$SCRIPT_DIR/.gitignore" "$TARGET_DIR/" 2>/dev/null || true
+        echo -e "    ${GREEN}+ Added: .gitignore${NC}"
+    else
+        echo -e "    ${YELLOW}Kept existing: .gitignore${NC}"
+    fi
+else
+    echo -e "${GREEN}[1/6]${NC} Copying .claude directory..."
+    cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR/"
+
+    echo -e "${GREEN}[2/6]${NC} Copying configuration files..."
+    cp "$SCRIPT_DIR/CLAUDE.md" "$TARGET_DIR/"
+    cp "$SCRIPT_DIR/.mcp.json" "$TARGET_DIR/" 2>/dev/null || true
+    cp "$SCRIPT_DIR/.gitignore" "$TARGET_DIR/" 2>/dev/null || true
+fi
 
 echo -e "${GREEN}[3/6]${NC} Copying documentation..."
 cp "$SCRIPT_DIR/README.md" "$TARGET_DIR/" 2>/dev/null || true
-cp "$SCRIPT_DIR/HOOKS.md" "$TARGET_DIR/" 2>/dev/null || true
-cp "$SCRIPT_DIR/INSTALLATION.md" "$TARGET_DIR/" 2>/dev/null || true
-cp "$SCRIPT_DIR/QUICKSTART.md" "$TARGET_DIR/" 2>/dev/null || true
-cp "$SCRIPT_DIR/TROUBLESHOOTING.md" "$TARGET_DIR/" 2>/dev/null || true
+cp "$SCRIPT_DIR/LICENSE" "$TARGET_DIR/" 2>/dev/null || true
+cp "$SCRIPT_DIR/CHANGELOG"*.md "$TARGET_DIR/" 2>/dev/null || true
+cp "$SCRIPT_DIR/protocol-manifest.json" "$TARGET_DIR/" 2>/dev/null || true
+if [ -d "$SCRIPT_DIR/docs" ]; then
+    cp -r "$SCRIPT_DIR/docs" "$TARGET_DIR/"
+fi
+if [ -d "$SCRIPT_DIR/scripts" ]; then
+    cp -r "$SCRIPT_DIR/scripts" "$TARGET_DIR/"
+fi
 
 echo -e "${GREEN}[4/6]${NC} Copying install script..."
 cp "$SCRIPT_DIR/install.sh" "$TARGET_DIR/" 2>/dev/null || true
@@ -247,10 +340,34 @@ if [ "$ERRORS" -eq 0 ]; then
     echo -e "${GREEN}║              Installation Complete!                       ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "Next steps:"
-    echo -e "  1. ${BLUE}cd $TARGET_DIR${NC}"
-    echo -e "  2. ${BLUE}claude${NC}"
-    echo -e "  3. Run ${BLUE}/proto-init${NC} to initialize for your project"
+
+    # Prompt to delete origin directory
+    echo -e "${YELLOW}Delete the source directory (cloned repo)?${NC}"
+    echo -e "  Source: ${BLUE}$SCRIPT_DIR${NC}"
+    echo ""
+    read -p "Delete source directory? [y/N]: " delete_source
+    if [[ "$delete_source" =~ ^[Yy]$ ]]; then
+        # Safety check: make sure we're not deleting the target
+        if [ "$SCRIPT_DIR" != "$TARGET_DIR" ]; then
+            echo -e "${BLUE}Removing source directory...${NC}"
+            rm -rf "$SCRIPT_DIR"
+            echo -e "${GREEN}✓ Source directory deleted${NC}"
+        fi
+        echo ""
+        echo -e "${YELLOW}NOTE: Your shell is still in the deleted directory.${NC}"
+        echo -e "${YELLOW}Run this command to move to your project:${NC}"
+        echo ""
+        echo -e "  ${BLUE}cd $TARGET_DIR && claude${NC}"
+        echo ""
+        echo -e "Then run ${BLUE}/proto-init${NC} to initialize for your project"
+    else
+        echo -e "${YELLOW}Source directory kept at: $SCRIPT_DIR${NC}"
+        echo ""
+        echo -e "Next steps:"
+        echo -e "  1. ${BLUE}cd $TARGET_DIR${NC}"
+        echo -e "  2. ${BLUE}claude${NC}"
+        echo -e "  3. Run ${BLUE}/proto-init${NC} to initialize for your project"
+    fi
     echo ""
 else
     echo -e "${YELLOW}╔═══════════════════════════════════════════════════════════╗${NC}"
