@@ -3,7 +3,8 @@
 # Reads JSON from stdin, checks syntax, outputs error to stderr on failure
 
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
+source "$SCRIPT_DIR/hook-colors.sh" 2>/dev/null || true
+HOOK_NAME="post-write-validate"
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -12,8 +13,11 @@ INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 if [ -z "$FILE_PATH" ] || [ ! -f "$FILE_PATH" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
+
+hook_status "$HOOK_NAME" "CHECKING" "$(basename "$FILE_PATH")"
 
 # Get file extension
 EXT="${FILE_PATH##*.}"
@@ -24,8 +28,10 @@ case "$EXT" in
         if command -v python3 &> /dev/null; then
             RESULT=$(python3 -m py_compile "$FILE_PATH" 2>&1)
             if [ $? -ne 0 ]; then
-                echo "SYNTAX ERROR in $FILE_PATH: $RESULT" >&2
-                exit 2
+                hook_status "$HOOK_NAME" "FAIL" "Python syntax error"
+                ERRMSG=$(echo "$RESULT" | jq -Rs .)
+                echo "{\"decision\": \"block\", \"message\": $ERRMSG}"
+                exit 0
             fi
         fi
         ;;
@@ -33,8 +39,10 @@ case "$EXT" in
         if command -v node &> /dev/null; then
             RESULT=$(node --check "$FILE_PATH" 2>&1)
             if [ $? -ne 0 ]; then
-                echo "SYNTAX ERROR in $FILE_PATH: $RESULT" >&2
-                exit 2
+                hook_status "$HOOK_NAME" "FAIL" "JavaScript syntax error"
+                ERRMSG=$(echo "$RESULT" | jq -Rs .)
+                echo "{\"decision\": \"block\", \"message\": $ERRMSG}"
+                exit 0
             fi
         fi
         ;;
@@ -42,8 +50,10 @@ case "$EXT" in
         if command -v python3 &> /dev/null; then
             RESULT=$(python3 -c "import json, sys; json.load(open(sys.argv[1]))" "$FILE_PATH" 2>&1)
             if [ $? -ne 0 ]; then
-                echo "SYNTAX ERROR in $FILE_PATH: $RESULT" >&2
-                exit 2
+                hook_status "$HOOK_NAME" "FAIL" "Invalid JSON"
+                ERRMSG=$(echo "$RESULT" | jq -Rs .)
+                echo "{\"decision\": \"block\", \"message\": $ERRMSG}"
+                exit 0
             fi
         fi
         ;;
@@ -51,12 +61,16 @@ case "$EXT" in
         if command -v bash &> /dev/null; then
             RESULT=$(bash -n "$FILE_PATH" 2>&1)
             if [ $? -ne 0 ]; then
-                echo "SYNTAX ERROR in $FILE_PATH: $RESULT" >&2
-                exit 2
+                hook_status "$HOOK_NAME" "FAIL" "Bash syntax error"
+                ERRMSG=$(echo "$RESULT" | jq -Rs .)
+                echo "{\"decision\": \"block\", \"message\": $ERRMSG}"
+                exit 0
             fi
         fi
         ;;
 esac
 
-# No output on success
+# Success - output JSON
+hook_status "$HOOK_NAME" "OK" "Syntax valid"
+echo '{"continue": true}'
 exit 0
