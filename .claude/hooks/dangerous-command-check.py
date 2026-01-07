@@ -8,6 +8,14 @@ Blocks dangerous bash commands before execution.
 import json
 import sys
 import re
+import os
+
+# Import hook colors utility
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from hook_colors import hook_status
+except ImportError:
+    def hook_status(*args, **kwargs): pass
 
 DANGEROUS_PATTERNS = [
     # Filesystem destruction
@@ -55,23 +63,28 @@ def main():
     except json.JSONDecodeError as e:
         print(f"Failed to parse hook input: {e}", file=sys.stderr)
         sys.exit(1)
-    
+
     tool_name = input_data.get("tool_name", "")
     tool_input = input_data.get("tool_input", {})
-    
+
     if tool_name != "Bash":
         sys.exit(0)
-    
+
     command = tool_input.get("command", "")
     if not command:
         sys.exit(0)
-    
+
+    # Show shortened command for status
+    cmd_preview = command.split()[0] if command else "unknown"
+    hook_status("dangerous-command-check", "CHECKING", cmd_preview)
+
     violations = []
     for pattern, description in DANGEROUS_PATTERNS:
         if re.search(pattern, command, re.IGNORECASE):
             violations.append(description)
-    
+
     if violations:
+        hook_status("dangerous-command-check", "BLOCK", f"{len(violations)} dangerous patterns")
         msg = "DANGEROUS COMMAND BLOCKED:\n\n"
         msg += f"  Command: {command[:100]}{'...' if len(command) > 100 else ''}\n\n"
         msg += "  Violations:\n"
@@ -80,7 +93,8 @@ def main():
         msg += "\nUse a safer alternative or get explicit user approval."
         print(msg, file=sys.stderr)
         sys.exit(2)
-    
+
+    hook_status("dangerous-command-check", "OK", "Safe command")
     sys.exit(0)
 
 
