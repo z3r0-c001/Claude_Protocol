@@ -7,6 +7,11 @@
         "MEMORY_PATH": ".claude/memory"
       },
       "description": "Persistent memory server for storing learnings, decisions, corrections, and patterns across sessions"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+      "description": "File system access with safety guards"
     }
   },
   "mcpConfig": {
