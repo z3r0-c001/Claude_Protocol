@@ -5,10 +5,25 @@
 #
 # Usage: bash run-hook.sh <hook-name>
 # Example: bash run-hook.sh pretool-laziness-check.py
+#
+# Environment Variables:
+#   CLAUDE_HOOKS_DISABLED=1  - Disable all hooks (for debugging)
+#   CLAUDE_HOOK_DEBUG=1      - Enable verbose hook debugging
 
 set -o pipefail
 
 HOOK_NAME="$1"
+
+# Check if hooks are globally disabled
+if [ "${CLAUDE_HOOKS_DISABLED:-0}" = "1" ]; then
+    echo '{"continue": true}' 2>/dev/null || true
+    exit 0
+fi
+
+# Debug mode
+if [ "${CLAUDE_HOOK_DEBUG:-0}" = "1" ]; then
+    echo "[HOOK DEBUG] Running: $HOOK_NAME" >&2
+fi
 
 # Validate input
 if [ -z "$HOOK_NAME" ]; then

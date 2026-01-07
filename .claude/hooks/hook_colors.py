@@ -1,153 +1,72 @@
 #!/usr/bin/env python3
 """
-hook_colors.py - Colored output utility for Python hooks
-Import this module to get colored hook status indicators
+hook_colors.py - Backward compatibility wrapper
+
+This module re-exports from colors.py for backward compatibility.
+New code should import from colors.py directly.
 """
 
-import sys
 import os
+import sys
 
-# ANSI escape codes
-RESET = "\033[0m"
-BOLD = "\033[1m"
+# Add hooks directory to path for colors import
+_hooks_dir = os.path.dirname(os.path.abspath(__file__))
+if _hooks_dir not in sys.path:
+    sys.path.insert(0, _hooks_dir)
 
-# Hook color schemes: background + foreground
-HOOK_COLORS = {
-    # PreToolUse hooks - warm colors
-    "pre-write-check": "\033[1;97;41m",           # White on Red
-    "pretool-laziness-check": "\033[1;30;43m",    # Black on Yellow
-    "pretool-hallucination-check": "\033[1;97;45m",  # White on Magenta
-    "dangerous-command-check": "\033[1;97;101m",  # White on Bright Red
-    "agent-announce": "\033[1;30;104m",           # Black on Bright Blue
+from colors import (
+    ANSI,
+    COLORS_ENABLED,
+    get_hook_theme,
+    get_status_symbol,
+    format_hook_status,
+    hook_status,
+    set_current_hook,
+    status,
+)
 
-    # PostToolUse hooks - cool colors
-    "post-write-validate": "\033[1;97;44m",       # White on Blue
-    "file-edit-tracker": "\033[1;30;46m",         # Black on Cyan
-    "context-detector": "\033[1;30;42m",          # Black on Green
-    "research-quality-check": "\033[1;97;104m",   # White on Bright Blue
-    "doc-size-detector": "\033[1;30;106m",        # Black on Bright Cyan
-
-    # UserPromptSubmit hooks - green spectrum
-    "context-loader": "\033[1;30;102m",           # Black on Bright Green
-    "skill-activation-prompt": "\033[1;97;42m",   # White on Green
-
-    # Stop hooks - neutral/warning
-    "laziness-check": "\033[1;30;103m",           # Black on Bright Yellow
-    "honesty-check": "\033[1;97;105m",            # White on Bright Magenta
-    "stop-verify": "\033[1;30;47m",               # Black on White
-
-    # SubagentStop hooks
-    "research-validator": "\033[1;97;102m",       # White on Bright Green
-    "agent-handoff-validator": "\033[1;30;107m",  # Black on Bright White
-}
-
-# Default for unknown hooks
-DEFAULT_COLOR = "\033[1;97;100m"  # White on Bright Black
-
-# Status icons
-STATUS_ICONS = {
-    "START": "▶",
-    "CHECKING": "▶",
-    "RUNNING": "▶",
-    "OK": "✓",
-    "PASS": "✓",
-    "CONTINUE": "✓",
-    "BLOCK": "✗",
-    "FAIL": "✗",
-    "ERROR": "✗",
-    "WARN": "⚠",
-    "SKIP": "⚠",
-}
-
-
-def get_hook_name(script_path: str = None) -> str:
-    """Extract hook name from script path or __file__."""
-    if script_path is None:
-        # Try to get from caller's __file__
-        import inspect
-        frame = inspect.currentframe()
-        if frame and frame.f_back:
-            script_path = frame.f_back.f_globals.get("__file__", "unknown")
-
-    name = os.path.basename(script_path)
-    name = name.replace(".py", "").replace(".sh", "")
-    return name
-
+# Legacy aliases
+RESET = ANSI.RESET
+BOLD = ANSI.BOLD
 
 def get_hook_color(hook_name: str) -> str:
-    """Get ANSI color code for a hook."""
-    return HOOK_COLORS.get(hook_name, DEFAULT_COLOR)
+    """Legacy function - returns combined fg+bg code."""
+    fg, bg = get_hook_theme(hook_name)
+    return f"{fg}{bg}{ANSI.BOLD}"
 
-
-def hook_status(hook_name: str, status: str, detail: str = "") -> None:
-    """
-    Output colored hook status to stderr.
-
-    Args:
-        hook_name: Name of the hook (e.g., "pre-write-check")
-        status: Status string (e.g., "START", "OK", "BLOCK")
-        detail: Optional detail message
-    """
-    color = get_hook_color(hook_name)
-    icon = STATUS_ICONS.get(status.upper(), "⚡")
-
-    # Format display name
-    display_name = hook_name.replace("-", " ").title()
-
-    if detail:
-        msg = f"{color} {icon} {display_name}: {status} {RESET} {detail}"
-    else:
-        msg = f"{color} {icon} {display_name}: {status} {RESET}"
-
-    print(msg, file=sys.stderr)
-
-
-def hook_compact(hook_name: str, status: str) -> None:
+def hook_compact(hook_name: str, status_str: str) -> None:
     """Output a compact one-line colored status."""
-    color = get_hook_color(hook_name)
-    print(f"{color} {status} {RESET}", file=sys.stderr)
-
+    fg, bg = get_hook_theme(hook_name)
+    print(f"{fg}{bg}{ANSI.BOLD} {status_str} {ANSI.RESET}", file=sys.stderr)
 
 def hook_banner(hook_name: str, message: str = "") -> None:
-    """Output a more prominent banner-style status."""
-    color = get_hook_color(hook_name)
+    """Output a banner-style status."""
+    fg, bg = get_hook_theme(hook_name)
     display_name = hook_name.replace("-", " ").upper()
     width = max(len(display_name) + 10, 40)
-
-    border = "━" * width
+    border = "-" * width
     padding = " " * (width - len(display_name) - 4)
-
+    
     banner = f"""
-{color}┏{border}┓{RESET}
-{color}┃  {display_name}{padding}┃{RESET}
-{color}┗{border}┛{RESET}
+{fg}{bg}{ANSI.BOLD}+{border}+{ANSI.RESET}
+{fg}{bg}{ANSI.BOLD}|  {display_name}{padding}|{ANSI.RESET}
+{fg}{bg}{ANSI.BOLD}+{border}+{ANSI.RESET}
 """
     print(banner, file=sys.stderr)
     if message:
         print(f"  {message}", file=sys.stderr)
 
-
-# Auto-detect hook name when module is imported
-_current_hook = None
-
-
-def set_current_hook(name: str) -> None:
-    """Set the current hook name for simplified API."""
-    global _current_hook
-    _current_hook = name
-
-
-def status(status_str: str, detail: str = "") -> None:
-    """Simplified status output using auto-detected hook name."""
-    global _current_hook
-    if _current_hook is None:
-        _current_hook = get_hook_name()
-    hook_status(_current_hook, status_str, detail)
-
-
-def compact(status_str: str) -> None:
-    """Simplified compact output using auto-detected hook name."""
-    global _current_hook
-    if _current_hook is None:
-        _current_hook = get_hook_name()
-    hook_compact(_current_hook, status_str)
+# Re-export STATUS_ICONS for compatibility
+STATUS_ICONS = {
+    "START": ">",
+    "CHECKING": ">",
+    "RUNNING": ">",
+    "OK": "+",
+    "PASS": "+",
+    "CONTINUE": "+",
+    "BLOCK": "X",
+    "FAIL": "X",
+    "ERROR": "X",
+    "WARN": "!",
+    "SKIP": "-",
+}
