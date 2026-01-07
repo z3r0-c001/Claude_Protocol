@@ -3,7 +3,10 @@
 # Reads JSON from stdin with tool_response
 
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/hook-logger.sh" 2>/dev/null || { hook_log() { :; }; }
+source "$SCRIPT_DIR/hook-colors.sh" 2>/dev/null || true
+HOOK_NAME="research-quality-check"
+
+hook_status "$HOOK_NAME" "RUNNING" "Checking research"
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -12,6 +15,7 @@ INPUT=$(cat)
 OUTPUT=$(echo "$INPUT" | jq -r '.tool_response // empty')
 
 if [ -z "$OUTPUT" ]; then
+    echo '{"continue": true}'
     exit 0
 fi
 
@@ -28,9 +32,11 @@ if echo "$OUTPUT" | grep -qiE "however|but|contrary|conflicting|disputed"; then
 fi
 
 if [ -n "$ISSUES" ]; then
-    cat << ENDJSON
-{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"RESEARCH NOTE: ${ISSUES}. Verify information accuracy."}}
-ENDJSON
+    hook_status "$HOOK_NAME" "WARN" "Issues: ${ISSUES}"
+    echo "{\"continue\": true, \"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"RESEARCH NOTE: ${ISSUES}. Verify information accuracy.\"}}"
+else
+    hook_status "$HOOK_NAME" "OK" "Quality check passed"
+    echo '{"continue": true}'
 fi
 
 exit 0
