@@ -1,9 +1,126 @@
 # Changelog
 
-**Current Version:** 1.2.10
+**Current Version:** 1.2.12
 **Date:** 2026-01-08
 
 > This file is overwritten with each release. For historical changes, see git history.
+
+---
+
+## v1.2.12 - Agent Disambiguation & Enforcement (Minor)
+
+Adds disambiguation for ambiguous prompts and comprehensive agent usage enforcement.
+
+### New Features
+
+**Agent Disambiguation:**
+- When multiple agents score within 15% of each other, presents user with options
+- Prevents wrong agent selection on ambiguous prompts like "Fix it"
+- Configurable gap threshold, max options, and minimum score
+- Visual banner showing all matching agents with scores
+
+**Agent Enforcement System:**
+- Validates required agents are used based on file patterns and prompt analysis
+- Stop hook blocks completion until requirements met (configurable strictness)
+- Tracks agent invocations throughout session
+- Rules for security, architecture, testing, frontend, and database changes
+
+**Agent Creation Command:**
+- `/create-agent` command for safe agent creation with registry integration
+- Automatic trigger generation based on agent purpose
+- Schema validation for new agents
+
+**Test Suites:**
+- `test-auto-invoke.py`: 39 tests covering all invocation scenarios
+- `test-agent-lifecycle.py`: 8 tests for agent creation and enforcement
+
+### New Files
+
+| File | Purpose |
+|------|---------|
+| `.claude/hooks/agent-enforcement-check.py` | Stop hook for usage enforcement |
+| `.claude/hooks/agent-visibility.py` | Terminal banners and disambiguation UI |
+| `.claude/config/enforcement-rules.json` | Enforcement rule definitions |
+| `.claude/commands/create-agent.md` | Agent creation command |
+| `.claude/scripts/register-agent.py` | Agent registry script |
+| `.claude/tests/test-auto-invoke.py` | Auto-invocation test suite |
+| `.claude/tests/test-agent-lifecycle.py` | Agent lifecycle test suite |
+
+### Configuration Options
+
+| Setting | Description |
+|---------|-------------|
+| `disambiguation.enabled` | Enable multi-agent options (default: true) |
+| `disambiguation.score_gap_threshold` | Max score difference for disambiguation (default: 15) |
+| `disambiguation.max_options` | Maximum options to show (default: 3) |
+| `disambiguation.min_score_for_option` | Minimum score to be an option (default: 20) |
+
+### Updates
+
+| File | Change |
+|------|--------|
+| `CLAUDE.md` | Added disambiguation docs, fixed threshold values (70%/45%) |
+| `invoke-config.json` | Added disambiguation section |
+| `agent-auto-invoke.py` | Added disambiguation detection and handling |
+| `agent-visibility.py` | Added format_disambiguation_banner() |
+| `test-auto-invoke.py` | Support for comma-separated expected agents |
+
+---
+
+## v1.2.11 - Agent Auto-Invocation System (Minor)
+
+Comprehensive agent auto-invocation system with 3-layer matching pipeline for automatic agent selection based on user prompts.
+
+### New Features
+
+**3-Layer Matching Pipeline:**
+- Layer 1 (25%): Keyword matching against agent triggers
+- Layer 2 (35%): Category-based classification
+- Layer 3 (40%): Phrase pattern matching for intent analysis
+
+**Confidence Thresholds:**
+- >= 70%: Auto-invoke with banner notification
+- 45-69%: Prompt user for confirmation
+- < 45%: Non-blocking suggestion
+
+### New Files
+
+| File | Purpose |
+|------|---------|
+| `.claude/config/invoke-config.json` | Auto-invocation configuration |
+| `.claude/config/invoke-config.schema.json` | Configuration schema validation |
+| `.claude/agents/agent-registry.json` | Centralized agent trigger registry |
+| `.claude/agents/agent-registry.schema.json` | Registry schema validation |
+| `.claude/hooks/agent-auto-invoke.py` | Main UserPromptSubmit hook |
+| `.claude/commands/auto-agent-config.md` | Configuration command |
+
+### Configuration Options
+
+| Setting | Description |
+|---------|-------------|
+| `thresholds.auto_invoke` | Minimum confidence for auto-invoke (default: 70) |
+| `thresholds.prompt_user` | Minimum confidence for prompt (default: 45) |
+| `weights.keyword` | Layer 1 weight (default: 0.25) |
+| `weights.category` | Layer 2 weight (default: 0.35) |
+| `weights.llm_intent` | Layer 3 weight (default: 0.40) |
+| `visibility.show_banners` | Display agent banners (default: true) |
+| `visibility.show_confidence_breakdown` | Show layer scores (default: true) |
+
+### Agent Registry Features
+
+- All 31 agents with comprehensive trigger definitions
+- Exact keywords and phrase patterns per agent
+- File pattern triggers
+- Negation patterns to prevent false matches
+- Orchestration metadata for multi-agent workflows
+- Command-to-agent mappings
+
+### Updates
+
+| File | Change |
+|------|--------|
+| `CLAUDE.md` | Added Auto-Invocation System section, updated hooks table |
+| `.claude/settings.json` | Added agent-auto-invoke.py to UserPromptSubmit |
 
 ---
 
