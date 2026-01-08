@@ -136,6 +136,24 @@
       "required_agents": ["data-modeler"],
       "required_categories": ["data"],
       "message": "Database schema modified without data modeling review"
+    },
+
+    "version_bump_release": {
+      "description": "Version bumps MUST include GitHub release creation",
+      "enabled": true,
+      "strictness": "block",
+      "trigger": {
+        "file_patterns": [
+          "**/protocol-manifest.json",
+          "**/CHANGELOG.md"
+        ],
+        "content_patterns": [
+          "\"version\":\\s*\"\\d+\\.\\d+\\.\\d+\"",
+          "## v\\d+\\.\\d+\\.\\d+"
+        ]
+      },
+      "required_actions": ["gh_release_create"],
+      "message": "Version bumped without GitHub release. Run: gh release create vX.Y.Z --title \"...\" --notes \"...\""
     }
   },
 
