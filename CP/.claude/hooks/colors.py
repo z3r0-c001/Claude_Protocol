@@ -3,7 +3,10 @@
 colors.py - Unified color system for Claude Protocol hooks and agents
 
 Single source of truth for all terminal colorization.
-Based on the working v1.1.10 implementation - NO TTY detection.
+
+Environment variable support per CLI best practices:
+- NO_COLOR: https://no-color.org/ - Disable colors when set (any value)
+- FORCE_COLOR: https://force-color.org/ - Force colors even when piped
 """
 
 import sys
@@ -87,6 +90,14 @@ AGENT_COLORS = {
     "orchestrator": "\033[1;30;107m",             # Black on Bright White
     "git-strategist": "\033[1;30;43m",            # Black on Yellow
     "tech-debt-tracker": "\033[1;30;103m",        # Black on Bright Yellow
+
+    # Additional agents (previously missing)
+    "accessibility-auditor": "\033[1;97;45m",     # White on Magenta (Quality)
+    "api-designer": "\033[1;97;44m",              # White on Blue (Domain)
+    "data-modeler": "\033[1;30;42m",              # Black on Green (Domain)
+    "devops-engineer": "\033[1;97;44m",           # White on Blue (Domain)
+    "error-handler": "\033[1;97;41m",             # White on Red (Quality)
+    "refactorer": "\033[1;97;104m",               # White on Bright Blue (Core)
 }
 
 DEFAULT_AGENT_COLOR = "\033[1;97;100m"  # White on Bright Black
@@ -157,8 +168,35 @@ class ANSI:
     BG_BRIGHT_WHITE = "\033[107m"
 
 
-# Always enabled - no TTY detection (this is what v1.1.10 did)
-COLORS_ENABLED = True
+# =============================================================================
+# COLOR DETECTION - Per CLI best practices
+# Sources:
+#   - NO_COLOR: https://no-color.org/
+#   - FORCE_COLOR: https://force-color.org/
+# =============================================================================
+
+def _should_use_color() -> bool:
+    """
+    Determine if colors should be enabled based on environment variables.
+
+    Priority order:
+    1. FORCE_COLOR - if set, always enable colors (for piped output, CI, etc.)
+    2. NO_COLOR - if set, disable colors (user preference)
+    3. Default - enable colors (backward compatible with v1.1.10)
+    """
+    # FORCE_COLOR takes precedence (per force-color.org)
+    if os.environ.get('FORCE_COLOR'):
+        return True
+
+    # NO_COLOR disables colors when present (per no-color.org)
+    # Value doesn't matter - just presence
+    if 'NO_COLOR' in os.environ:
+        return False
+
+    # Default: colors enabled (maintains v1.1.10 behavior)
+    return True
+
+COLORS_ENABLED = _should_use_color()
 
 
 # =============================================================================
