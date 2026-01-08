@@ -1,0 +1,1007 @@
+{
+  "$schema": "./agent-registry.schema.json",
+  "version": "1.0.0",
+  "description": "Centralized registry of all agents with triggers, categories, and orchestration metadata",
+
+  "agents": {
+
+    "architect": {
+      "name": "architect",
+      "path": "core/architect.md",
+      "description": "System design, architecture decisions, and strategic planning",
+      "category_group": "core",
+      "categories": ["design", "architecture", "planning"],
+      "model_tier": "high",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "architecture", "system design", "ADR", "technical design",
+          "integration", "refactor architecture", "design pattern"
+        ],
+        "phrase_patterns": [
+          "(design|plan|architect).*?(system|feature|module|service)",
+          "(how should|what's the best way).*?(structure|organize|design)",
+          "(refactor|restructure|reorganize).*?(code|system|module)",
+          "(major|significant).*?(change|implementation|feature)"
+        ],
+        "file_patterns": [
+          "**/architecture/**", "**/design/**", "**/*.adr.md"
+        ],
+        "negation_patterns": [
+          "don't.*?design", "skip.*?planning", "just.*?implement"
+        ]
+      },
+      "orchestration": {
+        "typical_position": "early",
+        "often_follows": ["brainstormer"],
+        "often_precedes": ["security-scanner", "tester", "reviewer"],
+        "can_parallel_with": []
+      }
+    },
+
+    "debugger": {
+      "name": "debugger",
+      "path": "core/debugger.md",
+      "description": "Systematic debugging and root cause analysis",
+      "category_group": "core",
+      "categories": ["debugging", "troubleshooting"],
+      "model_tier": "high",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "debug", "debugging", "trace", "root cause", "stack trace",
+          "breakpoint", "step through", "investigate error"
+        ],
+        "phrase_patterns": [
+          "(debug|trace|investigate).*?(error|issue|bug|problem)",
+          "(why|what).*?(failing|broken|not working|crashing)",
+          "(find|locate|identify).*?(bug|issue|problem|cause)",
+          "(error|exception|crash).*?(happening|occurring|showing)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "any",
+        "often_follows": [],
+        "often_precedes": ["tester"],
+        "can_parallel_with": []
+      }
+    },
+
+    "documenter": {
+      "name": "documenter",
+      "path": "core/documenter.md",
+      "description": "Generate and maintain documentation synchronized with code",
+      "category_group": "core",
+      "categories": ["documentation"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "document", "documentation", "README", "JSDoc", "docstring",
+          "API docs", "code comments", "ADR"
+        ],
+        "phrase_patterns": [
+          "(write|create|update|generate).*?(documentation|docs|README)",
+          "(add|write).*?(comments|docstrings|JSDoc)",
+          "(document|explain).*?(code|API|function|module)"
+        ],
+        "file_patterns": [
+          "**/docs/**", "**/*.md", "**/README*"
+        ],
+        "negation_patterns": [
+          "don't.*?document", "skip.*?docs", "no.*?documentation"
+        ]
+      },
+      "orchestration": {
+        "typical_position": "late",
+        "often_follows": ["architect", "reviewer"],
+        "often_precedes": [],
+        "can_parallel_with": []
+      }
+    },
+
+    "performance-analyzer": {
+      "name": "performance-analyzer",
+      "path": "core/performance-analyzer.md",
+      "description": "Analyze code for performance issues and optimization opportunities",
+      "category_group": "core",
+      "categories": ["performance"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "performance", "optimize", "slow", "fast", "speed",
+          "memory", "cache", "benchmark", "bottleneck", "profiling"
+        ],
+        "phrase_patterns": [
+          "(optimize|improve|speed up).*?(performance|speed|loading)",
+          "(slow|bottleneck|memory leak|high CPU)",
+          "(why|what).*?(slow|taking so long|performance issue)",
+          "(profile|benchmark|measure).*?(code|function|query)"
+        ],
+        "file_patterns": [
+          "**/cache/**", "**/worker/**", "**/queue/**"
+        ],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "middle",
+        "often_follows": ["architect"],
+        "often_precedes": ["reviewer"],
+        "can_parallel_with": ["security-scanner"]
+      }
+    },
+
+    "refactorer": {
+      "name": "refactorer",
+      "path": "core/refactorer.md",
+      "description": "Apply proven refactoring patterns while preserving behavior",
+      "category_group": "core",
+      "categories": ["design", "quality"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "refactor", "refactoring", "clean up", "restructure",
+          "extract method", "rename", "code smell", "DRY"
+        ],
+        "phrase_patterns": [
+          "(refactor|clean up|restructure).*?(code|function|class|module)",
+          "(extract|move|rename).*?(method|function|class|variable)",
+          "(reduce|eliminate).*?(duplication|complexity|coupling)",
+          "(improve|simplify).*?(code|structure|design)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": [
+          "don't.*?refactor", "skip.*?refactoring"
+        ]
+      },
+      "orchestration": {
+        "typical_position": "middle",
+        "often_follows": ["architect", "reviewer"],
+        "often_precedes": ["tester", "reviewer"],
+        "can_parallel_with": []
+      }
+    },
+
+    "research-analyzer": {
+      "name": "research-analyzer",
+      "path": "core/research-analyzer.md",
+      "description": "Analyze and synthesize research findings",
+      "category_group": "core",
+      "categories": ["research", "analysis"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "research", "analyze findings", "synthesize", "compare options",
+          "evaluate alternatives", "trade-offs"
+        ],
+        "phrase_patterns": [
+          "(analyze|synthesize|compare).*?(research|findings|options)",
+          "(evaluate|assess).*?(alternatives|approaches|solutions)",
+          "(what are|compare).*?(trade-offs|pros and cons)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "early",
+        "often_follows": ["brainstormer"],
+        "often_precedes": ["architect"],
+        "can_parallel_with": []
+      }
+    },
+
+    "accessibility-auditor": {
+      "name": "accessibility-auditor",
+      "path": "quality/accessibility-auditor.md",
+      "description": "Ensure WCAG compliance, screen reader compatibility, keyboard navigation",
+      "category_group": "quality",
+      "categories": ["frontend", "quality", "accessibility"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "accessibility", "a11y", "WCAG", "screen reader", "keyboard navigation",
+          "color contrast", "ARIA", "alt text"
+        ],
+        "phrase_patterns": [
+          "(check|audit|review).*?(accessibility|a11y|WCAG)",
+          "(make|ensure).*?(accessible|keyboard navigable)",
+          "(screen reader|assistive technology).*?(compatible|support)",
+          "(fix|improve).*?(accessibility|contrast|focus)"
+        ],
+        "file_patterns": [
+          "**/*.tsx", "**/*.jsx", "**/components/**"
+        ],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "late",
+        "often_follows": ["frontend-designer"],
+        "often_precedes": ["reviewer"],
+        "can_parallel_with": ["security-scanner"]
+      }
+    },
+
+    "error-handler": {
+      "name": "error-handler",
+      "path": "quality/error-handler.md",
+      "description": "Ensure consistent error responses, proper logging, and observability",
+      "category_group": "quality",
+      "categories": ["quality", "debugging"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "error handling", "exception handling", "logging", "monitoring",
+          "observability", "error response", "try catch"
+        ],
+        "phrase_patterns": [
+          "(add|implement|improve).*?(error handling|logging|monitoring)",
+          "(handle|catch).*?(error|exception|failure)",
+          "(what happens|how to handle).*?(error|failure|exception)"
+        ],
+        "file_patterns": [
+          "**/error/**", "**/logging/**", "**/middleware/**"
+        ],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "middle",
+        "often_follows": ["architect"],
+        "often_precedes": ["tester", "reviewer"],
+        "can_parallel_with": []
+      }
+    },
+
+    "fact-checker": {
+      "name": "fact-checker",
+      "path": "quality/fact-checker.md",
+      "description": "Verify factual claims about APIs, libraries, dates, statistics",
+      "category_group": "quality",
+      "categories": ["quality", "research"],
+      "model_tier": "standard",
+      "supports_plan_mode": false,
+      "triggers": {
+        "exact_keywords": [
+          "fact check", "verify", "is this correct", "is this true",
+          "confirm", "validate claim"
+        ],
+        "phrase_patterns": [
+          "(is it true|is this correct|verify).*?(that|if|whether)",
+          "(fact check|double check|confirm).*?(claim|statement|information)",
+          "(are you sure|can you verify).*?(about|that)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "any",
+        "often_follows": [],
+        "often_precedes": [],
+        "can_parallel_with": ["hallucination-checker"]
+      }
+    },
+
+    "hallucination-checker": {
+      "name": "hallucination-checker",
+      "path": "quality/hallucination-checker.md",
+      "description": "Verify all claims, packages, APIs, and technical details are real",
+      "category_group": "quality",
+      "categories": ["quality"],
+      "model_tier": "standard",
+      "supports_plan_mode": false,
+      "triggers": {
+        "exact_keywords": [
+          "verify package", "check if exists", "real package",
+          "validate API", "verify library"
+        ],
+        "phrase_patterns": [
+          "(does|is).*?(package|library|API|module).*?(exist|real|valid)",
+          "(verify|check|validate).*?(import|dependency|package)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "late",
+        "often_follows": [],
+        "often_precedes": [],
+        "can_parallel_with": ["laziness-destroyer"]
+      }
+    },
+
+    "honesty-evaluator": {
+      "name": "honesty-evaluator",
+      "path": "quality/honesty-evaluator.md",
+      "description": "Audit intellectual honesty and ensure appropriate uncertainty representation",
+      "category_group": "quality",
+      "categories": ["quality"],
+      "model_tier": "standard",
+      "supports_plan_mode": false,
+      "triggers": {
+        "exact_keywords": [
+          "am I being honest", "overclaiming", "uncertainty",
+          "confidence level", "epistemic"
+        ],
+        "phrase_patterns": [
+          "(am I|are you).*?(overclaiming|being honest|certain)",
+          "(check|evaluate).*?(honesty|claims|certainty)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "last",
+        "often_follows": [],
+        "often_precedes": [],
+        "can_parallel_with": []
+      }
+    },
+
+    "laziness-destroyer": {
+      "name": "laziness-destroyer",
+      "path": "quality/laziness-destroyer.md",
+      "description": "Catch lazy, incomplete, or placeholder code",
+      "category_group": "quality",
+      "categories": ["quality"],
+      "model_tier": "standard",
+      "supports_plan_mode": false,
+      "triggers": {
+        "exact_keywords": [
+          "check for placeholders", "find TODOs", "incomplete code",
+          "check completeness"
+        ],
+        "phrase_patterns": [
+          "(check|scan|find).*?(placeholder|TODO|incomplete|stub)",
+          "(is|are).*?(code|implementation).*?(complete|finished)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "last",
+        "often_follows": [],
+        "often_precedes": [],
+        "can_parallel_with": ["hallucination-checker"]
+      }
+    },
+
+    "reviewer": {
+      "name": "reviewer",
+      "path": "quality/reviewer.md",
+      "description": "Perform thorough code reviews for quality and best practices",
+      "category_group": "quality",
+      "categories": ["quality", "review"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "review", "code review", "PR review", "pull request",
+          "feedback", "critique", "assess code"
+        ],
+        "phrase_patterns": [
+          "(review|check|assess).*?(code|changes|PR|pull request)",
+          "(is this|does this).*?(good|correct|right|proper)",
+          "(give|provide).*?(feedback|review|assessment)",
+          "(what do you think).*?(about|of).*?(code|implementation)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": [
+          "don't.*?review", "skip.*?review"
+        ]
+      },
+      "orchestration": {
+        "typical_position": "last",
+        "often_follows": ["tester", "security-scanner"],
+        "often_precedes": [],
+        "can_parallel_with": []
+      }
+    },
+
+    "security-scanner": {
+      "name": "security-scanner",
+      "path": "quality/security-scanner.md",
+      "description": "Identify security vulnerabilities and OWASP Top 10 issues",
+      "category_group": "quality",
+      "categories": ["security", "quality"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "security", "vulnerability", "CVE", "OWASP", "XSS", "CSRF",
+          "SQL injection", "authentication", "authorization", "secrets",
+          "credentials", "encrypt", "secure"
+        ],
+        "phrase_patterns": [
+          "(check|scan|audit|review).*?(security|vulnerabilities)",
+          "(auth|login|password|token).*?(implement|review|fix|check)",
+          "(secure|harden|protect).*?(code|application|api|endpoint)",
+          "(is this|are there).*?(secure|vulnerable|safe)"
+        ],
+        "file_patterns": [
+          "**/auth/**", "**/security/**", "**/*auth*", "**/*login*",
+          "**/*password*", "**/*token*", "**/*secret*", "**/*credential*"
+        ],
+        "negation_patterns": [
+          "not.*?security", "ignore.*?security", "skip.*?scan"
+        ]
+      },
+      "orchestration": {
+        "typical_position": "middle",
+        "often_follows": ["architect"],
+        "often_precedes": ["reviewer"],
+        "can_parallel_with": ["performance-analyzer", "test-coverage-enforcer"]
+      }
+    },
+
+    "test-coverage-enforcer": {
+      "name": "test-coverage-enforcer",
+      "path": "quality/test-coverage-enforcer.md",
+      "description": "Ensure adequate test coverage and identify gaps",
+      "category_group": "quality",
+      "categories": ["testing", "quality"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "test coverage", "coverage report", "coverage threshold",
+          "untested code", "missing tests"
+        ],
+        "phrase_patterns": [
+          "(check|analyze|improve).*?(test coverage|coverage)",
+          "(what|which).*?(code|functions?).*?(not tested|untested)",
+          "(increase|improve).*?(coverage|test coverage)"
+        ],
+        "file_patterns": [
+          "**/*.test.*", "**/*.spec.*", "**/coverage/**"
+        ],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "late",
+        "often_follows": ["tester"],
+        "often_precedes": ["reviewer"],
+        "can_parallel_with": ["security-scanner"]
+      }
+    },
+
+    "tester": {
+      "name": "tester",
+      "path": "quality/tester.md",
+      "description": "Write comprehensive tests and ensure code quality through testing",
+      "category_group": "quality",
+      "categories": ["testing"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "test", "unit test", "integration test", "e2e test", "TDD",
+          "jest", "pytest", "mocha", "vitest", "spec"
+        ],
+        "phrase_patterns": [
+          "(write|create|add|generate).*?(test|tests|spec|specs)",
+          "(test|cover).*?(function|module|component|API)",
+          "(TDD|test.first|test.driven)",
+          "(run|execute).*?(test|tests|test suite)"
+        ],
+        "file_patterns": [
+          "**/*.test.*", "**/*.spec.*", "**/test/**", "**/tests/**",
+          "**/__tests__/**"
+        ],
+        "negation_patterns": [
+          "don't.*?test", "skip.*?test", "no.*?tests"
+        ]
+      },
+      "orchestration": {
+        "typical_position": "late",
+        "often_follows": ["architect", "security-scanner"],
+        "often_precedes": ["reviewer"],
+        "can_parallel_with": ["security-scanner"]
+      }
+    },
+
+    "api-designer": {
+      "name": "api-designer",
+      "path": "domain/api-designer.md",
+      "description": "Design consistent, versioned, well-documented APIs",
+      "category_group": "domain",
+      "categories": ["api", "design"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "API design", "endpoint", "REST", "GraphQL", "API versioning",
+          "request/response", "route", "controller"
+        ],
+        "phrase_patterns": [
+          "(design|create|add).*?(API|endpoint|route)",
+          "(REST|GraphQL).*?(API|endpoint|schema)",
+          "(version|evolve).*?(API|endpoint)",
+          "(what should|how should).*?(API|endpoint).*?(look|be)"
+        ],
+        "file_patterns": [
+          "**/api/**", "**/routes/**", "**/controllers/**", "**/handlers/**",
+          "**/*openapi*", "**/*swagger*"
+        ],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "early",
+        "often_follows": ["architect"],
+        "often_precedes": ["security-scanner", "tester"],
+        "can_parallel_with": []
+      }
+    },
+
+    "codebase-analyzer": {
+      "name": "codebase-analyzer",
+      "path": "domain/codebase-analyzer.md",
+      "description": "Analyze project structure, detect languages/frameworks, identify patterns",
+      "category_group": "domain",
+      "categories": ["analysis"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "analyze codebase", "project structure", "code analysis",
+          "what framework", "what language", "understand codebase"
+        ],
+        "phrase_patterns": [
+          "(analyze|understand|explore).*?(codebase|project|code)",
+          "(what|which).*?(framework|language|pattern).*?(using|used)",
+          "(how is|what is).*?(project|codebase).*?(structured|organized)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "first",
+        "often_follows": [],
+        "often_precedes": ["architect", "protocol-generator"],
+        "can_parallel_with": []
+      }
+    },
+
+    "data-modeler": {
+      "name": "data-modeler",
+      "path": "domain/data-modeler.md",
+      "description": "Design schemas, write migrations, optimize queries",
+      "category_group": "domain",
+      "categories": ["data", "design"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "database", "schema", "migration", "query", "SQL", "ORM",
+          "model", "entity", "table", "index", "foreign key"
+        ],
+        "phrase_patterns": [
+          "(design|create|modify).*?(schema|database|model|entity)",
+          "(write|create).*?(migration|query)",
+          "(optimize|improve).*?(query|database|index)",
+          "(relationship|foreign key|join).*?(between|with)"
+        ],
+        "file_patterns": [
+          "**/migrations/**", "**/models/**", "**/schema/**", "**/*.sql",
+          "**/entities/**", "**/prisma/**"
+        ],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "early",
+        "often_follows": ["architect"],
+        "often_precedes": ["tester"],
+        "can_parallel_with": ["api-designer"]
+      }
+    },
+
+    "dependency-auditor": {
+      "name": "dependency-auditor",
+      "path": "domain/dependency-auditor.md",
+      "description": "Check dependency health: outdated packages, vulnerabilities, unused",
+      "category_group": "domain",
+      "categories": ["security", "quality"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "dependency", "dependencies", "npm audit", "outdated packages",
+          "package vulnerability", "unused dependencies", "update packages"
+        ],
+        "phrase_patterns": [
+          "(check|audit|review).*?(dependencies|packages)",
+          "(outdated|vulnerable|unused).*?(package|dependency)",
+          "(update|upgrade).*?(dependencies|packages)",
+          "(npm|yarn|pnpm).*?(audit|outdated)"
+        ],
+        "file_patterns": [
+          "package.json", "package-lock.json", "yarn.lock", "pnpm-lock.yaml",
+          "requirements.txt", "Pipfile", "Cargo.toml", "go.mod"
+        ],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "any",
+        "often_follows": [],
+        "often_precedes": ["security-scanner"],
+        "can_parallel_with": ["security-scanner"]
+      }
+    },
+
+    "devops-engineer": {
+      "name": "devops-engineer",
+      "path": "domain/devops-engineer.md",
+      "description": "Set up CI/CD, Docker, deployment configs with proper secrets handling",
+      "category_group": "domain",
+      "categories": ["devops"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "CI/CD", "Docker", "Kubernetes", "deploy", "deployment",
+          "pipeline", "container", "infrastructure", "GitHub Actions",
+          "Jenkins", "CircleCI"
+        ],
+        "phrase_patterns": [
+          "(set up|configure|create).*?(CI/CD|pipeline|deployment)",
+          "(deploy|containerize).*?(application|service|app)",
+          "(create|write).*?(Dockerfile|docker-compose|workflow)",
+          "(automate|configure).*?(build|test|deploy)"
+        ],
+        "file_patterns": [
+          "**/Dockerfile*", "**/.github/**", "**/docker-compose*",
+          "**/.gitlab-ci*", "**/Jenkinsfile", "**/*.yaml", "**/*.yml"
+        ],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "late",
+        "often_follows": ["tester"],
+        "often_precedes": [],
+        "can_parallel_with": []
+      }
+    },
+
+    "document-processor": {
+      "name": "document-processor",
+      "path": "domain/document-processor.md",
+      "description": "Process large documentation files into searchable chunks",
+      "category_group": "domain",
+      "categories": ["documentation"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "process documentation", "ingest docs", "chunk document",
+          "large documentation", "doc-ingest", "doc-search"
+        ],
+        "phrase_patterns": [
+          "(process|ingest|load).*?(documentation|docs|manual)",
+          "(large|big).*?(file|document|documentation)",
+          "(search|find in).*?(documentation|docs|processed)"
+        ],
+        "file_patterns": [
+          "**/docs/**/*.md", "**/documentation/**"
+        ],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "any",
+        "often_follows": [],
+        "often_precedes": [],
+        "can_parallel_with": []
+      }
+    },
+
+    "frontend-designer": {
+      "name": "frontend-designer",
+      "path": "domain/frontend-designer.md",
+      "description": "UI/UX design, component architecture, frontend consistency",
+      "category_group": "domain",
+      "categories": ["frontend", "design"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "UI", "UX", "frontend", "component", "button", "form", "modal",
+          "dialog", "layout", "responsive", "CSS", "styling", "Tailwind",
+          "React", "Vue", "Svelte", "design system"
+        ],
+        "phrase_patterns": [
+          "(create|build|design|implement).*?(UI|component|button|form|page|layout)",
+          "(style|design).*?(component|page|interface)",
+          "(make|create).*?(responsive|accessible|consistent)",
+          "(add|implement).*?(dark mode|theme|styling)"
+        ],
+        "file_patterns": [
+          "**/*.tsx", "**/*.jsx", "**/*.vue", "**/*.svelte",
+          "**/*.css", "**/*.scss", "**/components/**", "**/ui/**"
+        ],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "middle",
+        "often_follows": ["architect", "brainstormer"],
+        "often_precedes": ["accessibility-auditor", "tester"],
+        "can_parallel_with": ["ui-researcher"]
+      }
+    },
+
+    "protocol-analyzer": {
+      "name": "protocol-analyzer",
+      "path": "domain/protocol-analyzer.md",
+      "description": "Analyze protocol installation for optimization opportunities",
+      "category_group": "domain",
+      "categories": ["analysis"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "analyze protocol", "protocol optimization", "unused hooks",
+          "protocol health", "protocol analysis"
+        ],
+        "phrase_patterns": [
+          "(analyze|check|review).*?(protocol|installation)",
+          "(optimize|improve).*?(protocol|configuration)",
+          "(unused|outdated).*?(hooks|agents|skills)"
+        ],
+        "file_patterns": [
+          ".claude/**", "protocol-manifest.json"
+        ],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "any",
+        "often_follows": [],
+        "often_precedes": ["protocol-updater"],
+        "can_parallel_with": []
+      }
+    },
+
+    "protocol-generator": {
+      "name": "protocol-generator",
+      "path": "domain/protocol-generator.md",
+      "description": "Generate project-specific Claude artifacts based on codebase analysis",
+      "category_group": "domain",
+      "categories": ["workflow"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "generate protocol", "bootstrap", "generate CLAUDE.md",
+          "create protocol", "init protocol"
+        ],
+        "phrase_patterns": [
+          "(generate|create).*?(protocol|CLAUDE.md|tooling)",
+          "(bootstrap|initialize).*?(project|protocol)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "any",
+        "often_follows": ["codebase-analyzer"],
+        "often_precedes": [],
+        "can_parallel_with": []
+      }
+    },
+
+    "protocol-updater": {
+      "name": "protocol-updater",
+      "path": "domain/protocol-updater.md",
+      "description": "Fetch and apply protocol updates from GitHub with approval",
+      "category_group": "domain",
+      "categories": ["workflow"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "update protocol", "upgrade protocol", "proto-update",
+          "check for updates", "new version"
+        ],
+        "phrase_patterns": [
+          "(update|upgrade|sync).*?protocol",
+          "(check|look for).*?(updates|new version)",
+          "(protocol|version).*?(outdated|old|update)"
+        ],
+        "file_patterns": [
+          "protocol-manifest.json"
+        ],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "any",
+        "often_follows": ["protocol-analyzer"],
+        "often_precedes": [],
+        "can_parallel_with": []
+      }
+    },
+
+    "ui-researcher": {
+      "name": "ui-researcher",
+      "path": "domain/ui-researcher.md",
+      "description": "Research UI/UX patterns, design frameworks, frontend best practices",
+      "category_group": "domain",
+      "categories": ["frontend", "research"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "UI patterns", "UX best practices", "design patterns",
+          "component library", "design inspiration"
+        ],
+        "phrase_patterns": [
+          "(research|find|look up).*?(UI|UX|design).*?(pattern|practice|example)",
+          "(what|how).*?(other|best).*?(UI|design|component)",
+          "(recommend|suggest).*?(UI|design|component).*?(approach|pattern)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "early",
+        "often_follows": [],
+        "often_precedes": ["frontend-designer"],
+        "can_parallel_with": ["frontend-designer"]
+      }
+    },
+
+    "brainstormer": {
+      "name": "brainstormer",
+      "path": "workflow/brainstormer.md",
+      "description": "Facilitate design refinement through Socratic questioning",
+      "category_group": "workflow",
+      "categories": ["design", "planning", "workflow"],
+      "model_tier": "high",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "brainstorm", "I want to build", "I want to create",
+          "let's design", "help me plan", "before we start",
+          "requirements", "specification", "scope"
+        ],
+        "phrase_patterns": [
+          "(I want|I need|let's|help me).*?(build|create|implement|design)",
+          "(what|how).*?(should|would|could).*?(approach|design|structure)",
+          "(plan|design|spec).*?(feature|system|component)",
+          "before (we|I) (start|begin|implement)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": [
+          "don't.*?brainstorm", "skip.*?planning", "just.*?(implement|code|build)"
+        ]
+      },
+      "orchestration": {
+        "typical_position": "first",
+        "often_follows": [],
+        "often_precedes": ["architect", "research-analyzer"],
+        "can_parallel_with": []
+      }
+    },
+
+    "git-strategist": {
+      "name": "git-strategist",
+      "path": "workflow/git-strategist.md",
+      "description": "Manage complex git operations, resolve conflicts, maintain clean history",
+      "category_group": "workflow",
+      "categories": ["workflow"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "git conflict", "merge conflict", "rebase", "git strategy",
+          "branch strategy", "git history", "cherry pick"
+        ],
+        "phrase_patterns": [
+          "(resolve|fix).*?(merge conflict|conflict)",
+          "(merge|rebase).*?(branch|changes)",
+          "(clean up|fix).*?(git history|commits)",
+          "(strategy|approach).*?(merge|branch|git)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "any",
+        "often_follows": [],
+        "often_precedes": [],
+        "can_parallel_with": []
+      }
+    },
+
+    "orchestrator": {
+      "name": "orchestrator",
+      "path": "workflow/orchestrator.md",
+      "description": "Coordinate multi-agent workflows, determine execution order",
+      "category_group": "workflow",
+      "categories": ["workflow", "coordination"],
+      "model_tier": "high",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "orchestrate", "coordinate", "run all agents", "full audit",
+          "comprehensive review", "multi-agent", "validate everything"
+        ],
+        "phrase_patterns": [
+          "(full|comprehensive|complete).*?(audit|review|check|scan)",
+          "(run|invoke|use).*?(all|multiple).*?agents?",
+          "(coordinate|orchestrate).*?(agents?|workflow|tasks?)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "coordinator",
+        "often_follows": [],
+        "often_precedes": [],
+        "can_parallel_with": []
+      }
+    },
+
+    "tech-debt-tracker": {
+      "name": "tech-debt-tracker",
+      "path": "workflow/tech-debt-tracker.md",
+      "description": "Track, categorize, and prioritize technical debt with remediation estimates",
+      "category_group": "workflow",
+      "categories": ["quality", "planning"],
+      "model_tier": "standard",
+      "supports_plan_mode": true,
+      "triggers": {
+        "exact_keywords": [
+          "tech debt", "technical debt", "debt tracking", "HACK", "FIXME",
+          "shortcuts", "code quality issues"
+        ],
+        "phrase_patterns": [
+          "(track|find|list).*?(tech debt|technical debt)",
+          "(how much|what).*?(tech debt|technical debt)",
+          "(prioritize|address).*?(debt|shortcuts|hacks)"
+        ],
+        "file_patterns": [],
+        "negation_patterns": []
+      },
+      "orchestration": {
+        "typical_position": "any",
+        "often_follows": ["reviewer"],
+        "often_precedes": ["architect"],
+        "can_parallel_with": []
+      }
+    }
+  },
+
+  "command_mappings": {
+    "/validate": ["orchestrator"],
+    "/pr": ["orchestrator", "reviewer"],
+    "/security": ["security-scanner"],
+    "/test": ["tester"],
+    "/review": ["reviewer"],
+    "/docs": ["documenter"],
+    "/feature": ["brainstormer", "architect"],
+    "/fix": ["debugger", "tester"],
+    "/refactor": ["architect", "refactorer"],
+    "/orchestrate": ["orchestrator"],
+    "/doc-ingest": ["document-processor"],
+    "/doc-search": ["document-processor"],
+    "/proto-update": ["protocol-updater", "protocol-analyzer"],
+    "/proto-init": ["codebase-analyzer", "protocol-generator"]
+  },
+
+  "category_agent_mappings": {
+    "security": ["security-scanner", "dependency-auditor"],
+    "testing": ["tester", "test-coverage-enforcer"],
+    "design": ["architect", "brainstormer", "api-designer", "data-modeler"],
+    "frontend": ["frontend-designer", "ui-researcher", "accessibility-auditor"],
+    "quality": ["reviewer", "laziness-destroyer", "hallucination-checker", "fact-checker"],
+    "documentation": ["documenter", "document-processor"],
+    "performance": ["performance-analyzer"],
+    "debugging": ["debugger", "error-handler"],
+    "data": ["data-modeler"],
+    "devops": ["devops-engineer"],
+    "api": ["api-designer"],
+    "workflow": ["brainstormer", "orchestrator", "git-strategist", "tech-debt-tracker"]
+  }
+}
