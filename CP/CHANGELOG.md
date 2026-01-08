@@ -1,9 +1,33 @@
 # Changelog
 
-**Current Version:** 1.2.12
+**Current Version:** 1.2.13
 **Date:** 2026-01-08
 
 > This file is overwritten with each release. For historical changes, see git history.
+
+---
+
+## v1.2.13 - Mandatory Release Workflow (Patch)
+
+Enforces CHANGELOG updates and GitHub releases as immutable protocol requirements.
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `CLAUDE.md` | Added "Release Workflow (MANDATORY)" to Critical Behaviors section |
+| `enforcement-rules.json` | Added `version_bump_release` rule requiring GitHub release |
+| `commands/git.md` | Updated workflow with mandatory CHANGELOG, VERSION, and RELEASE steps |
+
+### Enforcement
+
+Version bumps now require:
+1. CHANGELOG.md entry with specific file changes
+2. Version bump in protocol-manifest.json and CLAUDE.md
+3. GitHub release creation immediately after push
+4. Verification that release shows as "Latest"
+
+Skipping any step is a protocol violation.
 
 ---
 
