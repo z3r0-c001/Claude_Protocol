@@ -1,0 +1,298 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "invoke-config.schema.json",
+  "title": "Agent Auto-Invocation Configuration",
+  "description": "Schema for the agent auto-invocation system configuration",
+  "type": "object",
+  "required": ["version", "thresholds", "weights"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to this schema"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Configuration version (semver)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the configuration"
+    },
+    "thresholds": {
+      "type": "object",
+      "required": ["auto_invoke", "prompt_user"],
+      "properties": {
+        "auto_invoke": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum confidence score to auto-invoke an agent"
+        },
+        "prompt_user": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum confidence score to prompt user for confirmation"
+        },
+        "suggest_only": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 0,
+          "description": "Minimum confidence score to show suggestion (non-blocking)"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "weights": {
+      "type": "object",
+      "required": ["keyword", "category", "llm_intent"],
+      "properties": {
+        "keyword": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Weight for Layer 1 keyword matching"
+        },
+        "category": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Weight for Layer 2 category classification"
+        },
+        "llm_intent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Weight for Layer 3 LLM intent analysis"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "llm_analysis": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to use LLM for intent analysis"
+        },
+        "model": {
+          "type": "string",
+          "enum": ["haiku", "sonnet", "opus"],
+          "default": "haiku",
+          "description": "Model to use for intent analysis"
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 60000,
+          "default": 10000,
+          "description": "Timeout for LLM analysis in milliseconds"
+        },
+        "fallback_on_timeout": {
+          "type": "string",
+          "enum": ["skip_layer", "use_cached", "fail"],
+          "default": "skip_layer",
+          "description": "What to do if LLM analysis times out"
+        },
+        "fallback_on_error": {
+          "type": "string",
+          "enum": ["skip_layer", "use_cached", "fail"],
+          "default": "skip_layer",
+          "description": "What to do if LLM analysis fails"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "memory_learning": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to use MCP memory for learning"
+        },
+        "mcp_category": {
+          "type": "string",
+          "default": "agent-invocation-learning",
+          "description": "MCP memory category for storing corrections"
+        },
+        "max_boost": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50,
+          "default": 20,
+          "description": "Maximum confidence boost from memory"
+        },
+        "max_penalty": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50,
+          "default": 25,
+          "description": "Maximum confidence penalty from memory"
+        },
+        "decay_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.1,
+          "description": "Rate at which adjustments decay per application"
+        },
+        "similarity_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.7,
+          "description": "Minimum similarity for applying past corrections"
+        },
+        "expires_after_applications": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 10,
+          "description": "Number of applications before a correction expires"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "visibility": {
+      "type": "object",
+      "properties": {
+        "show_banners": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show agent invocation banners"
+        },
+        "show_confidence_breakdown": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show confidence score breakdown"
+        },
+        "show_progress": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show agent progress indicators"
+        },
+        "color_enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use colors in terminal output"
+        },
+        "banner_width": {
+          "type": "integer",
+          "minimum": 40,
+          "maximum": 120,
+          "default": 78,
+          "description": "Width of banner in characters"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "orchestration": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable multi-agent orchestration"
+        },
+        "auto_orchestrate_threshold": {
+          "type": "integer",
+          "minimum": 2,
+          "default": 2,
+          "description": "Number of high-confidence agents to trigger orchestration"
+        },
+        "max_parallel_agents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "default": 3,
+          "description": "Maximum agents to run in parallel"
+        },
+        "require_plan_mode_first": {
+          "type": "boolean",
+          "default": true,
+          "description": "Require plan mode approval before orchestration"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "properties": {
+        "always_plan_mode_first": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Agents that always require plan mode approval first"
+        },
+        "never_auto_invoke": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Agents that should never be auto-invoked"
+        },
+        "max_auto_invokes_per_prompt": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Maximum agents to auto-invoke per user prompt"
+        },
+        "require_user_confirmation_for_execute": {
+          "type": "boolean",
+          "default": true,
+          "description": "Require user confirmation before execute mode"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "categories": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keywords that indicate this category"
+          },
+          "file_patterns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "File glob patterns that indicate this category"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["high", "medium", "low"],
+            "default": "medium",
+            "description": "Priority level for this category"
+          }
+        }
+      },
+      "description": "Task category definitions for Layer 2 classification"
+    }
+  }
+}
