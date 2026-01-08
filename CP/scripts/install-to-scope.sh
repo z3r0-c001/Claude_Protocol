@@ -72,6 +72,25 @@ install_to_target() {
     if [ -d "$SOURCE_DIR/.claude/mcp/memory-server" ]; then
         cp -r "$SOURCE_DIR/.claude/mcp/memory-server/"* "$target/mcp/memory-server/" 2>/dev/null || true
         log_info "  Copied MCP memory server"
+
+        # Install MCP dependencies
+        if command -v node &> /dev/null && command -v npm &> /dev/null; then
+            if [ ! -d "$target/mcp/memory-server/node_modules" ]; then
+                log_info "  Installing MCP server dependencies..."
+                (cd "$target/mcp/memory-server" && npm install --silent 2>/dev/null) && \
+                    log_info "  ✓ MCP dependencies installed" || \
+                    log_warn "npm install failed - run: cd $target/mcp/memory-server && npm install"
+            fi
+            # Rebuild if dist missing
+            if [ ! -f "$target/mcp/memory-server/dist/index.js" ]; then
+                log_info "  Building MCP server..."
+                (cd "$target/mcp/memory-server" && npm run build --silent 2>/dev/null) && \
+                    log_info "  ✓ MCP server built" || \
+                    log_warn "Build failed - run: cd $target/mcp/memory-server && npm run build"
+            fi
+        else
+            log_warn "Node.js not found - MCP server won't work until: npm install && npm run build"
+        fi
     fi
 }
 
