@@ -1,80 +1,92 @@
 ---
-description: Pre-push checklist for quality commits. Usage: /git
+description: Git Pre-Push Checklist. Usage: /git
 ---
 
 # Git Pre-Push Checklist
 
-Run this before pushing to verify commit quality.
+Run this before pushing to verify commit quality and workflow compliance.
 
-## Checklist
-
-### 1. Commit Message Quality
+## Step 1: Run Guard Check
 
 ```bash
-git log origin/main..HEAD --format="%s" 2>/dev/null || git log -5 --format="%s"
+python3 "$CLAUDE_PROJECT_DIR/.claude/hooks/git-push-guard.py"
 ```
 
-**Block if generic messages:**
-- "Updated files"
-- "Fixed bugs"
-- "WIP"
-- "Changes"
-- Single-word descriptions
+This automatically checks:
+- Per-file commit comments present
+- No bulk/lazy commit messages
+- Root/.claude synced to CP/.claude (where applicable)
+- No direct CP edits without root changes
 
-**Good commit format:**
+## Step 2: Review Output
+
+**If BLOCKED:** Fix commit messages before proceeding.
+
+Required format:
 ```
-<summary line>
+<Summary line - what and why>
 
-- <file>: <specific change>
-- <file>: <specific change>
+- <file1>: <specific change description>
+- <file2>: <specific change description>
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
-### 2. Review Changes
+**If WARNINGS:** Review sync status, decide if sync needed.
+
+## Step 3: Version Check
+
+If this is a release, verify version is updated:
 
 ```bash
-git diff origin/main..HEAD --stat 2>/dev/null || git diff HEAD~1 --stat
+grep -E "Version.*[0-9]+\.[0-9]+\.[0-9]+" CLAUDE.md CP/CLAUDE.md protocol-manifest.json 2>/dev/null
 ```
 
-Verify:
-- No unintended files included
-- No secrets/credentials
-- No large binary files
+**Version types - ask user if unclear:**
+| Type | When |
+|------|------|
+| MAJOR (x.0.0) | Breaking changes |
+| MINOR (0.x.0) | New features |
+| PATCH (0.0.x) | Bug fixes |
 
-### 3. Version Check (if releasing)
-
-If this is a versioned release:
-```bash
-# Check version files exist and are updated
-grep -E 'version|Version' package.json pyproject.toml CLAUDE.md 2>/dev/null | head -5
-```
-
-### 4. Run Tests
-
-```bash
-# Project-specific - adapt to your setup
-npm test 2>/dev/null || pytest 2>/dev/null || echo "No test command found"
-```
-
-## Output Format
-
-```
-## Pre-Push Verification
-
-- [x] Commit messages: Specific and descriptive
-- [x] Changes reviewed: No secrets or unwanted files
-- [ ] Tests: FAILED - fix before pushing
-- [x] Version: Updated (if applicable)
-
-## Status: BLOCKED
-Fix failing tests before pushing.
-```
-
-## After Approval
+## Step 4: Push
 
 ```bash
 git push origin <branch>
 ```
 
+## Step 5: Create Release (if versioned)
+
+```bash
+gh release create v<version> --title "v<version>" --notes-file RELEASE_NOTES.md
+```
+
+Or with inline notes:
+```bash
+gh release create v<version> --title "v<version>" --notes "Release notes here"
+```
+
 ---
 
-**Note:** Customize this checklist to match your project's requirements.
+## Quick Reference
+
+| Check | Command |
+|-------|---------|
+| Run guard | `python3 .claude/hooks/git-push-guard.py` |
+| View commits | `git log origin/main..HEAD --oneline` |
+| View changes | `git diff origin/main..HEAD --stat` |
+| Push | `git push origin <branch>` |
+| Release | `gh release create v<version>` |
+
+## Workflow Reminder
+
+```
+1. DEVELOP  →  Edit in root .claude/
+2. TEST     →  Verify changes work
+3. SYNC     →  Copy to CP/.claude/ (if distributable)
+4. COMMIT   →  Per-file comments, no bulk
+5. PUSH     →  After guard passes
+6. RELEASE  →  Tag + GitHub release
+```
+
+**CP Protection:** Never edit CP directly. Changes flow from root → CP.
