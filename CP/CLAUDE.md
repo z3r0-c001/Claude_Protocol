@@ -132,7 +132,7 @@ Edit `.claude/config/enforcement-rules.json` to customize rules, thresholds, and
 
 | Property | Value |
 |----------|-------|
-| Version | 1.2.12 |
+| Version | 1.2.13 |
 | Philosophy | Research-first, quality-enforced |
 | Validation | Zero-error tolerance |
 
@@ -154,6 +154,31 @@ Edit `.claude/config/enforcement-rules.json` to customize rules, thresholds, and
 - Zero errors tolerated
 - No placeholders, TODOs, or stubs
 - All imports/packages verified to exist
+
+### Release Workflow (MANDATORY)
+**Every version bump MUST include CHANGELOG update and GitHub release. This is non-negotiable.**
+
+**Required steps for ANY changes to CP/:**
+1. **Update CHANGELOG.md** - Add entry describing changes with:
+   - New version header: `## vX.Y.Z - Title (Type)`
+   - Features/fixes/changes with specific file references
+   - Update `Current Version` at top of file
+2. **Update version** in `protocol-manifest.json` and `CLAUDE.md`
+3. **Commit** each CP/ file with specific per-file messages
+4. **Push** to remote
+5. **Create GitHub Release** immediately after push:
+   ```bash
+   gh release create vX.Y.Z --title "vX.Y.Z - Title" --notes "Release notes..."
+   ```
+6. **Verify** release shows as "Latest" on GitHub
+
+**NEVER skip ANY step. Incomplete releases are protocol violations.**
+
+| What Changed | Version Bump |
+|--------------|--------------|
+| Bug fix, docs only | Patch (x.y.**Z**) |
+| New feature, enhancement | Minor (x.**Y**.0) |
+| Breaking change | Major (**X**.0.0) |
 
 ### Thinking Triggers
 | Trigger | Use Case |
