@@ -1,0 +1,135 @@
+{
+  "$schema": "./invoke-config.schema.json",
+  "version": "1.0.0",
+  "description": "Configuration for the agent auto-invocation system",
+
+  "thresholds": {
+    "auto_invoke": 70,
+    "prompt_user": 45,
+    "suggest_only": 0,
+    "description": "Confidence thresholds: >=70% auto-invoke, 45-69% prompt, <45% suggest"
+  },
+
+  "weights": {
+    "keyword": 0.25,
+    "category": 0.35,
+    "llm_intent": 0.40,
+    "description": "Layer weights for combined scoring (must sum to 1.0)"
+  },
+
+  "llm_analysis": {
+    "enabled": true,
+    "model": "haiku",
+    "timeout_ms": 10000,
+    "fallback_on_timeout": "skip_layer",
+    "fallback_on_error": "skip_layer",
+    "description": "Layer 3 LLM intent analysis settings"
+  },
+
+  "memory_learning": {
+    "enabled": true,
+    "mcp_category": "agent-invocation-learning",
+    "max_boost": 20,
+    "max_penalty": 25,
+    "decay_rate": 0.1,
+    "similarity_threshold": 0.7,
+    "expires_after_applications": 10,
+    "description": "MCP memory-based learning from user corrections"
+  },
+
+  "visibility": {
+    "show_banners": true,
+    "show_confidence_breakdown": true,
+    "show_progress": true,
+    "color_enabled": true,
+    "banner_width": 78,
+    "description": "Terminal visibility settings for agent invocations"
+  },
+
+  "orchestration": {
+    "enabled": true,
+    "auto_orchestrate_threshold": 2,
+    "max_parallel_agents": 3,
+    "require_plan_mode_first": true,
+    "description": "Multi-agent orchestration settings"
+  },
+
+  "disambiguation": {
+    "enabled": true,
+    "score_gap_threshold": 15,
+    "max_options": 3,
+    "min_score_for_option": 20,
+    "description": "When top agents score within gap_threshold, present user with options instead of picking one"
+  },
+
+  "safety": {
+    "always_plan_mode_first": [],
+    "never_auto_invoke": [],
+    "max_auto_invokes_per_prompt": 1,
+    "require_user_confirmation_for_execute": true,
+    "description": "Safety guardrails for auto-invocation"
+  },
+
+  "categories": {
+    "security": {
+      "keywords": ["auth", "password", "token", "credential", "encrypt", "vulnerability", "CVE", "OWASP", "XSS", "CSRF", "injection", "secrets"],
+      "file_patterns": ["**/auth/**", "**/security/**", "**/*password*", "**/*token*", "**/*secret*", "**/*credential*"],
+      "priority": "high"
+    },
+    "testing": {
+      "keywords": ["test", "spec", "coverage", "TDD", "unit test", "integration", "jest", "pytest", "mocha"],
+      "file_patterns": ["**/*.test.*", "**/*.spec.*", "**/tests/**", "**/__tests__/**"],
+      "priority": "medium"
+    },
+    "design": {
+      "keywords": ["architecture", "design", "refactor", "structure", "pattern", "ADR", "planning"],
+      "file_patterns": ["**/architecture/**", "**/design/**", "**/*.adr.md"],
+      "priority": "high"
+    },
+    "frontend": {
+      "keywords": ["UI", "component", "button", "form", "CSS", "React", "Vue", "Svelte", "layout", "responsive", "accessibility"],
+      "file_patterns": ["**/*.tsx", "**/*.jsx", "**/*.vue", "**/*.svelte", "**/components/**", "**/ui/**"],
+      "priority": "medium"
+    },
+    "quality": {
+      "keywords": ["lint", "validate", "check", "audit", "review", "quality"],
+      "file_patterns": [],
+      "priority": "high"
+    },
+    "documentation": {
+      "keywords": ["document", "readme", "docs", "comment", "explain", "JSDoc", "docstring"],
+      "file_patterns": ["**/docs/**", "**/*.md"],
+      "priority": "low"
+    },
+    "performance": {
+      "keywords": ["optimize", "slow", "fast", "performance", "cache", "memory", "benchmark", "bottleneck"],
+      "file_patterns": ["**/cache/**", "**/worker/**", "**/queue/**"],
+      "priority": "medium"
+    },
+    "debugging": {
+      "keywords": ["debug", "fix", "bug", "error", "issue", "broken", "trace", "stack"],
+      "file_patterns": [],
+      "priority": "high"
+    },
+    "data": {
+      "keywords": ["database", "schema", "migration", "query", "SQL", "ORM", "model", "entity"],
+      "file_patterns": ["**/migrations/**", "**/models/**", "**/schema/**", "**/*.sql"],
+      "priority": "medium"
+    },
+    "devops": {
+      "keywords": ["CI/CD", "Docker", "Kubernetes", "deploy", "pipeline", "container", "infrastructure"],
+      "file_patterns": ["**/Dockerfile*", "**/.github/**", "**/docker-compose*", "**/*.yaml", "**/*.yml"],
+      "priority": "medium"
+    },
+    "api": {
+      "keywords": ["endpoint", "REST", "GraphQL", "API", "route", "controller", "handler"],
+      "file_patterns": ["**/api/**", "**/routes/**", "**/controllers/**", "**/handlers/**"],
+      "priority": "medium"
+    },
+    "workflow": {
+      "keywords": ["orchestrate", "coordinate", "brainstorm", "plan", "requirements", "build", "create", "implement", "develop", "make"],
+      "file_patterns": [],
+      "priority": "high"
+    }
+  }
+}

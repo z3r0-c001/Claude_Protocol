@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Runtime data
+.claude/logs/
+.claude/memory/
+.claude/flags/
+.claude/backups/
+
+# MCP data
+.claude/mcp/memory-server/data/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local config
+.claude/protocol-manifest.local.json
+
+# Node (for MCP server)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temp files
+*.tmp
+*.bak
+*.swp
+*~

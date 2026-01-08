@@ -1,0 +1,426 @@
+{
+  "dev-guidelines": {
+    "type": "domain",
+    "enforcement": "suggest",
+    "priority": "high",
+    "promptTriggers": {
+      "keywords": [
+        "implement",
+        "create",
+        "build",
+        "add feature",
+        "code",
+        "function",
+        "component",
+        "module",
+        "class",
+        "refactor"
+      ],
+      "intentPatterns": [
+        "(create|add|build|implement).*?(feature|component|function|module|class)",
+        "(how to|best practice|should I).*?(code|implement|structure)",
+        "(fix|debug|resolve).*?(error|bug|issue)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [
+        "src/**/*",
+        "lib/**/*",
+        "**/*.ts",
+        "**/*.js",
+        "**/*.py",
+        "**/*.go",
+        "**/*.rs"
+      ],
+      "contentPatterns": []
+    }
+  },
+  "frontend-design": {
+    "type": "domain",
+    "enforcement": "suggest",
+    "priority": "high",
+    "promptTriggers": {
+      "keywords": [
+        "UI",
+        "frontend",
+        "component",
+        "button",
+        "form",
+        "modal",
+        "dialog",
+        "layout",
+        "responsive",
+        "accessibility",
+        "a11y",
+        "CSS",
+        "styling",
+        "Tailwind",
+        "design system",
+        "user interface",
+        "navigation",
+        "header",
+        "footer",
+        "card",
+        "input",
+        "dropdown",
+        "menu",
+        "sidebar"
+      ],
+      "intentPatterns": [
+        "(create|build|design|implement).*?(UI|component|button|form|page|layout)",
+        "(style|design).*?(component|page|interface)",
+        "(make|create).*?(responsive|accessible|consistent)",
+        "(add|implement).*?(dark mode|theme|styling)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [
+        "**/*.tsx",
+        "**/*.jsx",
+        "**/*.vue",
+        "**/*.svelte",
+        "**/*.css",
+        "**/*.scss",
+        "**/*.less",
+        "**/components/**",
+        "**/ui/**",
+        "**/styles/**"
+      ],
+      "contentPatterns": [
+        "className",
+        "styled",
+        "css",
+        "tailwind"
+      ]
+    },
+    "autoInvoke": {
+      "agents": ["frontend-designer", "ui-researcher"]
+    }
+  },
+  "design-system": {
+    "type": "domain",
+    "enforcement": "suggest",
+    "priority": "high",
+    "promptTriggers": {
+      "keywords": [
+        "design system",
+        "design tokens",
+        "color palette",
+        "typography",
+        "spacing scale",
+        "component library",
+        "theme",
+        "brand colors",
+        "consistent styling",
+        "style guide",
+        "UI kit"
+      ],
+      "intentPatterns": [
+        "(create|setup|establish).*?(design system|style guide|theme)",
+        "(define|create).*?(tokens|colors|spacing|typography)",
+        "(consistent|unified).*?(styling|design|UI)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [
+        "**/tokens/**",
+        "**/theme/**",
+        "**/design-system/**",
+        "tailwind.config.*",
+        "**/styles/variables.*"
+      ],
+      "contentPatterns": [
+        "--color-",
+        "--spacing-",
+        "design.?token"
+      ]
+    }
+  },
+  "brainstormer": {
+    "type": "workflow",
+    "enforcement": "suggest",
+    "priority": "high",
+    "promptTriggers": {
+      "keywords": [
+        "I want to build",
+        "I want to create",
+        "let's design",
+        "help me plan",
+        "before we start",
+        "what should",
+        "how should",
+        "brainstorm",
+        "requirements",
+        "specification",
+        "scope"
+      ],
+      "intentPatterns": [
+        "(I want|I need|let's|help me).*?(build|create|implement|design)",
+        "(what|how).*?(should|would|could).*?(approach|design|structure)",
+        "(plan|design|spec).*?(feature|system|component)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [],
+      "contentPatterns": []
+    },
+    "autoInvoke": {
+      "agents": ["brainstormer"]
+    }
+  },
+  "research-verifier": {
+    "type": "workflow",
+    "enforcement": "suggest",
+    "priority": "medium",
+    "promptTriggers": {
+      "keywords": [
+        "best practice",
+        "should I",
+        "how should",
+        "correct way",
+        "recommended",
+        "standard",
+        "pattern",
+        "convention",
+        "proper way",
+        "official",
+        "according to",
+        "the right way",
+        "implementation"
+      ],
+      "intentPatterns": [
+        "(what is|what's).*?(best|correct|proper|standard|recommended)",
+        "(how|should).*?(implement|structure|organize|design)",
+        "(is this|is it).*?(correct|right|proper|standard)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [],
+      "contentPatterns": []
+    }
+  },
+  "security-scanner": {
+    "type": "domain",
+    "enforcement": "suggest",
+    "priority": "high",
+    "promptTriggers": {
+      "keywords": [
+        "security",
+        "vulnerability",
+        "authentication",
+        "authorization",
+        "injection",
+        "XSS",
+        "CSRF",
+        "secrets",
+        "credentials"
+      ],
+      "intentPatterns": [
+        "(check|scan|audit).*?(security|vulnerabilities)",
+        "(auth|login|password|token).*?(implement|fix|review)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [
+        "**/auth/**",
+        "**/security/**",
+        "**/*auth*",
+        "**/*login*",
+        "**/*password*",
+        "**/*token*",
+        "**/*secret*"
+      ],
+      "contentPatterns": [
+        "password",
+        "token",
+        "secret",
+        "api.?key",
+        "credential"
+      ]
+    }
+  },
+  "performance-analyzer": {
+    "type": "domain",
+    "enforcement": "suggest",
+    "priority": "medium",
+    "promptTriggers": {
+      "keywords": [
+        "performance",
+        "optimize",
+        "slow",
+        "fast",
+        "speed",
+        "memory",
+        "cache",
+        "benchmark"
+      ],
+      "intentPatterns": [
+        "(optimize|improve|speed up).*?(performance|speed|loading)",
+        "(slow|bottleneck|memory leak)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [
+        "**/cache/**",
+        "**/worker/**",
+        "**/queue/**"
+      ],
+      "contentPatterns": []
+    }
+  },
+  "test-coverage": {
+    "type": "workflow",
+    "enforcement": "suggest",
+    "priority": "medium",
+    "promptTriggers": {
+      "keywords": [
+        "test",
+        "coverage",
+        "unit test",
+        "integration test",
+        "TDD"
+      ],
+      "intentPatterns": [
+        "(write|add|create).*?(test|spec)",
+        "(check|improve).*?(coverage)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [
+        "**/*.test.*",
+        "**/*.spec.*",
+        "**/test/**",
+        "**/tests/**",
+        "**/__tests__/**"
+      ],
+      "contentPatterns": []
+    }
+  },
+  "quality-control": {
+    "type": "guardrail",
+    "enforcement": "require",
+    "priority": "high",
+    "promptTriggers": {
+      "keywords": [
+        "validate",
+        "audit",
+        "check quality",
+        "verify",
+        "quality control"
+      ],
+      "intentPatterns": []
+    },
+    "fileTriggers": {
+      "pathPatterns": [],
+      "contentPatterns": []
+    },
+    "autoInvoke": {
+      "onStop": true,
+      "agents": ["laziness-destroyer", "hallucination-checker"]
+    }
+  },
+  "orchestrator": {
+    "type": "workflow",
+    "enforcement": "suggest",
+    "priority": "high",
+    "promptTriggers": {
+      "keywords": [
+        "orchestrate",
+        "coordinate",
+        "run all agents",
+        "full audit",
+        "comprehensive review",
+        "multi-agent",
+        "check everything"
+      ],
+      "intentPatterns": [
+        "(full|comprehensive|complete).*?(audit|review|check|scan)",
+        "(run|invoke|use).*?(all|multiple).*?agents?",
+        "(coordinate|orchestrate).*?(agents?|workflow|tasks?)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [],
+      "contentPatterns": []
+    },
+    "autoInvoke": {
+      "onCommand": ["/validate", "/pr", "/security"],
+      "agents": ["orchestrator"]
+    }
+  },
+  "doc-processor": {
+    "type": "workflow",
+    "enforcement": "suggest",
+    "priority": "medium",
+    "promptTriggers": {
+      "keywords": [
+        "documentation",
+        "manual",
+        "reference",
+        "large file",
+        "ingest",
+        "process doc",
+        "API docs",
+        "read documentation",
+        "load docs",
+        "chunk",
+        "summary"
+      ],
+      "intentPatterns": [
+        "(read|load|ingest|process).*?(documentation|manual|docs|reference)",
+        "(large|big|huge).*?(file|document|doc)",
+        "(need|want).*?(reference|access).*?(documentation|manual)",
+        "(search|find).*?(in|through).*?(docs?|documentation|manual)"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [
+        "**/docs/**/*.md",
+        "**/documentation/**",
+        "**/*manual*.md",
+        "**/*reference*.md",
+        "**/*api-docs*",
+        "**/*guide*.md"
+      ],
+      "contentPatterns": []
+    },
+    "autoInvoke": {
+      "onCommand": ["/doc-ingest", "/doc-search", "/doc-list"],
+      "agents": ["document-processor"]
+    }
+  },
+  "protocol-updater": {
+    "type": "workflow",
+    "enforcement": "suggest",
+    "priority": "high",
+    "promptTriggers": {
+      "keywords": [
+        "update protocol",
+        "upgrade protocol",
+        "check for updates",
+        "protocol version",
+        "new version",
+        "outdated",
+        "latest version",
+        "sync protocol"
+      ],
+      "intentPatterns": [
+        "(update|upgrade|sync).*?protocol",
+        "(check|look).*?(updates|new version)",
+        "(protocol|version).*?(outdated|old|update)",
+        "(latest|newest).*?version"
+      ]
+    },
+    "fileTriggers": {
+      "pathPatterns": [
+        "protocol-manifest.json",
+        ".claude/protocol-manifest.local.json"
+      ],
+      "contentPatterns": []
+    },
+    "autoInvoke": {
+      "onCommand": ["/proto-update"],
+      "agents": ["protocol-updater", "protocol-analyzer"]
+    }
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "$schema": "./enforcement-rules.schema.json",
+  "version": "1.1.0",
+  "description": "Configuration for agent usage enforcement system - supports both specific agents and category-based matching",
+
+  "enabled": true,
+  "default_strictness": "block",
+
+  "exemptions": {
+    "max_files": 1,
+    "max_lines_changed": 20,
+    "prompt_patterns": ["^(what|how|why|explain|show|list|find|where)\\s"],
+    "description": "Skip enforcement for trivial changes and informational queries"
+  },
+
+  "rules": {
+    "security_code": {
+      "description": "Security-sensitive code modifications require security review",
+      "enabled": true,
+      "strictness": "block",
+      "trigger": {
+        "file_patterns": [
+          "**/auth/**",
+          "**/security/**",
+          "**/*auth*",
+          "**/middleware/*auth*",
+          "**/jwt*",
+          "**/oauth*",
+          "**/session*",
+          "**/login*",
+          "**/logout*"
+        ],
+        "content_patterns": [
+          "password",
+          "credential",
+          "bcrypt",
+          "argon2",
+          "hash.*password",
+          "verify.*token",
+          "sign.*jwt",
+          "decode.*jwt"
+        ]
+      },
+      "required_agents": ["security-scanner"],
+      "required_categories": ["security"],
+      "message": "Security code modified without security review"
+    },
+
+    "architecture_change": {
+      "description": "Multi-file changes require architecture review",
+      "enabled": true,
+      "strictness": "block",
+      "trigger": {
+        "file_count_threshold": 5
+      },
+      "required_agents": ["architect"],
+      "required_categories": ["design", "architecture"],
+      "message": "Modified 5+ files without architecture review"
+    },
+
+    "multi_step_task": {
+      "description": "Complex tasks require orchestrator coordination",
+      "enabled": true,
+      "strictness": "block",
+      "trigger": {
+        "prompt_patterns": [
+          "(implement|build|create|develop).*?(feature|system|module)",
+          "(add|write).*?(full|complete|entire)",
+          "(refactor|redesign|restructure).*?(whole|all|entire)"
+        ]
+      },
+      "required_agents": ["orchestrator"],
+      "required_categories": ["workflow", "coordination"],
+      "message": "Complex task attempted without orchestrator"
+    },
+
+    "test_changes": {
+      "description": "Test file modifications require testing review",
+      "enabled": true,
+      "strictness": "block",
+      "trigger": {
+        "file_patterns": [
+          "**/*.test.*",
+          "**/*.spec.*",
+          "**/tests/**",
+          "**/__tests__/**",
+          "**/test_*.py",
+          "**/*_test.go"
+        ]
+      },
+      "required_agents": ["tester"],
+      "required_categories": ["testing"],
+      "message": "Test files modified without testing review"
+    },
+
+    "frontend_component": {
+      "description": "UI components require frontend review",
+      "enabled": true,
+      "strictness": "warn",
+      "trigger": {
+        "file_patterns": [
+          "**/components/**",
+          "**/ui/**",
+          "**/*.tsx",
+          "**/*.jsx",
+          "**/*.vue",
+          "**/*.svelte"
+        ]
+      },
+      "required_agents": ["frontend-designer"],
+      "required_categories": ["frontend"],
+      "message": "Frontend component modified without design review"
+    },
+
+    "database_changes": {
+      "description": "Schema and migration changes require data modeling review",
+      "enabled": true,
+      "strictness": "block",
+      "trigger": {
+        "file_patterns": [
+          "**/migrations/**",
+          "**/schema/**",
+          "**/*.sql",
+          "**/models/**",
+          "**/entities/**"
+        ],
+        "content_patterns": [
+          "CREATE TABLE",
+          "ALTER TABLE",
+          "DROP TABLE",
+          "ADD COLUMN",
+          "DROP COLUMN",
+          "CREATE INDEX"
+        ]
+      },
+      "required_agents": ["data-modeler"],
+      "required_categories": ["data"],
+      "message": "Database schema modified without data modeling review"
+    },
+
+    "version_bump_release": {
+      "description": "Version bumps MUST include GitHub release creation",
+      "enabled": true,
+      "strictness": "block",
+      "trigger": {
+        "file_patterns": [
+          "**/protocol-manifest.json",
+          "**/CHANGELOG.md"
+        ],
+        "content_patterns": [
+          "\"version\":\\s*\"\\d+\\.\\d+\\.\\d+\"",
+          "## v\\d+\\.\\d+\\.\\d+"
+        ]
+      },
+      "required_actions": ["gh_release_create"],
+      "message": "Version bumped without GitHub release. Run: gh release create vX.Y.Z --title \"...\" --notes \"...\""
+    }
+  },
+
+  "_notes": {
+    "dynamic_matching": "Rules use both required_agents (exact match) and required_categories (any agent with that category satisfies). New agents registered in agent-registry.json with matching categories will automatically satisfy rules.",
+    "custom_agents": "When protocol-generator creates new project-specific agents, add them to agent-registry.json with appropriate categories to participate in enforcement."
+  }
+}

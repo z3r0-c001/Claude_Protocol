@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "description": "Intelligent model routing configuration for Claude Protocol agents",
+  
+  "tiers": {
+    "fast": {
+      "model": "claude-haiku-4-5-20251001",
+      "description": "Quick, simple tasks - pattern matching, formatting, simple checks",
+      "cost_factor": 1,
+      "speed": "fastest",
+      "use_cases": ["linting", "formatting", "simple_tests", "quick_lookups", "status_checks"]
+    },
+    "standard": {
+      "model": "claude-sonnet-4-5-20250929",
+      "description": "Balanced performance - most development tasks",
+      "cost_factor": 5,
+      "speed": "fast",
+      "use_cases": ["code_review", "implementation", "documentation", "refactoring", "testing"]
+    },
+    "high": {
+      "model": "claude-opus-4-5-20251101",
+      "description": "Complex reasoning - architecture, debugging, security, planning",
+      "cost_factor": 25,
+      "speed": "slower",
+      "use_cases": ["architecture", "complex_debugging", "security_audit", "planning", "research"]
+    }
+  },
+
+  "task_complexity_mapping": {
+    "fast": [
+      "lint",
+      "format",
+      "type_check",
+      "simple_test",
+      "file_search",
+      "grep",
+      "status_check",
+      "simple_validation",
+      "changelog_entry",
+      "simple_docs"
+    ],
+    "standard": [
+      "code_review",
+      "implementation",
+      "unit_test_writing",
+      "integration_test",
+      "documentation",
+      "refactoring_simple",
+      "api_implementation",
+      "bug_fix_simple",
+      "dependency_update",
+      "config_change"
+    ],
+    "high": [
+      "architecture_design",
+      "system_design",
+      "complex_debugging",
+      "root_cause_analysis",
+      "security_audit",
+      "performance_analysis",
+      "planning",
+      "research",
+      "major_refactoring",
+      "breaking_change_analysis",
+      "fact_checking",
+      "hallucination_detection"
+    ]
+  },
+
+  "agent_constraints": {
+    "always_high": [
+      "orchestrator",
+      "architect", 
+      "fact-checker",
+      "hallucination-checker",
+      "research-analyzer"
+    ],
+    "always_standard_or_higher": [
+      "security-scanner",
+      "debugger",
+      "refactorer"
+    ],
+    "can_use_fast": [
+      "tester",
+      "reviewer",
+      "documenter",
+      "laziness-destroyer",
+      "git-strategist",
+      "tech-debt-tracker"
+    ]
+  },
+
+  "complexity_signals": {
+    "high_complexity_keywords": [
+      "architecture",
+      "design",
+      "security",
+      "vulnerability",
+      "performance",
+      "scale",
+      "complex",
+      "critical",
+      "production",
+      "breaking change",
+      "migration",
+      "debug",
+      "root cause",
+      "investigate"
+    ],
+    "low_complexity_keywords": [
+      "lint",
+      "format",
+      "typo",
+      "rename",
+      "simple",
+      "quick",
+      "check",
+      "status",
+      "list"
+    ]
+  },
+
+  "routing_rules": [
+    {
+      "name": "orchestrator_always_opus",
+      "condition": "agent == 'orchestrator'",
+      "tier": "high",
+      "reason": "Planning requires best reasoning"
+    },
+    {
+      "name": "accuracy_critical_opus",
+      "condition": "agent in ['fact-checker', 'hallucination-checker']",
+      "tier": "high",
+      "reason": "Accuracy-critical tasks need best model"
+    },
+    {
+      "name": "simple_validation_haiku",
+      "condition": "task_type in ['lint', 'format', 'type_check']",
+      "tier": "fast",
+      "reason": "Deterministic tasks don't need advanced reasoning"
+    },
+    {
+      "name": "default_sonnet",
+      "condition": "default",
+      "tier": "standard",
+      "reason": "Good balance of capability and cost"
+    }
+  ]
+}
