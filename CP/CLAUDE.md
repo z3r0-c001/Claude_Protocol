@@ -43,11 +43,96 @@ Input: "Write unit tests for the auth module"
 
 ---
 
+## Agent Auto-Invocation System
+
+Agents are automatically suggested or invoked based on prompt analysis using a 3-layer matching pipeline:
+
+### Matching Layers
+| Layer | Weight | Description |
+|-------|--------|-------------|
+| Keywords | 25% | Exact keyword matching against agent triggers |
+| Category | 35% | Task category classification |
+| Patterns | 40% | Phrase pattern matching for intent |
+
+### Confidence Thresholds
+| Threshold | Action |
+|-----------|--------|
+| >= 70% | **Auto-invoke** - Agent runs automatically with banner notification |
+| 45-69% | **Prompt** - User asked to confirm before invocation |
+| < 45% | **Suggest** - Non-blocking tip shown |
+
+### Disambiguation
+When multiple agents score within **15%** of each other (and below auto-invoke threshold), the system presents options instead of picking one:
+
+```
+AGENT CHOICE: Multiple agents match this request.
+Options: [1] debugger (24%), [2] error-handler (24%).
+Ask the user which agent they prefer...
+```
+
+Configure in `.claude/config/invoke-config.json`:
+```json
+"disambiguation": {
+  "enabled": true,
+  "score_gap_threshold": 15,
+  "max_options": 3,
+  "min_score_for_option": 20
+}
+```
+
+### Configuration
+Use `/auto-agent-config` to customize:
+- Adjust thresholds (auto-invoke, prompt)
+- Change layer weights
+- Disable/enable specific agents
+- View current configuration
+
+### Visual Feedback
+When agents are invoked, colored banners display:
+- Agent name and execution mode
+- Confidence score
+- Layer breakdown (optional)
+
+Suppress with `CLAUDE_NO_BANNERS=1` or `NO_COLOR=1`.
+
+---
+
+## Agent Usage Enforcement
+
+The protocol enforces that required agents are used for specific task types:
+
+### Enforcement Rules
+| Rule | Required Agent | Strictness |
+|------|----------------|------------|
+| Security code (`**/auth/**`, `**/*auth*`) | security-scanner | block |
+| Architecture changes (5+ files) | architect | block |
+| Multi-step tasks (implement/build feature) | orchestrator | block |
+| Test file changes (`**/*.test.*`) | tester | block |
+| Frontend components (`**/*.tsx`) | frontend-designer | warn |
+| Database changes (`**/migrations/**`) | data-modeler | block |
+
+### Strictness Levels
+| Level | Behavior |
+|-------|----------|
+| `block` | Stops completion until agent is invoked |
+| `warn` | Shows warning but allows completion |
+| `off` | No enforcement |
+
+### How It Works
+1. **UserPromptSubmit**: `agent-auto-invoke.py` detects patterns and sets required agents
+2. **PreToolUse(Task)**: `agent-announce.py` tracks agent invocations
+3. **Stop**: `agent-enforcement-check.py` validates requirements were met
+
+### Configuration
+Edit `.claude/config/enforcement-rules.json` to customize rules, thresholds, and exemptions.
+
+---
+
 ## Project Status
 
 | Property | Value |
 |----------|-------|
-| Version | 1.2.10 |
+| Version | 1.2.12 |
 | Philosophy | Research-first, quality-enforced |
 | Validation | Zero-error tolerance |
 
@@ -94,6 +179,7 @@ Input: "Write unit tests for the auth module"
 ### UserPromptSubmit
 | Script | Purpose |
 |--------|---------|
+| agent-auto-invoke.py | Auto-invoke agents based on prompt analysis |
 | context-loader.py | Load context at session start |
 | skill-activation-prompt.py | Auto-activate skills based on prompt |
 
@@ -122,6 +208,7 @@ Input: "Write unit tests for the auth module"
 | laziness-check.sh | Block incomplete code |
 | honesty-check.sh | Check for overclaiming |
 | stop-verify.sh | Final quality gate |
+| agent-enforcement-check.py | Enforce required agent usage |
 
 ### SubagentStop
 | Script | Purpose |
@@ -232,6 +319,8 @@ When agents run, colored banners display their status:
 | `/proto-update` | Check for and apply updates |
 | `/proto-update --check` | Dry run - show available updates |
 | `/proto-update --analyze` | Full analysis with suggestions |
+| `/auto-agent-config` | Configure agent auto-invocation |
+| `/create-agent` | Create and register a new agent |
 | `/manage-tools` | Manage protocol tooling |
 
 ## Memory System
