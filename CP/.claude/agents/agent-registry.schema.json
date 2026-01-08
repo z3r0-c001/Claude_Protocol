@@ -1,0 +1,188 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "agent-registry.schema.json",
+  "title": "Agent Registry",
+  "description": "Schema for the centralized agent registry with triggers, categories, and orchestration metadata",
+  "type": "object",
+  "required": ["version", "agents"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to this schema"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Registry version (semver)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the registry"
+    },
+    "agents": {
+      "type": "object",
+      "description": "Map of agent name to agent definition",
+      "additionalProperties": {
+        "$ref": "#/definitions/agent"
+      }
+    },
+    "command_mappings": {
+      "type": "object",
+      "description": "Map of slash commands to agent names",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "description": "List of agents invoked by this command"
+      }
+    },
+    "category_agent_mappings": {
+      "type": "object",
+      "description": "Map of task categories to relevant agents",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "description": "List of agents for this category"
+      }
+    }
+  },
+  "definitions": {
+    "agent": {
+      "type": "object",
+      "required": ["name", "path", "description", "category_group", "categories", "model_tier", "supports_plan_mode", "triggers", "orchestration"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "description": "Agent identifier (lowercase, hyphenated)"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^[a-z]+/[a-z][a-z0-9-]*\\.md$",
+          "description": "Relative path to agent file from agents directory"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 200,
+          "description": "Brief description of agent purpose"
+        },
+        "category_group": {
+          "type": "string",
+          "enum": ["core", "quality", "domain", "workflow"],
+          "description": "Primary organizational group for the agent"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "security", "testing", "design", "frontend", "quality",
+              "documentation", "performance", "debugging", "data",
+              "devops", "api", "workflow", "architecture", "planning",
+              "research", "analysis", "accessibility", "coordination"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "Task categories this agent handles"
+        },
+        "model_tier": {
+          "type": "string",
+          "enum": ["fast", "standard", "high"],
+          "description": "Model tier for cost/performance optimization"
+        },
+        "supports_plan_mode": {
+          "type": "boolean",
+          "description": "Whether agent supports plan mode for user approval"
+        },
+        "triggers": {
+          "$ref": "#/definitions/triggers"
+        },
+        "orchestration": {
+          "$ref": "#/definitions/orchestration"
+        }
+      }
+    },
+    "triggers": {
+      "type": "object",
+      "required": ["exact_keywords", "phrase_patterns"],
+      "properties": {
+        "exact_keywords": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 2
+          },
+          "description": "Keywords that trigger this agent (case-insensitive match)"
+        },
+        "phrase_patterns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Regex pattern for phrase matching"
+          },
+          "description": "Regex patterns for more complex phrase matching"
+        },
+        "file_patterns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Glob pattern for file matching"
+          },
+          "default": [],
+          "description": "File glob patterns that indicate this agent"
+        },
+        "negation_patterns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Regex pattern for negation"
+          },
+          "default": [],
+          "description": "Patterns that indicate NOT to use this agent"
+        }
+      }
+    },
+    "orchestration": {
+      "type": "object",
+      "required": ["typical_position"],
+      "properties": {
+        "typical_position": {
+          "type": "string",
+          "enum": ["first", "early", "middle", "late", "last", "any", "coordinator"],
+          "description": "Typical position in multi-agent workflow"
+        },
+        "often_follows": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Agents that typically run before this one"
+        },
+        "often_precedes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Agents that typically run after this one"
+        },
+        "can_parallel_with": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Agents that can run in parallel with this one"
+        }
+      }
+    }
+  }
+}
