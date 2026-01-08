@@ -10,6 +10,13 @@ import os
 import urllib.request
 import urllib.error
 
+# Color support
+try:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from hook_colors import hook_status
+except ImportError:
+    def hook_status(*args, **kwargs): pass
+
 REPO_API = "https://api.github.com/repos/z3r0-c001/Claude_Protocol/releases/latest"
 REPO_URL = "https://github.com/z3r0-c001/Claude_Protocol"
 
@@ -54,21 +61,24 @@ def parse_version(v):
         return (0, 0, 0)
 
 def main():
+    hook_status("update-check", "CHECKING", "Protocol version")
+
     local = get_local_version()
     latest = get_latest_release()
-    
+
     if not local:
-        # Can't determine local version, skip check
+        hook_status("update-check", "SKIP", "No local version")
         sys.exit(0)
-    
+
     if not latest:
-        # Network issue or no releases, skip silently
+        hook_status("update-check", "SKIP", "Network unavailable")
         sys.exit(0)
-    
+
     local_tuple = parse_version(local)
     latest_tuple = parse_version(latest)
-    
+
     if latest_tuple > local_tuple:
+        hook_status("update-check", "WARN", f"Update: v{local} → v{latest}")
         # Output update notice - this gets added to context on SessionStart
         print(f"""
 ╔══════════════════════════════════════════════════════════════╗
@@ -81,7 +91,9 @@ def main():
 ║  {REPO_URL}/releases/latest  ║
 ╚══════════════════════════════════════════════════════════════╝
 """)
-    
+    else:
+        hook_status("update-check", "OK", f"v{local} is current")
+
     sys.exit(0)
 
 if __name__ == "__main__":
