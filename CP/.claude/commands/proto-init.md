@@ -610,24 +610,71 @@ npm --version
 ```
 
 **If node not found:**
-> Node.js is required for the MCP server. Please install Node.js 18+ first.
+> Node.js is required for the MCP server. Please install Node.js 20+ first.
 > https://nodejs.org/
+
+**If node found, continue.**
 
 #### C5.2 Copy MCP Server Files
 Copy memory-server source files to `.claude/mcp/memory-server/`
 
-#### C5.3 Install & Build
+#### C5.3 Check for Missing Dependencies
+**CRITICAL: Check for node_modules directory:**
+```bash
+test -d .claude/mcp/memory-server/node_modules && echo "EXISTS" || echo "MISSING"
+```
+
+**If MISSING (common on fresh installs):**
+
+**SAY:**
+> MCP server dependencies not installed. Installing now...
+
 **RUN:**
 ```bash
-cd .claude/mcp/memory-server && npm install && npm run build
+cd .claude/mcp/memory-server && npm install
+```
+
+**If npm install fails:**
+> ⚠️ npm install failed. Common causes:
+> - Network issues
+> - Node.js version mismatch (requires 20+)
+> - Permissions issues
+>
+> Manual fix: `cd .claude/mcp/memory-server && npm install`
+
+#### C5.4 Build if Needed
+**Check for dist/index.js:**
+```bash
+test -f .claude/mcp/memory-server/dist/index.js && echo "EXISTS" || echo "MISSING"
+```
+
+**If MISSING:**
+**RUN:**
+```bash
+cd .claude/mcp/memory-server && npm run build
 ```
 
 **Expected:** `dist/index.js` created
 
-#### C5.4 Create .mcp.json
+**If build fails:**
+> ⚠️ Build failed. Run manually: `cd .claude/mcp/memory-server && npm run build`
+
+#### C5.5 Verify MCP Server Works
+**RUN:**
+```bash
+node .claude/mcp/memory-server/dist/index.js --help 2>&1 || echo "CHECK FAILED"
+```
+
+**If CHECK FAILED:**
+> ⚠️ MCP server cannot start. Check:
+> 1. node_modules exists: `ls .claude/mcp/memory-server/node_modules`
+> 2. dist/index.js exists: `ls .claude/mcp/memory-server/dist/index.js`
+> 3. Rebuild: `cd .claude/mcp/memory-server && npm install && npm run build`
+
+#### C5.6 Create .mcp.json
 Create `.mcp.json` in project root with memory server config.
 
-#### C5.5 Initialize Memory
+#### C5.7 Initialize Memory
 **ASK:**
 > Would you like to store any initial facts now? Common categories:
 > - `architecture` - Code structure decisions
