@@ -177,7 +177,7 @@ echo ""
 
 # Copy files
 if [ "$MERGE_MODE" = true ]; then
-    echo -e "${GREEN}[1/6]${NC} Merging .claude directory (preserving existing)..."
+    echo -e "${GREEN}[1/7]${NC} Merging .claude directory (preserving existing)..."
     # Create .claude if it doesn't exist
     mkdir -p "$TARGET_DIR/.claude"
 
@@ -206,7 +206,7 @@ if [ "$MERGE_MODE" = true ]; then
         echo -e "    ${YELLOW}Kept existing: settings.json${NC}"
     fi
 
-    echo -e "${GREEN}[2/6]${NC} Merging configuration files..."
+    echo -e "${GREEN}[2/7]${NC} Merging configuration files..."
 
     # CLAUDE.md - analyze and merge
     if [ -f "$TARGET_DIR/CLAUDE.md" ]; then
@@ -234,16 +234,16 @@ if [ "$MERGE_MODE" = true ]; then
         echo -e "    ${YELLOW}Kept existing: .gitignore${NC}"
     fi
 else
-    echo -e "${GREEN}[1/6]${NC} Copying .claude directory..."
+    echo -e "${GREEN}[1/7]${NC} Copying .claude directory..."
     cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR/"
 
-    echo -e "${GREEN}[2/6]${NC} Copying configuration files..."
+    echo -e "${GREEN}[2/7]${NC} Copying configuration files..."
     cp "$SCRIPT_DIR/CLAUDE.md" "$TARGET_DIR/"
     cp "$SCRIPT_DIR/.mcp.json" "$TARGET_DIR/" 2>/dev/null || true
     cp "$SCRIPT_DIR/.gitignore" "$TARGET_DIR/" 2>/dev/null || true
 fi
 
-echo -e "${GREEN}[3/6]${NC} Copying documentation..."
+echo -e "${GREEN}[3/7]${NC} Copying documentation..."
 cp "$SCRIPT_DIR/README.md" "$TARGET_DIR/" 2>/dev/null || true
 cp "$SCRIPT_DIR/LICENSE" "$TARGET_DIR/" 2>/dev/null || true
 cp "$SCRIPT_DIR/CHANGELOG"*.md "$TARGET_DIR/" 2>/dev/null || true
@@ -255,16 +255,42 @@ if [ -d "$SCRIPT_DIR/scripts" ]; then
     cp -r "$SCRIPT_DIR/scripts" "$TARGET_DIR/"
 fi
 
-echo -e "${GREEN}[4/6]${NC} Copying install script..."
+echo -e "${GREEN}[4/7]${NC} Copying install script..."
 cp "$SCRIPT_DIR/install.sh" "$TARGET_DIR/" 2>/dev/null || true
 
-echo -e "${GREEN}[5/6]${NC} Setting executable permissions on hooks..."
+echo -e "${GREEN}[5/7]${NC} Setting executable permissions on hooks..."
 chmod +x "$TARGET_DIR/.claude/hooks/"*.sh 2>/dev/null || true
 chmod +x "$TARGET_DIR/.claude/hooks/"*.py 2>/dev/null || true
 
-echo -e "${GREEN}[6/6]${NC} Setting executable permissions on scripts..."
+echo -e "${GREEN}[6/7]${NC} Setting executable permissions on scripts..."
 chmod +x "$TARGET_DIR/.claude/scripts/"*.sh 2>/dev/null || true
 chmod +x "$TARGET_DIR/install.sh" 2>/dev/null || true
+
+echo -e "${GREEN}[7/7]${NC} Installing MCP memory server dependencies..."
+if [ -d "$TARGET_DIR/.claude/mcp/memory-server" ]; then
+    if command -v node &> /dev/null && command -v npm &> /dev/null; then
+        if [ ! -d "$TARGET_DIR/.claude/mcp/memory-server/node_modules" ]; then
+            echo -e "    ${BLUE}Running npm install for MCP server...${NC}"
+            (cd "$TARGET_DIR/.claude/mcp/memory-server" && npm install --silent 2>/dev/null) && \
+                echo -e "    ${GREEN}✓ MCP dependencies installed${NC}" || \
+                echo -e "    ${YELLOW}! npm install failed - run manually: cd .claude/mcp/memory-server && npm install${NC}"
+        else
+            echo -e "    ${GREEN}✓ MCP dependencies already present${NC}"
+        fi
+        # Rebuild if dist missing or outdated
+        if [ ! -f "$TARGET_DIR/.claude/mcp/memory-server/dist/index.js" ]; then
+            echo -e "    ${BLUE}Building MCP server...${NC}"
+            (cd "$TARGET_DIR/.claude/mcp/memory-server" && npm run build --silent 2>/dev/null) && \
+                echo -e "    ${GREEN}✓ MCP server built${NC}" || \
+                echo -e "    ${YELLOW}! Build failed - run manually: cd .claude/mcp/memory-server && npm run build${NC}"
+        fi
+    else
+        echo -e "    ${YELLOW}! Node.js not found - MCP server won't work until dependencies installed${NC}"
+        echo -e "    ${YELLOW}  Install Node.js 20+, then: cd .claude/mcp/memory-server && npm install && npm run build${NC}"
+    fi
+else
+    echo -e "    ${YELLOW}MCP server not found (optional feature)${NC}"
+fi
 
 # Verify installation
 echo ""
