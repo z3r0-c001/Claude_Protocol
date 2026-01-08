@@ -3,10 +3,6 @@
   "permissions": {
     "allow": [
       "Read",
-      "Write",
-      "Edit",
-      "MultiEdit",
-      "Bash",
       "Grep",
       "Glob",
       "Task",
@@ -14,76 +10,28 @@
       "WebFetch",
       "TodoRead",
       "TodoWrite",
-      "NotebookEdit",
-      "mcp__memory__:*",
-      "mcp__filesystem__:*",
-      "Bash(mkdir:*)",
-      "Bash(chmod +x:*)",
-      "Bash(chmod 755:*)",
-      "Bash(chmod 644:*)",
-      "Bash(npm:*)",
-      "Bash(npx:*)",
-      "Bash(node:*)",
-      "Bash(cd:*)",
+      "mcp__memory__memory_read",
+      "mcp__memory__memory_search",
+      "mcp__memory__memory_list",
       "Bash(ls:*)",
+      "Bash(pwd)",
+      "Bash(which:*)",
       "Bash(cat:*)",
       "Bash(head:*)",
       "Bash(tail:*)",
       "Bash(grep:*)",
       "Bash(find:*)",
-      "Bash(which:*)",
-      "Bash(pwd)",
-      "Bash(echo:*)",
-      "Bash(python:*)",
-      "Bash(python3:*)",
-      "Bash(pip:*)",
-      "Bash(pip3:*)",
-      "Bash(git:*)",
-      "Bash(gh:*)",
-      "Bash(cargo:*)",
-      "Bash(go:*)",
-      "Bash(rustc:*)",
-      "Bash(tsc:*)",
-      "Bash(eslint:*)",
-      "Bash(prettier:*)",
-      "Bash(jest:*)",
-      "Bash(pytest:*)",
-      "Bash(make:*)",
-      "Bash(touch:*)",
-      "Bash(cp:*)",
-      "Bash(mv:*)",
-      "Bash(rm -rf node_modules)",
-      "Bash(rm -rf dist)",
-      "Bash(rm -rf build)",
-      "Bash(rm -rf .cache)",
-      "Bash(rm -rf coverage)",
-      "Bash(rm -rf __pycache__)",
-      "Bash(rm -rf .pytest_cache)",
-      "Bash(rm -f:*)",
+      "Bash(wc:*)",
       "Bash(test:*)",
       "Bash([:*)",
-      "Bash(wc:*)",
-      "Bash(sort:*)",
-      "Bash(uniq:*)",
-      "Bash(cut:*)",
-      "Bash(awk:*)",
-      "Bash(sed:*)",
-      "Bash(tr:*)",
-      "Bash(xargs:*)",
-      "Bash(env:*)",
-      "Bash(export:*)",
-      "Bash(source:*)",
-      "Bash(.:*)",
-      "Bash(bash:*)",
-      "Bash(sh:*)",
-      "Bash(jq:*)",
-      "Bash(curl:*)",
-      "Bash(wget:*)",
-      "Bash(tar:*)",
-      "Bash(unzip:*)",
-      "Bash(zip:*)",
-      "Bash(gzip:*)",
-      "Bash(gunzip:*)"
+      "Bash(node --version)",
+      "Bash(npm --version)",
+      "Bash(python --version)",
+      "Bash(python3 --version)",
+      "Bash(git status)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git branch:*)"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -95,6 +43,10 @@
       "Bash(su:*)",
       "Bash(chmod 777:*)",
       "Bash(chown:*)",
+      "Bash(curl * | sh)",
+      "Bash(curl * | bash)",
+      "Bash(wget * | sh)",
+      "Bash(wget * | bash)",
       "Bash(mkfs:*)",
       "Bash(dd if=/dev/zero:*)",
       "Bash(dd if=/dev/random:*)",
@@ -106,8 +58,15 @@
       "Bash(service:*)",
       "Bash(kill -9 1)",
       "Bash(pkill:*)",
-      "Bash(killall:*)"
-    ]
+      "Bash(killall:*)",
+      "Write(.env*)",
+      "Edit(.env*)",
+      "Write(*credentials*)",
+      "Edit(*credentials*)",
+      "Write(*secret*)",
+      "Edit(*secret*)"
+    ],
+    "_mode": "restricted"
   },
   "hooks": {
     "SessionStart": [
@@ -125,6 +84,11 @@
     "UserPromptSubmit": [
       {
         "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" agent-auto-invoke.py",
+            "timeout": 10
+          },
           {
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" skill-activation-prompt.py",
@@ -176,6 +140,11 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" dangerous-command-check.py",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" git-push-check.py",
+            "timeout": 15
           }
         ]
       },
@@ -254,6 +223,11 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" stop-verify.sh",
             "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" agent-enforcement-check.py",
+            "timeout": 10
           }
         ]
       }
