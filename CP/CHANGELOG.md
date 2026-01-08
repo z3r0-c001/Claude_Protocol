@@ -1,9 +1,38 @@
 # Changelog
 
-**Current Version:** 1.2.9
-**Date:** 2026-01-07
+**Current Version:** 1.2.10
+**Date:** 2026-01-08
 
 > This file is overwritten with each release. For historical changes, see git history.
+
+---
+
+## v1.2.10 - MCP Initialization Fix (Patch)
+
+Fix MCP memory server failing on fresh installs due to missing node_modules.
+
+### Bug Fixes
+
+| File | Change |
+|------|--------|
+| `install.sh` | Add step 7/7 to run `npm install` and `npm run build` for MCP server |
+| `scripts/install-to-scope.sh` | Add npm install/build after copying MCP files |
+| `.claude/commands/proto-init.md` | Add C5.3-C5.5 dependency check and verification steps |
+
+### New Hooks
+
+| File | Purpose |
+|------|---------|
+| `.claude/hooks/git-push-check.py` | Git push validation |
+| `.claude/hooks/git-push-guard.py` | Commit message quality enforcement |
+
+### Updates
+
+| File | Change |
+|------|--------|
+| `.claude/commands/git.md` | Use git-push-guard.py for pre-push checks |
+| `.claude/hooks/colors.py` | Add color definitions for additional agents |
+| `.claude/hooks/update-check.py` | Add color status output support |
 
 ---
 
