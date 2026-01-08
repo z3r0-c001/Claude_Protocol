@@ -1,443 +1,451 @@
 #!/usr/bin/env python3
 """
-colors.py - Unified color system for Claude Protocol hooks and agents
+colors.py - Hook output system for Claude Code
 
-Single source of truth for all terminal colorization.
+IMPORTANT: ANSI colors do NOT work in Claude Code hook output.
+Hook stdout/stderr is captured as plain text - escape codes are not rendered.
 
-Environment variable support per CLI best practices:
-- NO_COLOR: https://no-color.org/ - Disable colors when set (any value)
-- FORCE_COLOR: https://force-color.org/ - Force colors even when piped
+ANSI colors ONLY work in:
+- Status line scripts (via statusLine in settings.json)
+- Direct terminal output (not through hooks)
+
+This module provides:
+1. Plain text formatting for hook output (Unicode box-drawing)
+2. JSON output helpers for proper Claude Code integration
+3. Status line ANSI helpers (for statusline scripts only)
+
+References:
+- https://github.com/anthropics/claude-code/issues/4084 (hook visibility)
+- https://github.com/anthropics/claude-code/issues/12653 (stderr not displaying)
+- https://github.com/anthropics/claude-code/issues/6466 (statusline colors)
 """
 
+import json
 import sys
 import os
+from typing import Optional, Dict, Any
+
 
 # =============================================================================
-# ANSI ESCAPE CODES - Combined format that works in Claude Code
+# CONSTANTS
 # =============================================================================
+
+# Unicode box-drawing characters for visual structure (work everywhere)
+BOX = {
+    "h": "─",      # horizontal
+    "v": "│",      # vertical
+    "tl": "┌",     # top-left
+    "tr": "┐",     # top-right
+    "bl": "└",     # bottom-left
+    "br": "┘",     # bottom-right
+    "dh": "═",     # double horizontal
+    "dv": "║",     # double vertical
+    "dtl": "╔",    # double top-left
+    "dtr": "╗",    # double top-right
+    "dbl": "╚",    # double bottom-left
+    "dbr": "╝",    # double bottom-right
+}
+
+# Status icons (Unicode, work everywhere)
+ICONS = {
+    "success": "✓",
+    "error": "✗",
+    "warning": "⚠",
+    "info": "ℹ",
+    "running": "▶",
+    "pending": "○",
+    "blocked": "⊘",
+    "agent": "🤖",
+}
+
+# Hook event types
+HOOK_EVENTS = [
+    "PreToolUse",
+    "PostToolUse",
+    "UserPromptSubmit",
+    "SessionStart",
+    "Stop",
+    "SubagentStop",
+    "PreCompact",
+    "Notification",
+]
+
+
+# =============================================================================
+# PLAIN TEXT FORMATTING (for hook output)
+# =============================================================================
+
+def format_banner(title: str, width: int = 50) -> str:
+    """
+    Create a plain text banner with Unicode box-drawing.
+
+    Works in all hook output contexts.
+    """
+    title = title.upper()
+    padding = width - len(title) - 2
+    left_pad = padding // 2
+    right_pad = padding - left_pad
+
+    top = f"{BOX['dtl']}{BOX['dh'] * width}{BOX['dtr']}"
+    middle = f"{BOX['dv']}{' ' * left_pad}{title}{' ' * right_pad}{BOX['dv']}"
+    bottom = f"{BOX['dbl']}{BOX['dh'] * width}{BOX['dbr']}"
+
+    return f"{top}\n{middle}\n{bottom}"
+
+
+def format_status(hook_name: str, status: str, detail: str = "") -> str:
+    """
+    Format a hook status line (plain text).
+
+    Args:
+        hook_name: Name of the hook
+        status: Status string (OK, BLOCK, ERROR, etc.)
+        detail: Optional detail message
+
+    Returns:
+        Formatted status line
+    """
+    icon = ICONS.get(status.lower(), ICONS["info"])
+    display_name = hook_name.replace("-", " ").title()
+
+    if detail:
+        return f"{icon} {display_name}: {status} - {detail}"
+    return f"{icon} {display_name}: {status}"
+
+
+def format_agent_banner(agent_name: str, mode: str = "") -> str:
+    """
+    Create a plain text agent banner.
+
+    Args:
+        agent_name: Name of the agent
+        mode: Optional mode (PLAN, EXECUTE, etc.)
+
+    Returns:
+        Formatted banner string
+    """
+    display_name = agent_name.replace("-", " ").upper()
+    width = 50
+
+    lines = [
+        f"{BOX['dtl']}{BOX['dh'] * width}{BOX['dtr']}",
+        f"{BOX['dv']}{display_name:^{width}}{BOX['dv']}",
+    ]
+
+    if mode:
+        lines.append(f"{BOX['dv']}{f'[{mode}]':^{width}}{BOX['dv']}")
+
+    lines.append(f"{BOX['dbl']}{BOX['dh'] * width}{BOX['dbr']}")
+
+    return "\n".join(lines)
+
+
+def format_confidence(score: float, agent_name: str) -> str:
+    """
+    Format a confidence score with visual bar (plain text).
+
+    Args:
+        score: Confidence percentage (0-100)
+        agent_name: Name of the matched agent
+
+    Returns:
+        Formatted confidence display
+    """
+    bar_width = 20
+    filled = int(score / 100 * bar_width)
+    empty = bar_width - filled
+
+    bar = "█" * filled + "░" * empty
+
+    if score >= 85:
+        action = "AUTO-INVOKE"
+    elif score >= 60:
+        action = "PROMPT"
+    else:
+        action = "SUGGEST"
+
+    return f"[{bar}] {score:.1f}% {action} -> {agent_name}"
+
+
+# =============================================================================
+# JSON OUTPUT (for Claude Code integration)
+# =============================================================================
+
+def json_output(
+    decision: Optional[str] = None,
+    reason: Optional[str] = None,
+    additional_context: Optional[str] = None,
+    hook_event: Optional[str] = None,
+    continue_: bool = True,
+    stop_reason: Optional[str] = None,
+    permission_decision: Optional[str] = None,
+    permission_reason: Optional[str] = None,
+    updated_input: Optional[Dict[str, Any]] = None,
+) -> str:
+    """
+    Create properly formatted JSON output for Claude Code hooks.
+
+    This is the CORRECT way to communicate from hooks to Claude Code.
+
+    Args:
+        decision: "block" or None (for PostToolUse, Stop, SubagentStop)
+        reason: Explanation (shown to Claude for block, user for allow)
+        additional_context: Added to Claude's context as system-reminder
+        hook_event: Hook event name for hookSpecificOutput
+        continue_: Whether Claude should continue (default True)
+        stop_reason: Message shown to user when continue_=False
+        permission_decision: "allow", "deny", or "ask" (PreToolUse only)
+        permission_reason: Explanation for permission decision
+        updated_input: Modified tool input (PreToolUse only)
+
+    Returns:
+        JSON string to print to stdout
+
+    Example:
+        # For UserPromptSubmit - add context
+        print(json_output(
+            additional_context="Agent 'tester' suggested for this task",
+            hook_event="UserPromptSubmit"
+        ))
+        sys.exit(0)
+
+        # For PreToolUse - block dangerous command
+        print(json_output(
+            permission_decision="deny",
+            permission_reason="Blocked: rm -rf detected",
+            hook_event="PreToolUse"
+        ))
+        sys.exit(0)
+    """
+    output = {}
+
+    # Common fields
+    if not continue_:
+        output["continue"] = False
+        if stop_reason:
+            output["stopReason"] = stop_reason
+
+    if decision:
+        output["decision"] = decision
+
+    if reason:
+        output["reason"] = reason
+
+    # Hook-specific output
+    if hook_event or additional_context or permission_decision:
+        hook_specific = {}
+
+        if hook_event:
+            hook_specific["hookEventName"] = hook_event
+
+        if additional_context:
+            hook_specific["additionalContext"] = additional_context
+
+        if permission_decision:
+            hook_specific["permissionDecision"] = permission_decision
+            if permission_reason:
+                hook_specific["permissionDecisionReason"] = permission_reason
+
+        if updated_input:
+            hook_specific["updatedInput"] = updated_input
+
+        if hook_specific:
+            output["hookSpecificOutput"] = hook_specific
+
+    return json.dumps(output)
+
+
+def output_context(context: str, hook_event: str = "UserPromptSubmit") -> None:
+    """
+    Output additional context to Claude (appears as system-reminder).
+
+    This is the recommended way to inject context from hooks.
+
+    Args:
+        context: Text to add to Claude's context
+        hook_event: The hook event name
+    """
+    print(json_output(additional_context=context, hook_event=hook_event))
+
+
+def output_block(reason: str, hook_event: str = "PreToolUse") -> None:
+    """
+    Block an operation with a reason shown to Claude.
+
+    Args:
+        reason: Why the operation was blocked
+        hook_event: The hook event name
+    """
+    if hook_event == "PreToolUse":
+        print(json_output(
+            permission_decision="deny",
+            permission_reason=reason,
+            hook_event=hook_event
+        ))
+    else:
+        print(json_output(decision="block", reason=reason))
+
+
+# =============================================================================
+# STATUS LINE ONLY - ANSI Colors
+# =============================================================================
+# These functions are ONLY for status line scripts.
+# They will NOT work in hook stdout/stderr.
+
+class StatusLine:
+    """
+    ANSI color helpers for status line scripts ONLY.
+
+    Usage in ~/.claude/statusline.sh or statusLine command:
+        from colors import StatusLine
+        sl = StatusLine()
+        print(sl.colored("text", "green", "black"))
+
+    IMPORTANT: These colors ONLY render in status line context.
+    Using them in hooks will output raw escape codes.
+    """
+
+    # Combined ANSI codes (the only format that works in Claude Code statusline)
+    # Format: \033[STYLE;FG;BGm
+    # Style: 0=normal, 1=bold
+    # FG: 30-37 (dark), 90-97 (bright)
+    # BG: 40-47 (dark), 100-107 (bright)
+
+    FG = {
+        "black": 30,
+        "red": 31,
+        "green": 32,
+        "yellow": 33,
+        "blue": 34,
+        "magenta": 35,
+        "cyan": 36,
+        "white": 37,
+        "bright_black": 90,
+        "bright_red": 91,
+        "bright_green": 92,
+        "bright_yellow": 93,
+        "bright_blue": 94,
+        "bright_magenta": 95,
+        "bright_cyan": 96,
+        "bright_white": 97,
+    }
+
+    BG = {
+        "black": 40,
+        "red": 41,
+        "green": 42,
+        "yellow": 43,
+        "blue": 44,
+        "magenta": 45,
+        "cyan": 46,
+        "white": 47,
+        "bright_black": 100,
+        "bright_red": 101,
+        "bright_green": 102,
+        "bright_yellow": 103,
+        "bright_blue": 104,
+        "bright_magenta": 105,
+        "bright_cyan": 106,
+        "bright_white": 107,
+    }
+
+    RESET = "\033[0m"
+
+    @classmethod
+    def colored(cls, text: str, fg: str = "white", bg: str = None, bold: bool = False) -> str:
+        """
+        Apply color to text using COMBINED escape sequence.
+
+        ONLY works in status line context, not in hooks.
+
+        Args:
+            text: Text to color
+            fg: Foreground color name
+            bg: Background color name (optional)
+            bold: Whether to make text bold
+
+        Returns:
+            ANSI-colored string
+        """
+        fg_code = cls.FG.get(fg, cls.FG["white"])
+        style = "1" if bold else "0"
+
+        if bg:
+            bg_code = cls.BG.get(bg, cls.BG["black"])
+            return f"\033[{style};{fg_code};{bg_code}m{text}{cls.RESET}"
+        else:
+            return f"\033[{style};{fg_code}m{text}{cls.RESET}"
+
+    @classmethod
+    def segment(cls, text: str, fg: str, bg: str) -> str:
+        """
+        Create a powerline-style segment.
+
+        ONLY works in status line context.
+        """
+        return cls.colored(f" {text} ", fg, bg, bold=True)
+
+
+# =============================================================================
+# BACKWARD COMPATIBILITY
+# =============================================================================
+
+# These are kept for existing code but they DO NOT render colors in hooks
+# They output raw escape codes which appear as garbage text
 
 RESET = "\033[0m"
 BOLD = "\033[1m"
 
-# Hook color schemes: combined bold + foreground + background
-# Format: \033[1;FG;BGm where FG=30-37/90-97, BG=40-47/100-107
-HOOK_COLORS = {
-    # PreToolUse hooks - warm colors
-    "pre-write-check": "\033[1;97;41m",           # White on Red
-    "pretool-laziness-check": "\033[1;30;43m",    # Black on Yellow
-    "pretool-hallucination-check": "\033[1;97;45m",  # White on Magenta
-    "dangerous-command-check": "\033[1;97;101m",  # White on Bright Red
-    "agent-announce": "\033[1;30;104m",           # Black on Bright Blue
-    "agent-plan-enforcer": "\033[1;97;44m",       # White on Blue
-    "model-audit": "\033[1;30;46m",               # Black on Cyan
+def red(text: str) -> str:
+    """DEPRECATED: Colors don't work in hooks. Returns plain text."""
+    return text
 
-    # PostToolUse hooks - cool colors
-    "post-write-validate": "\033[1;97;44m",       # White on Blue
-    "file-edit-tracker": "\033[1;30;46m",         # Black on Cyan
-    "context-detector": "\033[1;30;42m",          # Black on Green
-    "research-quality-check": "\033[1;97;104m",   # White on Bright Blue
-    "doc-size-detector": "\033[1;30;106m",        # Black on Bright Cyan
+def green(text: str) -> str:
+    """DEPRECATED: Colors don't work in hooks. Returns plain text."""
+    return text
 
-    # UserPromptSubmit hooks - green spectrum
-    "context-loader": "\033[1;30;102m",           # Black on Bright Green
-    "skill-activation-prompt": "\033[1;97;42m",   # White on Green
+def yellow(text: str) -> str:
+    """DEPRECATED: Colors don't work in hooks. Returns plain text."""
+    return text
 
-    # Stop hooks - neutral/warning
-    "laziness-check": "\033[1;30;103m",           # Black on Bright Yellow
-    "honesty-check": "\033[1;97;105m",            # White on Bright Magenta
-    "stop-verify": "\033[1;30;47m",               # Black on White
+def blue(text: str) -> str:
+    """DEPRECATED: Colors don't work in hooks. Returns plain text."""
+    return text
 
-    # SubagentStop hooks
-    "research-validator": "\033[1;97;102m",       # White on Bright Green
-    "agent-handoff-validator": "\033[1;30;107m",  # Black on Bright White
-    "agent-response-handler": "\033[1;97;44m",    # White on Blue
-}
+def cyan(text: str) -> str:
+    """DEPRECATED: Colors don't work in hooks. Returns plain text."""
+    return text
 
-# Default for unknown hooks
-DEFAULT_COLOR = "\033[1;97;100m"  # White on Bright Black
+def magenta(text: str) -> str:
+    """DEPRECATED: Colors don't work in hooks. Returns plain text."""
+    return text
 
-# Agent color schemes
-AGENT_COLORS = {
-    # Quality agents - red/yellow spectrum
-    "security-scanner": "\033[1;97;41m",          # White on Red
-    "laziness-destroyer": "\033[1;30;101m",       # Black on Bright Red
-    "hallucination-checker": "\033[1;97;45m",     # White on Magenta
-    "honesty-evaluator": "\033[1;30;105m",        # Black on Bright Magenta
-    "fact-checker": "\033[1;97;105m",             # White on Bright Magenta
-    "reviewer": "\033[1;30;43m",                  # Black on Yellow
-    "tester": "\033[1;30;42m",                    # Black on Green
-    "test-coverage-enforcer": "\033[1;30;103m",   # Black on Bright Yellow
-
-    # Core agents - blue spectrum
-    "architect": "\033[1;97;44m",                 # White on Blue
-    "research-analyzer": "\033[1;97;104m",        # White on Bright Blue
-    "performance-analyzer": "\033[1;30;46m",      # Black on Cyan
-    "debugger": "\033[1;97;41m",                  # White on Red
-
-    # Domain agents - green/cyan spectrum
-    "codebase-analyzer": "\033[1;30;42m",         # Black on Green
-    "frontend-designer": "\033[1;30;106m",        # Black on Bright Cyan
-    "ui-researcher": "\033[1;97;46m",             # White on Cyan
-    "dependency-auditor": "\033[1;30;103m",       # Black on Bright Yellow
-    "protocol-generator": "\033[1;30;102m",       # Black on Bright Green
-    "protocol-analyzer": "\033[1;30;42m",         # Black on Green
-    "protocol-updater": "\033[1;30;102m",         # Black on Bright Green
-    "document-processor": "\033[1;97;44m",        # White on Blue
-    "documenter": "\033[1;97;44m",                # White on Blue
-
-    # Workflow agents - neutral spectrum
-    "brainstormer": "\033[1;30;47m",              # Black on White
-    "orchestrator": "\033[1;30;107m",             # Black on Bright White
-    "git-strategist": "\033[1;30;43m",            # Black on Yellow
-    "tech-debt-tracker": "\033[1;30;103m",        # Black on Bright Yellow
-
-    # Additional agents (previously missing)
-    "accessibility-auditor": "\033[1;97;45m",     # White on Magenta (Quality)
-    "api-designer": "\033[1;97;44m",              # White on Blue (Domain)
-    "data-modeler": "\033[1;30;42m",              # Black on Green (Domain)
-    "devops-engineer": "\033[1;97;44m",           # White on Blue (Domain)
-    "error-handler": "\033[1;97;41m",             # White on Red (Quality)
-    "refactorer": "\033[1;97;104m",               # White on Bright Blue (Core)
-}
-
-DEFAULT_AGENT_COLOR = "\033[1;97;100m"  # White on Bright Black
-
-# Status icons
-STATUS_ICONS = {
-    "START": "▶",
-    "CHECKING": "▶",
-    "RUNNING": "▶",
-    "OK": "✓",
-    "PASS": "✓",
-    "CONTINUE": "✓",
-    "BLOCK": "✗",
-    "FAIL": "✗",
-    "ERROR": "✗",
-    "WARN": "⚠",
-    "SKIP": "⚠",
-}
+def bold(text: str) -> str:
+    """DEPRECATED: Colors don't work in hooks. Returns plain text."""
+    return text
 
 
-# =============================================================================
-# BACKWARD COMPATIBILITY - ANSI class
-# =============================================================================
-
-class ANSI:
-    """ANSI escape codes for terminal styling."""
-    RESET = RESET
-    BOLD = BOLD
-    
-    # Foreground colors
-    BLACK = "\033[30m"
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
-    BLUE = "\033[34m"
-    MAGENTA = "\033[35m"
-    CYAN = "\033[36m"
-    WHITE = "\033[37m"
-    
-    # Bright foreground
-    BRIGHT_BLACK = "\033[90m"
-    BRIGHT_RED = "\033[91m"
-    BRIGHT_GREEN = "\033[92m"
-    BRIGHT_YELLOW = "\033[93m"
-    BRIGHT_BLUE = "\033[94m"
-    BRIGHT_MAGENTA = "\033[95m"
-    BRIGHT_CYAN = "\033[96m"
-    BRIGHT_WHITE = "\033[97m"
-    
-    # Background colors
-    BG_BLACK = "\033[40m"
-    BG_RED = "\033[41m"
-    BG_GREEN = "\033[42m"
-    BG_YELLOW = "\033[43m"
-    BG_BLUE = "\033[44m"
-    BG_MAGENTA = "\033[45m"
-    BG_CYAN = "\033[46m"
-    BG_WHITE = "\033[47m"
-    
-    # Bright backgrounds
-    BG_BRIGHT_BLACK = "\033[100m"
-    BG_BRIGHT_RED = "\033[101m"
-    BG_BRIGHT_GREEN = "\033[102m"
-    BG_BRIGHT_YELLOW = "\033[103m"
-    BG_BRIGHT_BLUE = "\033[104m"
-    BG_BRIGHT_MAGENTA = "\033[105m"
-    BG_BRIGHT_CYAN = "\033[106m"
-    BG_BRIGHT_WHITE = "\033[107m"
-
-
-# =============================================================================
-# COLOR DETECTION - Per CLI best practices
-# Sources:
-#   - NO_COLOR: https://no-color.org/
-#   - FORCE_COLOR: https://force-color.org/
-# =============================================================================
-
-def _should_use_color() -> bool:
-    """
-    Determine if colors should be enabled based on environment variables.
-
-    Priority order:
-    1. FORCE_COLOR - if set, always enable colors (for piped output, CI, etc.)
-    2. NO_COLOR - if set, disable colors (user preference)
-    3. Default - enable colors (backward compatible with v1.1.10)
-    """
-    # FORCE_COLOR takes precedence (per force-color.org)
-    if os.environ.get('FORCE_COLOR'):
-        return True
-
-    # NO_COLOR disables colors when present (per no-color.org)
-    # Value doesn't matter - just presence
-    if 'NO_COLOR' in os.environ:
-        return False
-
-    # Default: colors enabled (maintains v1.1.10 behavior)
-    return True
-
-COLORS_ENABLED = _should_use_color()
-
-
-# =============================================================================
-# HOOK FUNCTIONS
-# =============================================================================
-
-def get_hook_color(hook_name: str) -> str:
-    """Get ANSI color code for a hook."""
-    return HOOK_COLORS.get(hook_name, DEFAULT_COLOR)
-
-
-def get_agent_color(agent_name: str) -> str:
-    """Get ANSI color code for an agent."""
-    return AGENT_COLORS.get(agent_name, DEFAULT_AGENT_COLOR)
-
-
+# Legacy compatibility - these functions now output plain text
 def hook_status(hook_name: str, status: str, detail: str = "") -> None:
-    """
-    Output colored hook status to stderr.
-
-    Args:
-        hook_name: Name of the hook (e.g., "pre-write-check")
-        status: Status string (e.g., "START", "OK", "BLOCK")
-        detail: Optional detail message
-    """
-    color = get_hook_color(hook_name)
-    icon = STATUS_ICONS.get(status.upper(), "⚡")
-    display_name = hook_name.replace("-", " ").title()
-
-    if detail:
-        msg = f"{color} {icon} {display_name}: {status} {RESET} {detail}"
-    else:
-        msg = f"{color} {icon} {display_name}: {status} {RESET}"
-
+    """Output hook status to stderr (plain text, no colors)."""
+    msg = format_status(hook_name, status, detail)
     print(msg, file=sys.stderr)
 
 
-def hook_compact(hook_name: str, status: str) -> None:
-    """Output a compact one-line colored status."""
-    color = get_hook_color(hook_name)
-    print(f"{color} {status} {RESET}", file=sys.stderr)
-
-
-def hook_banner(hook_name: str, message: str = "") -> None:
-    """Output a more prominent banner-style status."""
-    color = get_hook_color(hook_name)
-    display_name = hook_name.replace("-", " ").upper()
-    width = max(len(display_name) + 10, 40)
-
-    border = "━" * width
-    padding = " " * (width - len(display_name) - 4)
-
-    banner = f"""
-{color}┏{border}┓{RESET}
-{color}┃  {display_name}{padding}┃{RESET}
-{color}┗{border}┛{RESET}
-"""
-    print(banner, file=sys.stderr)
-    if message:
-        print(f"  {message}", file=sys.stderr)
-
-
-# =============================================================================
-# AGENT FUNCTIONS
-# =============================================================================
-
 def agent_banner(agent_name: str, mode: str = "") -> None:
-    """Output a colored agent banner."""
-    color = get_agent_color(agent_name)
-    display_name = agent_name.replace("-", " ").upper()
-    width = 50
-
-    border = "═" * width
-    
-    banner = f"""
-{color}╔{border}╗{RESET}
-{color}║{display_name:^{width}}║{RESET}"""
-    
-    if mode:
-        banner += f"""
-{color}║{f'[{mode}]':^{width}}║{RESET}"""
-    
-    banner += f"""
-{color}╚{border}╝{RESET}
-"""
+    """Output agent banner to stderr (plain text, no colors)."""
+    banner = format_agent_banner(agent_name, mode)
     print(banner, file=sys.stderr)
 
 
-def agent_compact(agent_name: str, mode: str = "") -> None:
-    """Output a compact single-line agent indicator."""
-    color = get_agent_color(agent_name)
-    display_name = agent_name.replace("-", " ").title()
-    
-    if mode:
-        print(f"{color} [{mode}] {display_name} {RESET}", file=sys.stderr)
-    else:
-        print(f"{color} {display_name} {RESET}", file=sys.stderr)
+def get_hook_color(hook_name: str) -> str:
+    """DEPRECATED: Returns empty string. Colors don't work in hooks."""
+    return ""
 
 
-# =============================================================================
-# SIMPLIFIED API
-# =============================================================================
-
-_current_hook = None
-
-
-def set_current_hook(name: str) -> None:
-    """Set the current hook name for simplified API."""
-    global _current_hook
-    _current_hook = name
-
-
-def status(status_str: str, detail: str = "") -> None:
-    """Simplified status output using previously set hook name."""
-    global _current_hook
-    if _current_hook:
-        hook_status(_current_hook, status_str, detail)
-
-
-def get_hook_name(script_path: str = None) -> str:
-    """Extract hook name from script path."""
-    if script_path is None:
-        import inspect
-        frame = inspect.currentframe()
-        if frame and frame.f_back:
-            script_path = frame.f_back.f_globals.get("__file__", "unknown")
-    
-    name = os.path.basename(script_path)
-    name = name.replace(".py", "").replace(".sh", "")
-    return name
-
-
-# =============================================================================
-# SIMPLE COLOR FUNCTIONS
-# =============================================================================
-
-def red(text: str) -> str:
-    return f"\033[91m{text}{RESET}"
-
-def green(text: str) -> str:
-    return f"\033[92m{text}{RESET}"
-
-def yellow(text: str) -> str:
-    return f"\033[93m{text}{RESET}"
-
-def blue(text: str) -> str:
-    return f"\033[94m{text}{RESET}"
-
-def cyan(text: str) -> str:
-    return f"\033[96m{text}{RESET}"
-
-def magenta(text: str) -> str:
-    return f"\033[95m{text}{RESET}"
-
-def bold(text: str) -> str:
-    return f"\033[1m{text}{RESET}"
-
-
-# =============================================================================
-# THEME COMPATIBILITY (for hook_colors.py imports)
-# =============================================================================
-
-def get_hook_theme(hook_name: str) -> tuple:
-    """Get (foreground, background) - returns combined code for compatibility."""
-    color = get_hook_color(hook_name)
-    return (color, "")
-
-
-def get_agent_theme(agent_name: str) -> tuple:
-    """Get (foreground, background, category) for an agent."""
-    color = get_agent_color(agent_name)
-    category = agent_name.upper().replace("-", "")[:8]
-    return (color, "", category)
-
-
-def get_status_symbol(status: str) -> str:
-    """Get symbol for a status."""
-    return STATUS_ICONS.get(status.upper(), "⚡")
-
-
-def format_hook_status(hook_name: str, status: str, detail: str = "") -> str:
-    """Format a colored hook status line (returns string, doesn't print)."""
-    color = get_hook_color(hook_name)
-    icon = STATUS_ICONS.get(status.upper(), "⚡")
-    display_name = hook_name.replace("-", " ").title()
-
-    if detail:
-        return f"{color} {icon} {display_name}: {status} {RESET} {detail}"
-    return f"{color} {icon} {display_name}: {status} {RESET}"
-
-
-def format_agent_banner(agent_name: str) -> str:
-    """Format a colored agent banner (returns string)."""
-    color = get_agent_color(agent_name)
-    display_name = agent_name.replace("-", " ").upper()
-    width = 50
-    border = "═" * width
-    
-    return f"""
-{color}╔{border}╗{RESET}
-{color}║{display_name:^{width}}║{RESET}
-{color}╚{border}╝{RESET}
-"""
-
-
-def format_agent_banner_with_mode(agent_name: str, execution_mode: str = "") -> str:
-    """Format a colored agent banner with optional execution mode."""
-    color = get_agent_color(agent_name)
-    display_name = agent_name.replace("-", " ").upper()
-    width = 50
-    border = "═" * width
-    
-    banner = f"""
-{color}╔{border}╗{RESET}
-{color}║{display_name:^{width}}║{RESET}"""
-    
-    if execution_mode:
-        banner += f"""
-{color}║{f'[{execution_mode}]':^{width}}║{RESET}"""
-    
-    banner += f"""
-{color}╚{border}╝{RESET}
-"""
-    return banner
-
-
-def format_agent_compact(agent_name: str) -> str:
-    """Format a compact single-line agent indicator."""
-    color = get_agent_color(agent_name)
-    display_name = agent_name.replace("-", " ").title()
-    return f"{color} {display_name} {RESET}"
-
-
-def format_agent_compact_with_mode(agent_name: str, execution_mode: str = "") -> str:
-    """Format a compact single-line agent indicator with optional execution mode."""
-    color = get_agent_color(agent_name)
-    display_name = agent_name.replace("-", " ").title()
-    
-    if execution_mode:
-        return f"{color} [{execution_mode}] {display_name} {RESET}"
-    return f"{color} {display_name} {RESET}"
+def get_agent_color(agent_name: str) -> str:
+    """DEPRECATED: Returns empty string. Colors don't work in hooks."""
+    return ""
 
 
 # =============================================================================
@@ -445,20 +453,43 @@ def format_agent_compact_with_mode(agent_name: str, execution_mode: str = "") ->
 # =============================================================================
 
 if __name__ == "__main__":
-    print("=== HOOK STATUS EXAMPLES ===", file=sys.stderr)
-    hook_status("pre-write-check", "OK", "example.py")
-    hook_status("laziness-check", "OK", "No lazy code")
-    hook_status("context-loader", "OK", "Loaded context")
-    hook_status("dangerous-command-check", "BLOCK", "rm -rf detected")
-    
-    print("\n=== AGENT BANNER EXAMPLES ===", file=sys.stderr)
-    agent_banner("security-scanner")
-    agent_banner("orchestrator", "PLANNING")
-    
-    print("\n=== SIMPLE COLORS ===", file=sys.stderr)
-    print(f"  {red('RED')} {green('GREEN')} {yellow('YELLOW')} {blue('BLUE')} {cyan('CYAN')}", file=sys.stderr)
-    
-    print("\n=== RAW TEST ===", file=sys.stderr)
-    print(f"\033[1;97;41m WHITE ON RED \033[0m", file=sys.stderr)
-    print(f"\033[1;30;42m BLACK ON GREEN \033[0m", file=sys.stderr)
-    print(f"\033[1;30;103m BLACK ON BRIGHT YELLOW \033[0m", file=sys.stderr)
+    print("=" * 60)
+    print("  CLAUDE CODE HOOK OUTPUT SYSTEM")
+    print("  (ANSI colors do NOT work in hooks)")
+    print("=" * 60)
+
+    print("\n--- Plain Text Banner ---")
+    print(format_banner("Security Scanner"))
+
+    print("\n--- Agent Banner ---")
+    print(format_agent_banner("orchestrator", "PLANNING"))
+
+    print("\n--- Status Lines ---")
+    print(format_status("pre-write-check", "success", "file.py validated"))
+    print(format_status("laziness-check", "blocked", "placeholder detected"))
+    print(format_status("context-loader", "info", "loaded 3 files"))
+
+    print("\n--- Confidence Display ---")
+    print(format_confidence(92.5, "security-scanner"))
+    print(format_confidence(67.3, "tester"))
+    print(format_confidence(45.0, "brainstormer"))
+
+    print("\n--- JSON Output Examples ---")
+    print("\nUserPromptSubmit context injection:")
+    print(json_output(
+        additional_context="AGENT INVOKE: Use 'tester' agent",
+        hook_event="UserPromptSubmit"
+    ))
+
+    print("\nPreToolUse block:")
+    print(json_output(
+        permission_decision="deny",
+        permission_reason="Blocked: dangerous command",
+        hook_event="PreToolUse"
+    ))
+
+    print("\n--- Status Line Colors (ONLY work in statusline) ---")
+    sl = StatusLine()
+    print(f"In status line: {sl.colored('GREEN', 'green', 'black', True)}")
+    print(f"In status line: {sl.segment('SEGMENT', 'white', 'blue')}")
+    print("(Above will show raw codes if not in statusline context)")
