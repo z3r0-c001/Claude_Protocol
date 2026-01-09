@@ -40,3 +40,8 @@ yarn-error.log*
 *.bak
 *.swp
 *~
+
+# Build artifacts
+dist/
+build/
+*.log
