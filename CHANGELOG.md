@@ -1,9 +1,44 @@
 # Changelog
 
-**Current Version:** 1.2.13
-**Date:** 2026-01-08
+**Current Version:** 1.2.14
+**Date:** 2026-01-09
 
 > This file is overwritten with each release. For historical changes, see git history.
+
+---
+
+## v1.2.14 - Proto-Init State Detection Fix (Patch)
+
+Fixes confusing "Protocol already detected" messaging when running proto-init after fresh install.
+
+### Problem
+
+When users installed protocol files and then ran `/proto-init`, they saw "Protocol already detected in this project" - confusing because they had just installed it.
+
+### Solution
+
+Added 3-state detection logic:
+
+| State | Condition | Message |
+|-------|-----------|---------|
+| `fresh` | No protocol files | "This appears to be your first time using Claude Protocol." |
+| `installed` | Files exist, not configured | "✓ Protocol infrastructure found. Continuing with project configuration..." |
+| `configured` | Full setup complete | "Protocol is already configured in this project." |
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `commands/proto-init.md` | Added 3-state detection (fresh/installed/configured) with explicit messaging |
+| `commands/proto-init.md` | Added "SAY EXACTLY" directives to prevent paraphrasing |
+| `commands/proto-init.md` | Added instruction to suppress intermediate search output |
+
+### Testing
+
+Created test suite in `dev/test-proto-init/`:
+- 3 core state tests (fresh, installed, configured)
+- 3 edge case tests (CLAUDE.md without protocol, partial config, corrupted state)
+- All 6 tests pass
 
 ---
 
