@@ -15,17 +15,25 @@ Initialize the protocol for a new or existing project.
 /proto-init
 ```
 
+**State Detection:**
+| State | Condition | Behavior |
+|-------|-----------|----------|
+| `fresh` | No protocol files | Asks where to install (global/project/hybrid) |
+| `installed` | Files exist, not configured | Proceeds directly to configuration |
+| `configured` | Full setup complete | Offers reconfigure/status/exit options |
+
 **Process:**
-1. Asks if project is new or existing
-2. For new projects: asks name, description, type, tech stack
-3. For existing projects: scans codebase, asks about goals
-4. **For existing projects: runs comprehensive audit** (code quality, security, docs, tests, dependencies, architecture)
-5. Asks about persistence preferences (JSON or SQLite)
-6. Builds MCP server if persistence enabled
-7. Creates directory structure
-8. Generates project-specific CLAUDE.md
-9. Validates all files
-10. **Offers permissions configuration** (keep/restrict/audit/custom)
+1. Detects protocol state (see above)
+2. Asks if project is new or existing
+3. For new projects: asks name, description, type, tech stack
+4. For existing projects: scans codebase, asks about goals
+5. **For existing projects: runs comprehensive audit** (code quality, security, docs, tests, dependencies, architecture)
+6. Asks about persistence preferences (JSON or SQLite)
+7. Builds MCP server if persistence enabled
+8. Creates directory structure
+9. Generates project-specific CLAUDE.md
+10. Validates all files
+11. **Offers permissions configuration** (keep/restrict/audit/custom)
 
 **Interactive Flow:**
 - Questions are asked ONE AT A TIME
