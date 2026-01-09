@@ -2,6 +2,73 @@
 
 Quality-enforced protocol with automated hooks, specialized agents, and persistent memory.
 
+---
+
+## 🎯 CCP: Claude Protocol Development Environment
+
+**This project (`ccp`) is the development environment for Claude Protocol itself.**
+
+### Project Structure
+
+```
+ccp/
+├── dev/              ← Staging/testing (NEVER pushed to GitHub)
+│   ├── agents/       ← New/modified agents in development
+│   ├── hooks/        ← New/modified hooks in development
+│   ├── skills/       ← New/modified skills in development
+│   ├── commands/     ← New/modified commands in development
+│   ├── scripts/      ← Utility scripts in development
+│   └── config/       ← Configuration files in development
+├── prod/             ← Approved work (pushed to GitHub)
+│   └── [same structure as dev/]
+├── .claude/          ← Active protocol (base version for validation)
+└── CLAUDE.md         ← This file
+```
+
+### CRITICAL WORKFLOW RULES
+
+1. **ALL work happens in `dev/`** - Never modify `prod/` directly
+2. **`dev/` is NEVER pushed** - It's staging/testing only
+3. **Promotion requires validation** - Use `dev-to-prod-promoter` agent
+4. **Per-file unique commits** - No generic "updated files" messages
+5. **CHANGELOG.md MUST be updated** - Every release, no exceptions
+6. **GitHub releases are MANDATORY** - Version tag + release notes
+
+### CCP-Specific Agents (in `dev/agents/`)
+
+| Agent | Purpose |
+|-------|---------|
+| `dev-to-prod-promoter` | Validates and promotes files from dev to prod |
+| `protocol-validator` | Runs full validation suite on protocol files |
+
+### CCP-Specific Hooks (in `dev/hooks/`)
+
+| Hook | Purpose |
+|------|---------|
+| `changelog-enforcer.py` | Blocks pushes without CHANGELOG updates |
+| `commit-message-validator.py` | Rejects generic commit messages |
+
+### CCP-Specific Skills (in `dev/skills/`)
+
+| Skill | Purpose |
+|-------|---------|
+| `anthropic-docs-fetcher` | Fetches official Anthropic documentation |
+
+### Reference Sources
+
+- **Anthropic Docs:** https://platform.claude.com/docs/en/home
+- **Protocol Repo:** https://github.com/z3r0-c001/Claude_Protocol
+
+### Promotion Workflow
+
+```
+1. Work in dev/ → 2. Run /validate → 3. Fix issues →
+4. Run dev-to-prod-promoter → 5. Review commits →
+6. Update CHANGELOG → 7. Push to GitHub → 8. Create release
+```
+
+---
+
 ## ⚡ MANDATORY: Session Startup
 
 **BEFORE responding to the user's first message, run:**
@@ -132,7 +199,7 @@ Edit `.claude/config/enforcement-rules.json` to customize rules, thresholds, and
 
 | Property | Value |
 |----------|-------|
-| Version | 1.2.13 |
+| Version | 1.2.14 |
 | Philosophy | Research-first, quality-enforced |
 | Validation | Zero-error tolerance |
 
