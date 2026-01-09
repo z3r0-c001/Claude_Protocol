@@ -4,9 +4,7 @@ Reusable test infrastructure for validating Claude Protocol installations.
 
 ## Location
 
-```
-/home/great_ape/codeOne/Claude_Protocol/test/   ← You are here
-```
+This directory contains the test framework for validating protocol installations.
 
 ## Status
 
@@ -34,9 +32,6 @@ test/
 
 ## Test Run Directories
 
-Each test run creates a fresh directory in:
-```
-/home/great_ape/codeOne/<camelCase>/
-```
+Each test run creates a fresh directory with a randomized camelCase name.
 
 Examples: `silverFox/`, `blueSky/`, `ironBolt/`
