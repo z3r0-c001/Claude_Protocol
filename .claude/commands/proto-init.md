@@ -24,9 +24,21 @@ You are conducting an interactive intake session to set up Claude Bootstrap Prot
 
 **First, check for existing protocol:**
 
-Check if `.claude/settings.json` exists in project OR `~/.claude/hooks/` has protocol files.
+Check these conditions:
+1. `.claude/settings.json` exists in project
+2. `CLAUDE.md` exists and contains protocol content (not just project docs)
+3. `.claude/protocol-manifest.local.json` exists (indicates completed setup)
 
-**If protocol NOT found, ASK:**
+**Determine state:**
+
+| settings.json | CLAUDE.md (protocol) | manifest.local | State |
+|---------------|---------------------|----------------|-------|
+| No | No | No | `fresh` - No protocol |
+| Yes | No | No | `installed` - Files copied, not configured |
+| Yes | No | Yes | `installed` - Partially configured |
+| Yes | Yes | Yes | `configured` - Full setup complete |
+
+**If `fresh` (no protocol files), ASK:**
 > This appears to be your first time using Claude Protocol.
 >
 > Where would you like to install the protocol tooling?
@@ -59,8 +71,26 @@ Check if `.claude/settings.json` exists in project OR `~/.claude/hooks/` has pro
   - Install customizations to `./.claude/`
   - SAY: "Core quality hooks installed globally, project customizations local"
 
-**If protocol ALREADY found:**
-> Protocol detected at [location]. Proceeding with configuration...
+**If `installed` (files exist, not yet configured):**
+
+SAY EXACTLY:
+> ✓ Protocol infrastructure found. Continuing with project configuration...
+
+Do NOT say "already detected" or "already exists" - the user just installed these files.
+
+**If `configured` (full setup already complete):**
+
+SAY EXACTLY:
+> Protocol is already configured in this project.
+>
+> What would you like to do?
+> - `reconfigure` - Run setup again (keeps existing memory)
+> - `status` - Show current configuration (`/proto-status`)
+> - `exit` - Cancel
+
+**WAIT FOR RESPONSE** (if configured)
+
+**IMPORTANT:** Do NOT output intermediate search results or file checks to the user. Run checks silently, then report the determined state with the appropriate message above.
 
 **THEN continue to STEP 1**
 
