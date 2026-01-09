@@ -1,5 +1,6 @@
 #!/bin/bash
 # install-to-scope.sh - Install Claude Protocol to specified scope
+# Version: 1.2.14
 # Usage: bash install-to-scope.sh <scope> [source_dir]
 #   scope: global | project | hybrid
 #   source_dir: Optional path to protocol source (defaults to script's parent dir)
