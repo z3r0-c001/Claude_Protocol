@@ -4,6 +4,8 @@
 # ====================================
 # Sets up Claude Protocol in your project directory
 #
+# Version: 1.2.14
+#
 
 set -e
 
