@@ -1,5 +1,7 @@
 # Claude Bootstrap Protocol
 
+**Version 1.2.14** | [Changelog](CHANGELOG.md) | [Releases](https://github.com/z3r0-c001/Claude_Protocol/releases)
+
 A self-invoking protocol that generates customized Claude Code tooling for any project.
 
 ## Notice
