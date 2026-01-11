@@ -199,7 +199,7 @@ Edit `.claude/config/enforcement-rules.json` to customize rules, thresholds, and
 
 | Property | Value |
 |----------|-------|
-| Version | 1.2.14 |
+| Version | 1.3.0 |
 | Philosophy | Research-first, quality-enforced |
 | Validation | Zero-error tolerance |
 
