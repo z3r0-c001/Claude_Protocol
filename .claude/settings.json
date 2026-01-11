@@ -75,6 +75,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/monitor-startup.py\"",
+            "timeout": 15
+          },
+          {
+            "type": "command",
             "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/update-check.py\"",
             "timeout": 10
           }
