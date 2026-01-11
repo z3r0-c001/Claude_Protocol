@@ -1,9 +1,81 @@
 # Changelog
 
-**Current Version:** 1.2.14
-**Date:** 2026-01-09
+**Current Version:** 1.3.0
+**Date:** 2026-01-11
 
 > This file is overwritten with each release. For historical changes, see git history.
+
+---
+
+## v1.3.0 - V2-Secure Monitor System (Minor)
+
+Real-time monitoring dashboard for Claude Code with protocol enforcement visualization.
+
+### New Features
+
+**Monitor Dashboard:**
+- Real-time log streaming via WebSocket (localhost:3847)
+- Color-coded event badges: ORCH, AGENT, HOOK, TOOL, ERROR
+- Filter by type and search functionality
+- Hook monitor, intent evaluator, and agent activity tabs
+- Electron native window OR browser fallback
+
+**Protocol Enforcement Hooks:**
+- `enforcement-hook.py`: Complexity scoring (1-5) and orchestration enforcement
+- `log-emitter.py`: Universal logging to monitor server (full prompt visibility)
+- Automatic orchestrator requirement for complexity >= 3
+- Domain detection for security, architecture, testing, performance, frontend
+
+**Monitor Agent (Impartial Enforcer):**
+- Watches all activity in real-time
+- Detects protocol violations
+- Anomaly detection (timing spikes, error clustering)
+- Can STOP, ASK, or LOG based on violation severity
+
+**Security Hardening:**
+- Server binds to localhost only (127.0.0.1)
+- Path traversal protection for log directory
+- Input sanitization with XSS escaping
+- Request size limits (50kb)
+- Confirmation required for destructive operations
+
+### New Files
+
+| File | Purpose |
+|------|---------|
+| `.claude/hooks/enforcement-hook.py` | UserPromptSubmit complexity scoring |
+| `.claude/hooks/log-emitter.py` | Universal event logger |
+| `.claude/config/enforcement-rules.json` | Upgraded to v2.0.0 |
+| `monitor/server/index.js` | WebSocket server (security hardened) |
+| `monitor/web/index.html` | Dashboard UI |
+| `monitor/electron/main.js` | Electron app |
+| `monitor/monitor-agent.py` | Protocol enforcement agent |
+| `monitor/install.sh` | Installation script |
+| `monitor/claude-monitor` | Launcher script |
+
+### Configuration (enforcement-rules.json v2.0.0)
+
+| Section | Description |
+|---------|-------------|
+| `domain_detection` | 8 domains with patterns and required agents |
+| `subagent_rules` | Automatic sub-agent spawning rules |
+| `quality_gates` | Required hooks and blocking configuration |
+| `bypass_phrases` | Phrases that skip enforcement |
+| `logging` | Full prompt logging, violation tracking |
+
+### Installation
+
+```bash
+cd monitor
+./install.sh
+claude-monitor  # Launches Claude with monitoring
+```
+
+### Updates
+
+| File | Change |
+|------|--------|
+| `.claude/settings.json` | Added log-emitter and enforcement-hook to UserPromptSubmit |
 
 ---
 
