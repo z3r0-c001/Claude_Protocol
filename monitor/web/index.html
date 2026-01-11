@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Monitor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+    
+    body { font-family: 'Inter', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    
+    .log-container { 
+      height: calc(100vh - 200px); 
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+    
+    .log-entry {
+      border-left: 3px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .log-entry:hover { background: rgba(255,255,255,0.05); }
+    .log-entry.new { animation: flash 0.5s ease; }
+    
+    @keyframes flash {
+      0% { background: rgba(59, 130, 246, 0.3); }
+      100% { background: transparent; }
+    }
+    
+    /* Log type colors */
+    .log-hook { border-left-color: #a78bfa; }
+    .log-tool { border-left-color: #34d399; }
+    .log-agent { border-left-color: #fbbf24; }
+    .log-error { border-left-color: #f87171; background: rgba(248, 113, 113, 0.1); }
+    .log-intent { border-left-color: #60a5fa; }
+    .log-system { border-left-color: #6b7280; }
+    .log-prompt { border-left-color: #f472b6; }
+    .log-response { border-left-color: #2dd4bf; }
+    
+    /* Status indicators */
+    .status-running { color: #fbbf24; }
+    .status-ok { color: #34d399; }
+    .status-error { color: #f87171; }
+    .status-blocked { color: #f87171; }
+    
+    /* Scrollbar */
+    .log-container::-webkit-scrollbar { width: 8px; }
+    .log-container::-webkit-scrollbar-track { background: #1f2937; }
+    .log-container::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+    .log-container::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+    
+    .tab-active { 
+      background: #1f2937; 
+      border-bottom: 2px solid #3b82f6;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+  <div class="flex flex-col h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse" id="connection-indicator"></div>
+        <h1 class="text-lg font-semibold">Claude Monitor</h1>
+        <span class="text-xs text-gray-500 mono" id="log-count">0 entries</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="toggleAutoScroll()" id="autoscroll-btn" class="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 rounded">
+          Auto-scroll: ON
+        </button>
+        <button onclick="clearLogs()" class="px-3 py-1 text-sm bg-gray-700 hover:bg-gray-600 rounded">
+          Clear
+        </button>
+        <button onclick="exportLogs()" class="px-3 py-1 text-sm bg-gray-700 hover:bg-gray-600 rounded">
+          Export
+        </button>
+      </div>
+    </header>
+    
+    <!-- Tabs -->
+    <div class="bg-gray-800 border-b border-gray-700 flex">
+      <button onclick="switchTab('logs')" id="tab-logs" class="px-4 py-2 text-sm font-medium tab-active">
+        Live Logs
+      </button>
+      <button onclick="switchTab('hooks')" id="tab-hooks" class="px-4 py-2 text-sm font-medium hover:bg-gray-700">
+        Hook Monitor
+      </button>
+      <button onclick="switchTab('intent')" id="tab-intent" class="px-4 py-2 text-sm font-medium hover:bg-gray-700">
+        Intent Evaluator
+      </button>
+      <button onclick="switchTab('agents')" id="tab-agents" class="px-4 py-2 text-sm font-medium hover:bg-gray-700">
+        Agent Activity
+      </button>
+    </div>
+    
+    <!-- Filter Bar -->
+    <div class="bg-gray-850 border-b border-gray-700 px-4 py-2 flex items-center gap-4" style="background: #1a1f2e;">
+      <span class="text-xs text-gray-500">Filter:</span>
+      <label class="flex items-center gap-1 text-xs">
+        <input type="checkbox" checked onchange="toggleFilter('hook')" class="rounded"> 
+        <span class="text-purple-400">Hooks</span>
+      </label>
+      <label class="flex items-center gap-1 text-xs">
+        <input type="checkbox" checked onchange="toggleFilter('tool')" class="rounded">
+        <span class="text-green-400">Tools</span>
+      </label>
+      <label class="flex items-center gap-1 text-xs">
+        <input type="checkbox" checked onchange="toggleFilter('agent')" class="rounded">
+        <span class="text-yellow-400">Agents</span>
+      </label>
+      <label class="flex items-center gap-1 text-xs">
+        <input type="checkbox" checked onchange="toggleFilter('prompt')" class="rounded">
+        <span class="text-pink-400">Prompts</span>
+      </label>
+      <label class="flex items-center gap-1 text-xs">
+        <input type="checkbox" checked onchange="toggleFilter('error')" class="rounded">
+        <span class="text-red-400">Errors</span>
+      </label>
+      <div class="flex-1"></div>
+      <input type="text" id="search" placeholder="Search logs..." 
+        class="px-3 py-1 text-sm bg-gray-800 border border-gray-600 rounded w-64"
+        oninput="filterLogs()">
+    </div>
+    
+    <!-- Main Content -->
+    <main class="flex-1 overflow-hidden">
+      <!-- Live Logs Panel -->
+      <div id="panel-logs" class="h-full">
+        <div id="log-container" class="log-container p-2 mono text-sm">
+          <div class="text-gray-500 text-center py-8">Waiting for logs...</div>
+        </div>
+      </div>
+      
+      <!-- Hook Monitor Panel -->
+      <div id="panel-hooks" class="h-full hidden p-4">
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-gray-800 rounded-lg p-4">
+            <h3 class="text-sm font-medium text-gray-400 mb-3">UserPromptSubmit</h3>
+            <div id="hooks-prompt" class="space-y-2 text-sm"></div>
+          </div>
+          <div class="bg-gray-800 rounded-lg p-4">
+            <h3 class="text-sm font-medium text-gray-400 mb-3">PreToolUse</h3>
+            <div id="hooks-pretool" class="space-y-2 text-sm"></div>
+          </div>
+          <div class="bg-gray-800 rounded-lg p-4">
+            <h3 class="text-sm font-medium text-gray-400 mb-3">PostToolUse</h3>
+            <div id="hooks-posttool" class="space-y-2 text-sm"></div>
+          </div>
+          <div class="bg-gray-800 rounded-lg p-4">
+            <h3 class="text-sm font-medium text-gray-400 mb-3">Stop</h3>
+            <div id="hooks-stop" class="space-y-2 text-sm"></div>
+          </div>
+          <div class="bg-gray-800 rounded-lg p-4 col-span-2">
+            <h3 class="text-sm font-medium text-gray-400 mb-3">Recent Hook Executions</h3>
+            <div id="hooks-recent" class="space-y-1 text-sm mono max-h-64 overflow-y-auto"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Intent Evaluator Panel -->
+      <div id="panel-intent" class="h-full hidden p-4">
+        <div class="grid grid-cols-2 gap-4 h-full">
+          <div class="bg-gray-800 rounded-lg p-4 flex flex-col">
+            <h3 class="text-sm font-medium text-gray-400 mb-3">Test Intent Evaluation</h3>
+            <textarea id="intent-input" placeholder="Enter a prompt to evaluate..." 
+              class="flex-1 p-3 bg-gray-900 border border-gray-600 rounded resize-none mb-3"></textarea>
+            <button onclick="evaluateIntent()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-medium">
+              Evaluate
+            </button>
+          </div>
+          <div class="bg-gray-800 rounded-lg p-4">
+            <h3 class="text-sm font-medium text-gray-400 mb-3">Analysis Result</h3>
+            <div id="intent-result" class="text-sm">
+              <div class="text-gray-500">Enter a prompt and click Evaluate</div>
+            </div>
+          </div>
+          <div class="bg-gray-800 rounded-lg p-4 col-span-2">
+            <h3 class="text-sm font-medium text-gray-400 mb-3">Recent Intent Evaluations</h3>
+            <div id="intent-history" class="space-y-2 text-sm max-h-48 overflow-y-auto"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Agent Activity Panel -->
+      <div id="panel-agents" class="h-full hidden p-4">
+        <div class="grid grid-cols-4 gap-4">
+          <div class="bg-gray-800 rounded-lg p-4 col-span-2">
+            <h3 class="text-sm font-medium text-gray-400 mb-3">Active Agents</h3>
+            <div id="agents-active" class="space-y-2"></div>
+          </div>
+          <div class="bg-gray-800 rounded-lg p-4 col-span-2">
+            <h3 class="text-sm font-medium text-gray-400 mb-3">Agent Statistics</h3>
+            <div id="agents-stats" class="grid grid-cols-2 gap-2 text-sm"></div>
+          </div>
+          <div class="bg-gray-800 rounded-lg p-4 col-span-4">
+            <h3 class="text-sm font-medium text-gray-400 mb-3">Agent Timeline</h3>
+            <div id="agents-timeline" class="space-y-1 mono text-sm max-h-64 overflow-y-auto"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Status Bar -->
+    <footer class="bg-gray-800 border-t border-gray-700 px-4 py-2 flex items-center justify-between text-xs text-gray-500">
+      <div class="flex items-center gap-4">
+        <span id="status-text">Connecting...</span>
+        <span id="last-event">-</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span id="memory-usage">-</span>
+        <span id="uptime">-</span>
+      </div>
+    </footer>
+  </div>
+  
+  <script>
+    let ws;
+    let logs = [];
+    let autoScroll = true;
+    let filters = { hook: true, tool: true, agent: true, prompt: true, error: true };
+    let hookStats = { prompt: [], pretool: [], posttool: [], stop: [] };
+    let agentStats = {};
+    let startTime = Date.now();
+    
+    // SECURITY: HTML escape function to prevent XSS
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      if (typeof str !== 'string') str = String(str);
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+    
+    function connect() {
+      const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${location.host}`);
+      
+      ws.onopen = () => {
+        document.getElementById('connection-indicator').classList.remove('bg-red-500');
+        document.getElementById('connection-indicator').classList.add('bg-green-500');
+        document.getElementById('status-text').textContent = 'Connected';
+      };
+      
+      ws.onclose = () => {
+        document.getElementById('connection-indicator').classList.remove('bg-green-500');
+        document.getElementById('connection-indicator').classList.add('bg-red-500');
+        document.getElementById('status-text').textContent = 'Disconnected - Reconnecting...';
+        setTimeout(connect, 2000);
+      };
+      
+      ws.onmessage = (event) => {
+        try {
+          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+          handleLogEntry(data);
+        } catch (e) {
+          handleLogEntry({ type: 'raw', content: event.data, timestamp: Date.now() });
+        }
+      };
+    }
+    
+    function handleLogEntry(entry) {
+      logs.push(entry);
+      if (logs.length > 5000) logs = logs.slice(-4000);
+      
+      updateLogDisplay(entry);
+      updateHookMonitor(entry);
+      updateAgentActivity(entry);
+      updateIntentHistory(entry);
+      
+      document.getElementById('log-count').textContent = `${logs.length} entries`;
+      document.getElementById('last-event').textContent = `Last: ${formatTime(entry.timestamp)}`;
+    }
+    
+    function updateLogDisplay(entry) {
+      const container = document.getElementById('log-container');
+      if (container.querySelector('.text-center')) {
+        container.innerHTML = '';
+      }
+      
+      const typeClass = `log-${entry.type || 'system'}`;
+      const shouldShow = filters[entry.type] !== false;
+      
+      const div = document.createElement('div');
+      div.className = `log-entry ${typeClass} px-3 py-1.5 new ${shouldShow ? '' : 'hidden'}`;
+      div.dataset.type = entry.type;
+      div.innerHTML = formatLogEntry(entry);
+      
+      container.appendChild(div);
+      
+      if (autoScroll) {
+        container.scrollTop = container.scrollHeight;
+      }
+      
+      setTimeout(() => div.classList.remove('new'), 500);
+    }
+    
+    function formatLogEntry(entry) {
+      const time = formatTime(entry.timestamp);
+      const type = escapeHtml((entry.type || 'LOG').toUpperCase().padEnd(8));
+      
+      let content = '';
+      let statusClass = '';
+      
+      switch (entry.type) {
+        case 'hook':
+          statusClass = entry.status === 'OK' ? 'status-ok' : 
+                       entry.status === 'ERROR' ? 'status-error' : 
+                       entry.status === 'BLOCKED' ? 'status-blocked' : 'status-running';
+          content = `<span class="text-purple-400">[${escapeHtml(entry.hook)}]</span> ` +
+                   `<span class="${statusClass}">${escapeHtml(entry.status)}</span> ` +
+                   `<span class="text-gray-400">${escapeHtml(entry.message || '')}</span>`;
+          if (entry.duration) content += ` <span class="text-gray-600">(${parseInt(entry.duration) || 0}ms)</span>`;
+          break;
+          
+        case 'tool':
+          content = `<span class="text-green-400">[${escapeHtml(entry.tool)}]</span> ` +
+                   `<span class="text-gray-300">${escapeHtml(entry.action || '')}</span>`;
+          if (entry.file) content += ` <span class="text-blue-400">${escapeHtml(entry.file)}</span>`;
+          break;
+          
+        case 'agent':
+          content = `<span class="text-yellow-400">[${escapeHtml(entry.agent)}]</span> ` +
+                   `<span class="text-gray-300">${escapeHtml(entry.action || entry.status || '')}</span>`;
+          if (entry.mode) content += ` <span class="text-gray-500">(${escapeHtml(entry.mode)})</span>`;
+          break;
+          
+        case 'intent':
+          content = `<span class="text-blue-400">[INTENT]</span> ` +
+                   `Route: <span class="text-cyan-400">${escapeHtml(entry.route)}</span> ` +
+                   `Confidence: <span class="text-white">${parseInt(entry.confidence) || 0}%</span>`;
+          break;
+          
+        case 'prompt':
+          const truncated = escapeHtml((entry.content || '').slice(0, 100));
+          content = `<span class="text-pink-400">[USER]</span> ` +
+                   `<span class="text-gray-300">${truncated}${(entry.content?.length || 0) > 100 ? '...' : ''}</span>`;
+          break;
+          
+        case 'response':
+          content = `<span class="text-teal-400">[CLAUDE]</span> ` +
+                   `<span class="text-gray-400">${escapeHtml((entry.summary || entry.content || '').slice(0, 100))}...</span>`;
+          break;
+          
+        case 'error':
+          content = `<span class="text-red-400">[ERROR]</span> ` +
+                   `<span class="text-red-300">${escapeHtml(entry.message || entry.content)}</span>`;
+          if (entry.stack) content += `<pre class="text-xs text-red-400/70 mt-1 ml-4">${escapeHtml(entry.stack)}</pre>`;
+          break;
+          
+        default:
+          content = `<span class="text-gray-400">${escapeHtml(entry.content || entry.message || JSON.stringify(entry))}</span>`;
+      }
+      
+      return `<span class="text-gray-600">${time}</span> <span class="text-gray-500">${type}</span> ${content}`;
+    }
+    
+    function formatTime(ts) {
+      if (!ts) return '--:--:--';
+      const d = new Date(ts);
+      return d.toTimeString().slice(0, 8) + '.' + String(d.getMilliseconds()).padStart(3, '0');
+    }
+    
+    function updateHookMonitor(entry) {
+      if (entry.type !== 'hook') return;
+      
+      const event = entry.event || 'unknown';
+      const category = event.includes('Prompt') ? 'prompt' :
+                      event.includes('Pre') ? 'pretool' :
+                      event.includes('Post') ? 'posttool' :
+                      event.includes('Stop') ? 'stop' : 'prompt';
+      
+      hookStats[category].push(entry);
+      if (hookStats[category].length > 20) hookStats[category].shift();
+      
+      // Update recent executions
+      const recent = document.getElementById('hooks-recent');
+      const div = document.createElement('div');
+      const statusClass = entry.status === 'OK' ? 'text-green-400' : 
+                         entry.status === 'ERROR' ? 'text-red-400' : 'text-yellow-400';
+      div.innerHTML = `<span class="text-gray-600">${formatTime(entry.timestamp)}</span> ` +
+                     `<span class="text-purple-400">${entry.hook}</span> ` +
+                     `<span class="${statusClass}">${entry.status}</span>`;
+      recent.insertBefore(div, recent.firstChild);
+      if (recent.children.length > 50) recent.lastChild.remove();
+    }
+    
+    function updateAgentActivity(entry) {
+      if (entry.type !== 'agent') return;
+      
+      const agent = entry.agent;
+      if (!agentStats[agent]) {
+        agentStats[agent] = { invocations: 0, lastSeen: 0, statuses: [] };
+      }
+      agentStats[agent].invocations++;
+      agentStats[agent].lastSeen = entry.timestamp;
+      agentStats[agent].statuses.push(entry.status);
+      
+      // Update active agents display
+      const active = document.getElementById('agents-active');
+      active.innerHTML = Object.entries(agentStats)
+        .sort((a, b) => b[1].lastSeen - a[1].lastSeen)
+        .slice(0, 10)
+        .map(([name, stats]) => `
+          <div class="flex items-center justify-between p-2 bg-gray-700 rounded">
+            <span class="text-yellow-400">${name}</span>
+            <span class="text-gray-400">${stats.invocations} calls</span>
+          </div>
+        `).join('');
+      
+      // Update timeline
+      const timeline = document.getElementById('agents-timeline');
+      const div = document.createElement('div');
+      div.innerHTML = `<span class="text-gray-600">${formatTime(entry.timestamp)}</span> ` +
+                     `<span class="text-yellow-400">${agent}</span> ` +
+                     `<span class="text-gray-400">${entry.action || entry.status}</span>`;
+      timeline.insertBefore(div, timeline.firstChild);
+      if (timeline.children.length > 100) timeline.lastChild.remove();
+    }
+    
+    function updateIntentHistory(entry) {
+      if (entry.type !== 'intent') return;
+      
+      const history = document.getElementById('intent-history');
+      const routeColors = {
+        orchestrator: 'bg-purple-600',
+        orchestrator_lite: 'bg-blue-600',
+        direct_agent: 'bg-green-600',
+        prompt_user: 'bg-orange-600',
+        direct: 'bg-gray-600'
+      };
+      
+      const div = document.createElement('div');
+      div.className = 'flex items-center gap-2 p-2 bg-gray-700 rounded';
+      div.innerHTML = `
+        <span class="px-2 py-0.5 rounded text-xs ${routeColors[entry.route] || 'bg-gray-600'}">${entry.route}</span>
+        <span class="text-gray-400 flex-1 truncate">${entry.prompt?.slice(0, 50) || ''}</span>
+        <span class="text-gray-500">${entry.confidence}%</span>
+      `;
+      history.insertBefore(div, history.firstChild);
+      if (history.children.length > 20) history.lastChild.remove();
+    }
+    
+    function evaluateIntent() {
+      const input = document.getElementById('intent-input').value;
+      if (!input.trim()) return;
+      
+      // Simulate intent evaluation (in production, this would call the server)
+      const result = simulateIntentEvaluation(input);
+      
+      const resultDiv = document.getElementById('intent-result');
+      resultDiv.innerHTML = `
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500">Route:</span>
+            <span class="px-2 py-1 rounded bg-blue-600 text-sm font-medium">${result.route}</span>
+            <span class="text-gray-500">Confidence:</span>
+            <span class="font-bold">${result.confidence}%</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-sm">
+            <div><span class="text-gray-500">Intent:</span> ${result.intent_type}</div>
+            <div><span class="text-gray-500">Complexity:</span> ${result.complexity}/5</div>
+            <div><span class="text-gray-500">Scope:</span> ${result.implied_scope}</div>
+            <div><span class="text-gray-500">Planning:</span> ${result.requires_planning ? 'Yes' : 'No'}</div>
+          </div>
+          <div>
+            <span class="text-gray-500">Agents:</span>
+            <div class="flex gap-1 mt-1">
+              ${result.suggested_agents.map(a => `<span class="px-2 py-0.5 bg-gray-700 rounded text-xs">${a}</span>`).join('')}
+            </div>
+          </div>
+          <div class="text-gray-400 text-xs">${result.reasoning}</div>
+        </div>
+      `;
+      
+      // Send to log stream
+      handleLogEntry({
+        type: 'intent',
+        prompt: input,
+        ...result,
+        timestamp: Date.now()
+      });
+    }
+    
+    function simulateIntentEvaluation(prompt) {
+      // This mirrors the React artifact logic
+      const p = prompt.toLowerCase();
+      let complexity = 1;
+      let collaboration = /^(let's|can we|help me|how do we|figure out)/i.test(p);
+      let multiStep = /and then|after that|first .+ then/i.test(p);
+      
+      if (collaboration) complexity += 1;
+      if (multiStep) complexity += 2;
+      if (/entire|whole|all|across/i.test(p)) complexity += 2;
+      complexity = Math.min(complexity, 5);
+      
+      let route = 'direct';
+      if (complexity >= 4 || (collaboration && complexity >= 3)) route = 'orchestrator';
+      else if (complexity >= 3) route = 'orchestrator_lite';
+      else if (/research|investigate|compare/i.test(p)) route = 'research_first';
+      
+      return {
+        intent_type: collaboration ? 'exploration' : 'directive',
+        complexity,
+        requires_planning: complexity >= 3,
+        requires_research: /research|investigate/i.test(p),
+        implied_scope: /entire|whole/i.test(p) ? 'project' : 'unknown',
+        collaboration_signal: collaboration,
+        suggested_agents: ['architect', 'reviewer'],
+        reasoning: `Complexity ${complexity}/5. ${collaboration ? 'Collaboration detected.' : ''} ${multiStep ? 'Multi-step task.' : ''}`,
+        route,
+        confidence: route === 'orchestrator' ? 90 : 70
+      };
+    }
+    
+    function switchTab(tab) {
+      ['logs', 'hooks', 'intent', 'agents'].forEach(t => {
+        document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
+        document.getElementById(`tab-${t}`).classList.toggle('tab-active', t === tab);
+      });
+    }
+    
+    function toggleFilter(type) {
+      filters[type] = !filters[type];
+      document.querySelectorAll('.log-entry').forEach(el => {
+        if (el.dataset.type === type) {
+          el.classList.toggle('hidden', !filters[type]);
+        }
+      });
+    }
+    
+    function filterLogs() {
+      const search = document.getElementById('search').value.toLowerCase();
+      document.querySelectorAll('.log-entry').forEach(el => {
+        const text = el.textContent.toLowerCase();
+        const typeVisible = filters[el.dataset.type] !== false;
+        el.classList.toggle('hidden', !typeVisible || (search && !text.includes(search)));
+      });
+    }
+    
+    function toggleAutoScroll() {
+      autoScroll = !autoScroll;
+      document.getElementById('autoscroll-btn').textContent = `Auto-scroll: ${autoScroll ? 'ON' : 'OFF'}`;
+    }
+    
+    function clearLogs() {
+      logs = [];
+      document.getElementById('log-container').innerHTML = '<div class="text-gray-500 text-center py-8">Logs cleared</div>';
+      document.getElementById('log-count').textContent = '0 entries';
+      fetch('/api/logs/clear', { method: 'POST' });
+    }
+    
+    function exportLogs() {
+      const blob = new Blob([logs.map(l => JSON.stringify(l)).join('\n')], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `claude-logs-${new Date().toISOString().slice(0, 10)}.jsonl`;
+      a.click();
+    }
+    
+    // Update uptime
+    setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const mins = Math.floor(elapsed / 60);
+      const secs = elapsed % 60;
+      document.getElementById('uptime').textContent = `Uptime: ${mins}m ${secs}s`;
+    }, 1000);
+    
+    // Connect on load
+    connect();
+  </script>
+</body>
+</html>
