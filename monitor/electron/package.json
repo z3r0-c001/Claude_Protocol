@@ -1,0 +1,74 @@
+{
+  "name": "claude-monitor-app",
+  "version": "2.0.0",
+  "description": "Claude Monitor - Protocol Enforcement Dashboard",
+  "main": "main.js",
+  "author": "Claude Protocol",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.claude.monitor",
+    "productName": "Claude Monitor",
+    "directories": {
+      "output": "dist",
+      "buildResources": "icons"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "icons/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../server",
+        "to": "server"
+      },
+      {
+        "from": "../web",
+        "to": "web"
+      },
+      {
+        "from": "../monitor-agent.py",
+        "to": "monitor-agent.py"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "icon": "icons/icon.icns",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "icon": "icons/icon.ico",
+      "target": ["nsis", "portable"]
+    },
+    "linux": {
+      "icon": "icons",
+      "category": "Development",
+      "target": ["AppImage", "deb"]
+    },
+    "dmg": {
+      "title": "Claude Monitor",
+      "contents": [
+        { "x": 130, "y": 220 },
+        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
